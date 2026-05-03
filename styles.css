@@ -389,7 +389,7 @@ button:focus-visible,
 }
 .type-sample--serif {
   font-family: var(--font-sans);
-  font-weight: var(--sans-weight);
+  font-weight: 400;
   font-size: var(--serif-size);
   letter-spacing: var(--sans-tracking);
   color: var(--ink-mute);
