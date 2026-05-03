@@ -383,6 +383,7 @@ const state = {
 
 const ui = {
   card: $('#card'),
+  subhead: $('#subhead'),
   swatches: $$('.swatch'),
   starBtn: $('#starBtn'),
   shareBtn: $('#shareBtn'),
@@ -432,6 +433,7 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--serif-size', f.scale.serifSize);
     root.setProperty('--sans-tracking', f.scale.sansTrack);
     root.setProperty('--serif-tracking', f.scale.serifTrack);
+    ui.subhead.textContent = f.sans;
   }
 
   if (opts.applyColors !== false) {
@@ -687,7 +689,7 @@ function buildSavedCard(theme, idx) {
     <div class="card-body">
       <section class="type-pair" aria-label="Typography">
         <h2 class="type-sample type-sample--sans">Hello world</h2>
-        <h3 class="type-sample type-sample--serif">Have a nice day</h3>
+        <h3 class="type-sample type-sample--serif">${escapeHtml(t.font.sans)}</h3>
       </section>
       <section class="swatch-grid" aria-label="Colors">
         ${swatchHTML('palette', a, 0)}
