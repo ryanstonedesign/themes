@@ -388,10 +388,10 @@ button:focus-visible,
   letter-spacing: var(--sans-tracking);
 }
 .type-sample--serif {
-  font-family: var(--font-serif);
-  font-weight: var(--serif-weight);
+  font-family: var(--font-sans);
+  font-weight: var(--sans-weight);
   font-size: var(--serif-size);
-  letter-spacing: var(--serif-tracking);
+  letter-spacing: var(--sans-tracking);
   color: var(--ink-mute);
 }
 
