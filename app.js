@@ -385,10 +385,7 @@ const ui = {
   card: $('#card'),
   sansName: $('#sansName'),
   serifName: $('#serifName'),
-  sansHex: $('#sansHex'),
-  serifHex: $('#serifHex'),
   swatches: $$('.swatch'),
-  materialLabel: $('#materialLabel'),
   starBtn: $('#starBtn'),
   shareBtn: $('#shareBtn'),
   regenBtn: $('#regenBtn'),
@@ -451,8 +448,6 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--ink-strong', c.inkStrong);
     root.setProperty('--ink-mute', c.inkMute);
     root.setProperty('--accent', c.accent);
-    ui.sansHex.textContent = c.inkStrong;
-    ui.serifHex.textContent = c.inkMute;
     ui.swatches.forEach((el) => {
       const role = el.dataset.role;
       const i = +el.dataset.i;
@@ -486,7 +481,6 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--bg-orb-b', m.bgOrbs[1]);
     root.setProperty('--bg-orb-c', m.bgOrbs[2]);
     root.setProperty('--bg-orb-d', m.bgOrbs[3]);
-    ui.materialLabel.textContent = m.name;
   }
 
   // Update saved star state

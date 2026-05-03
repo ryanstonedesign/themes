@@ -369,8 +369,13 @@ button:focus-visible,
 /* =========================================================
    Typography preview
    ========================================================= */
-.type-pair { display: flex; flex-direction: column; gap: 8px; padding-right: 90px; }
-.type-row { display: flex; flex-direction: column; gap: 2px; }
+.type-pair {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.8vh, 10px);
+  padding-right: 100px;
+  flex-shrink: 0;
+}
 .type-sample {
   margin: 0;
   line-height: 1.05;
@@ -388,17 +393,7 @@ button:focus-visible,
   font-weight: var(--serif-weight);
   font-size: var(--serif-size);
   letter-spacing: var(--serif-tracking);
-  color: var(--ink-strong);
-}
-.type-row:nth-child(2) .type-sample--serif { color: var(--ink-strong); }
-
-.type-hex {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.02em;
   color: var(--ink-mute);
-  opacity: 0.85;
 }
 
 /* =========================================================
@@ -409,11 +404,14 @@ button:focus-visible,
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(8px, 1.4vh, 12px);
   flex-shrink: 0;
+  width: 100%;
+  max-width: clamp(220px, 70vw, 320px);
+  margin-inline: auto;
 }
 .swatch {
   position: relative;
   aspect-ratio: 1 / 1;
-  border-radius: 18px;
+  border-radius: clamp(12px, 2vw, 18px);
   background: #ccc;
   box-shadow:
     0 1px 2px rgba(15,18,25,0.06),
@@ -421,13 +419,13 @@ button:focus-visible,
     0 0 0 0.5px rgba(15,18,25,0.03);
   display: flex;
   align-items: flex-end;
-  padding: 10px 12px;
+  padding: 8px 10px;
   overflow: hidden;
   transition: background 600ms ease, box-shadow 600ms ease;
 }
 .swatch-hex {
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 12.5px;
+  font-size: clamp(10px, 1.8vw, 12px);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #ffffff;
@@ -443,22 +441,31 @@ button:focus-visible,
    ========================================================= */
 .btn-stack { display: flex; flex-direction: column; gap: clamp(6px, 1.2vh, 10px); flex-shrink: 0; }
 .pv {
+  position: relative;
   height: var(--btn-h);
   border-radius: var(--btn-radius);
   font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 16px;
+  font-size: clamp(14px, 1.8vh, 16px);
   letter-spacing: -0.005em;
-  cursor: default;
-  transition: transform 200ms ease, box-shadow 400ms ease,
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms cubic-bezier(.2,.7,.2,1),
+              box-shadow 220ms ease, filter 220ms ease,
               background 400ms ease, color 400ms ease, border 400ms ease;
+  will-change: transform;
 }
+.pv:hover { transform: translateY(-1px); filter: brightness(1.04); }
+.pv:active { transform: translateY(1px) scale(0.995); filter: brightness(0.96); transition-duration: 60ms; }
+.pv:focus-visible { outline: 2px solid rgba(0,0,0,0.25); outline-offset: 3px; }
+
 .pv--primary {
   background: var(--btn-primary-bg);
   color: #ffffff;
   box-shadow: var(--btn-primary-shadow);
   border: var(--btn-primary-border, none);
 }
+.pv--primary:hover { box-shadow: var(--btn-primary-shadow), 0 12px 28px rgba(0,0,0,0.06); }
 .pv--secondary {
   background: var(--btn-secondary-bg);
   color: var(--ink-strong);
@@ -471,33 +478,8 @@ button:focus-visible,
   border: var(--btn-tertiary-border);
   box-shadow: var(--btn-tertiary-shadow);
 }
-
-/* =========================================================
-   Card footer — material label
-   ========================================================= */
-.card-footer {
-  margin-top: 4px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  align-self: center;
-}
-.material-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 2px;
-  background: var(--accent);
-  opacity: 0.7;
-  display: inline-block;
-}
-.material-label {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-}
+.pv--tertiary:hover { background: rgba(0,0,0,0.02); }
+.pv--tertiary:active { background: rgba(0,0,0,0.04); }
 
 /* =========================================================
    Bottom controls
