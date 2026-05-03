@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Palette — A Visual Design Generator</title>
+    <meta name="description" content="A tactile design instrument for remixing cohesive visual systems." />
+    <meta name="theme-color" content="#eaeaf0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" id="font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" />
+
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true">
+      <div class="bg-orb bg-orb--a"></div>
+      <div class="bg-orb bg-orb--b"></div>
+      <div class="bg-orb bg-orb--c"></div>
+      <div class="bg-orb bg-orb--d"></div>
+      <div class="bg-grain"></div>
+    </div>
+
+    <main class="stage" id="stage">
+      <!-- Top mode segmented control -->
+      <nav class="segmented segmented--top" role="tablist" aria-label="Mode">
+        <button class="seg-btn is-active" role="tab" aria-selected="true" data-mode="create">Create</button>
+        <button class="seg-btn" role="tab" aria-selected="false" data-mode="saved">
+          Saved <span class="seg-count" id="savedCount" hidden>0</span>
+        </button>
+        <span class="seg-pill" aria-hidden="true"></span>
+      </nav>
+
+      <!-- Create view -->
+      <section class="view view--create" id="createView">
+        <article class="card" id="card" aria-label="Generated theme preview">
+          <div class="card-noise" aria-hidden="true"></div>
+
+          <header class="card-actions">
+            <button class="ctrl ctrl--icon" id="shareBtn" aria-label="Share theme" title="Share">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3v13"></path>
+                <path d="m7 8 5-5 5 5"></path>
+                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"></path>
+              </svg>
+            </button>
+            <button class="ctrl ctrl--icon" id="starBtn" aria-label="Save theme" title="Save">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" id="starIcon">
+                <path d="m12 3 2.9 6.3 6.6.6-5 4.6 1.5 6.5L12 17.8 6 21l1.5-6.5-5-4.6 6.6-.6L12 3Z"></path>
+              </svg>
+            </button>
+          </header>
+
+          <div class="card-body">
+            <section class="type-pair" aria-label="Typography">
+              <div class="type-row">
+                <h2 class="type-sample type-sample--sans" id="sansName">Inter</h2>
+                <span class="type-hex" id="sansHex">#1A1F2E</span>
+              </div>
+              <div class="type-row">
+                <h3 class="type-sample type-sample--serif" id="serifName">Merriweather</h3>
+                <span class="type-hex" id="serifHex">#475569</span>
+              </div>
+            </section>
+
+            <section class="swatch-grid" aria-label="Colors">
+              <div class="swatch" data-role="palette" data-i="0"><span class="swatch-hex"></span></div>
+              <div class="swatch" data-role="palette" data-i="1"><span class="swatch-hex"></span></div>
+              <div class="swatch" data-role="palette" data-i="2"><span class="swatch-hex"></span></div>
+              <div class="swatch" data-role="gray" data-i="0"><span class="swatch-hex"></span></div>
+              <div class="swatch" data-role="gray" data-i="1"><span class="swatch-hex"></span></div>
+              <div class="swatch" data-role="gray" data-i="2"><span class="swatch-hex"></span></div>
+            </section>
+
+            <section class="btn-stack" aria-label="Button preview">
+              <button class="pv pv--primary" tabindex="-1">Primary action</button>
+              <button class="pv pv--secondary" tabindex="-1">Secondary</button>
+              <button class="pv pv--tertiary" tabindex="-1">Tertiary</button>
+            </section>
+
+            <footer class="card-footer">
+              <span class="material-dot" aria-hidden="true"></span>
+              <span class="material-label" id="materialLabel">Chrome</span>
+            </footer>
+          </div>
+        </article>
+      </section>
+
+      <!-- Saved view -->
+      <section class="view view--saved" id="savedView" hidden>
+        <div class="saved-grid" id="savedGrid"></div>
+        <div class="saved-empty" id="savedEmpty">
+          <p>No saved themes yet.</p>
+          <p class="saved-empty-sub">Tap the star on a card to save it.</p>
+        </div>
+      </section>
+
+      <!-- Bottom control bar -->
+      <div class="controls" id="controls">
+        <nav class="segmented segmented--scope" role="tablist" aria-label="Regeneration scope">
+          <button class="seg-btn seg-btn--stack is-active" data-scope="all" aria-selected="true">
+            <svg class="seg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span class="seg-label">All</span>
+          </button>
+          <button class="seg-btn seg-btn--stack" data-scope="font" aria-selected="false">
+            <svg class="seg-icon" width="20" height="18" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17 7.5 4l4.5 13"/><path d="M4.6 12.5h5.8"/><path d="M14 17V8h3.5a2.5 2.5 0 0 1 0 5H14"/></svg>
+            <span class="seg-label">Font</span>
+          </button>
+          <button class="seg-btn seg-btn--stack" data-scope="colors" aria-selected="false">
+            <svg class="seg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.4-2 3.5-4 3.5h-2a2 2 0 0 0-1.4 3.4A2 2 0 0 1 12 22Z"/><circle cx="6.5" cy="12.5" r="1"/><circle cx="9" cy="7.5" r="1"/><circle cx="14.5" cy="6.5" r="1"/><circle cx="18" cy="11" r="1"/></svg>
+            <span class="seg-label">Colors</span>
+          </button>
+          <button class="seg-btn seg-btn--stack" data-scope="buttons" aria-selected="false">
+            <svg class="seg-icon" width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="9" rx="4.5"/></svg>
+            <span class="seg-label">Buttons</span>
+          </button>
+          <button class="seg-btn seg-btn--stack" data-scope="card" aria-selected="false">
+            <svg class="seg-icon" width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>
+            <span class="seg-label">Card</span>
+          </button>
+          <span class="seg-pill" aria-hidden="true"></span>
+        </nav>
+        <button class="ctrl ctrl--icon ctrl--regen" id="regenBtn" aria-label="Regenerate" title="Regenerate">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/>
+            <path d="M3 21v-5h5"/>
+          </svg>
+        </button>
+      </div>
+    </main>
+
+    <!-- Share sheet -->
+    <div class="sheet" id="shareSheet" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+      <div class="sheet-backdrop" data-close></div>
+      <div class="sheet-panel" role="document">
+        <header class="sheet-header">
+          <h2 id="shareTitle">Export theme</h2>
+          <button class="ctrl ctrl--icon sheet-close" data-close aria-label="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </header>
+        <div class="sheet-options">
+          <button class="ctrl ctrl--row" data-export="image">
+            <span class="row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+            </span>
+            <span class="row-text"><strong>Image</strong><em>Download a PNG of the card</em></span>
+          </button>
+          <button class="ctrl ctrl--row" data-export="pdf">
+            <span class="row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </span>
+            <span class="row-text"><strong>PDF</strong><em>Print-ready document</em></span>
+          </button>
+          <button class="ctrl ctrl--row" data-export="css">
+            <span class="row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </span>
+            <span class="row-text"><strong>CSS</strong><em>Copy variables to clipboard</em></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
