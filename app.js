@@ -383,8 +383,6 @@ const state = {
 
 const ui = {
   card: $('#card'),
-  sansName: $('#sansName'),
-  serifName: $('#serifName'),
   swatches: $$('.swatch'),
   starBtn: $('#starBtn'),
   shareBtn: $('#shareBtn'),
@@ -434,8 +432,6 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--serif-size', f.scale.serifSize);
     root.setProperty('--sans-tracking', f.scale.sansTrack);
     root.setProperty('--serif-tracking', f.scale.serifTrack);
-    ui.sansName.textContent = f.sans;
-    ui.serifName.textContent = f.serif;
   }
 
   if (opts.applyColors !== false) {
@@ -690,8 +686,8 @@ function buildSavedCard(theme, idx) {
     </header>
     <div class="card-body">
       <section class="type-pair" aria-label="Typography">
-        <h2 class="type-sample type-sample--sans">${escapeHtml(t.font.sans)}</h2>
-        <h3 class="type-sample type-sample--serif">${escapeHtml(t.font.serif)}</h3>
+        <h2 class="type-sample type-sample--sans">Guess what</h2>
+        <h3 class="type-sample type-sample--serif">Chicken butt</h3>
       </section>
       <section class="swatch-grid" aria-label="Colors">
         ${swatchHTML('palette', a, 0)}
