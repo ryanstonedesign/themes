@@ -514,7 +514,7 @@ button:focus-visible,
   scroll-snap-align: center;
   scroll-snap-stop: always;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
 }
 
