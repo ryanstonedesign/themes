@@ -396,7 +396,7 @@ const ui = {
   fontLink: $('#font-link'),
   createView: $('#createView'),
   savedView: $('#savedView'),
-  savedGrid: $('#savedGrid'),
+  snapStack: $('#snapStack'),
   savedEmpty: $('#savedEmpty'),
   savedCount: $('#savedCount'),
 };
@@ -622,53 +622,167 @@ function toggleSave() {
   if (state.mode === 'saved') renderSaved();
 }
 
+// Saved themes are persisted as plain JSON; restore live function refs.
+function rehydrate(theme) {
+  const bs = BUTTON_STYLES.find((s) => s.name === theme.button.name);
+  if (bs) theme.button = bs;
+  if (theme.material && MATERIALS[theme.material.name]) {
+    theme.material = { name: theme.material.name, ...MATERIALS[theme.material.name] };
+  }
+  return theme;
+}
+
+// Build the same card markup the Create view uses, with theme-scoped CSS vars.
+function buildSavedCard(theme, idx) {
+  const t = theme;
+  const a = t.colors.palette[0], b = t.colors.palette[1], c = t.colors.palette[2];
+  const [g1, g2, g3] = t.colors.grays;
+
+  const vars = {
+    '--card-bg': t.material.cardBg,
+    '--card-blur': `${t.material.blur}px`,
+    '--card-saturate': t.material.saturate,
+    '--card-shadow': t.material.cardShadow,
+    '--card-noise-opacity': t.material.noise,
+    '--card-border-opacity': t.material.borderOpacity,
+
+    '--font-sans': `'${t.font.sans}', system-ui, sans-serif`,
+    '--font-serif': `'${t.font.serif}', Georgia, serif`,
+    '--sans-weight': t.font.sansWeight,
+    '--serif-weight': t.font.serifWeight,
+    '--sans-size': t.font.scale.sansSize,
+    '--serif-size': t.font.scale.serifSize,
+    '--sans-tracking': t.font.scale.sansTrack,
+    '--serif-tracking': t.font.scale.serifTrack,
+
+    '--p1': a, '--p2': b, '--p3': c,
+    '--g1': g1, '--g2': g2, '--g3': g3,
+    '--ink-strong': t.colors.inkStrong,
+    '--ink-mute': t.colors.inkMute,
+    '--accent': t.colors.accent,
+
+    '--btn-radius': t.button.radius,
+    '--btn-primary-bg': t.button.primaryGrad(a, b, c),
+    '--btn-secondary-bg': t.button.secondaryGrad(g1, g2, g3),
+    '--btn-primary-shadow': t.button.primaryShadow(a, b),
+    '--btn-secondary-shadow': t.button.secondaryShadow,
+    '--btn-tertiary-border': t.button.tertiaryBorder(a),
+    '--btn-tertiary-shadow': t.button.tertiaryShadow,
+  };
+
+  const card = document.createElement('article');
+  card.className = 'card saved-card';
+  card.dataset.idx = String(idx);
+  Object.entries(vars).forEach(([k, v]) => card.style.setProperty(k, v));
+
+  const swatchHTML = (role, hex, i) =>
+    `<div class="swatch" data-role="${role}" data-i="${i}" style="background:${hex}"><span class="swatch-hex">${hex}</span></div>`;
+
+  card.innerHTML = `
+    <div class="card-noise" aria-hidden="true"></div>
+    <header class="card-actions">
+      <button class="ctrl ctrl--icon" data-action="share" aria-label="Share theme" title="Share">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+      </button>
+      <button class="ctrl ctrl--icon is-saved" data-action="unsave" aria-label="Remove from saved" title="Saved">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.9 6.3 6.6.6-5 4.6 1.5 6.5L12 17.8 6 21l1.5-6.5-5-4.6 6.6-.6L12 3Z"/></svg>
+      </button>
+    </header>
+    <div class="card-body">
+      <section class="type-pair" aria-label="Typography">
+        <h2 class="type-sample type-sample--sans">${escapeHtml(t.font.sans)}</h2>
+        <h3 class="type-sample type-sample--serif">${escapeHtml(t.font.serif)}</h3>
+      </section>
+      <section class="swatch-grid" aria-label="Colors">
+        ${swatchHTML('palette', a, 0)}
+        ${swatchHTML('palette', b, 1)}
+        ${swatchHTML('palette', c, 2)}
+        ${swatchHTML('gray', g1, 0)}
+        ${swatchHTML('gray', g2, 1)}
+        ${swatchHTML('gray', g3, 2)}
+      </section>
+      <section class="btn-stack" aria-label="Button preview">
+        <button class="pv pv--primary" type="button">Primary action</button>
+        <button class="pv pv--secondary" type="button">Secondary</button>
+        <button class="pv pv--tertiary" type="button">Tertiary</button>
+      </section>
+    </div>
+  `;
+
+  // Per-card actions
+  card.querySelector('[data-action="share"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openShare(theme);
+  });
+  card.querySelector('[data-action="unsave"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    state.saved.splice(idx, 1);
+    persistSaved();
+    renderSaved();
+    showToast('Removed from saved');
+  });
+
+  return card;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[<>&'"]/g, (c) => ({ '<':'&lt;','>':'&gt;','&':'&amp;',"'":'&#39;','"':'&quot;' }[c]));
+}
+
+let savedObserver = null;
+
+function updatePageAtmosphere(material) {
+  const root = document.documentElement.style;
+  root.setProperty('--bg-base', material.bgBase);
+  root.setProperty('--bg-orb-a', material.bgOrbs[0]);
+  root.setProperty('--bg-orb-b', material.bgOrbs[1]);
+  root.setProperty('--bg-orb-c', material.bgOrbs[2]);
+  root.setProperty('--bg-orb-d', material.bgOrbs[3]);
+}
+
 function renderSaved() {
-  ui.savedGrid.innerHTML = '';
+  // tear down prior observer
+  if (savedObserver) { savedObserver.disconnect(); savedObserver = null; }
+  ui.snapStack.innerHTML = '';
+
   if (state.saved.length === 0) {
     ui.savedEmpty.hidden = false;
-    ui.savedGrid.hidden = true;
+    ui.snapStack.hidden = true;
     return;
   }
   ui.savedEmpty.hidden = true;
-  ui.savedGrid.hidden = false;
-  state.saved.forEach((t, idx) => {
-    const tile = document.createElement('button');
-    tile.className = 'saved-tile';
-    tile.style.background = t.material.cardBg.replace(/[\d.]+\)/, '0.95)');
-    tile.innerHTML = `
-      <div class="saved-tile-canvas">
-        <span class="saved-tile-name">${t.material.name}</span>
-        <div class="saved-tile-fonts" style="color:${t.colors.inkStrong}">
-          <div class="saved-tile-sans" style="font-family:'${t.font.sans}',system-ui;font-weight:${t.font.sansWeight}">${t.font.sans}</div>
-          <div class="saved-tile-serif" style="font-family:'${t.font.serif}',Georgia,serif;font-weight:${t.font.serifWeight};color:${t.colors.inkMute}">${t.font.serif}</div>
-        </div>
-        <div class="saved-tile-row">
-          <div class="saved-tile-chip" style="background:${t.colors.palette[0]}"></div>
-          <div class="saved-tile-chip" style="background:${t.colors.palette[1]}"></div>
-          <div class="saved-tile-chip" style="background:${t.colors.palette[2]}"></div>
-        </div>
-      </div>
-      <span class="saved-tile-remove" data-remove="${idx}" title="Remove">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </span>
-    `;
-    tile.addEventListener('click', (e) => {
-      const rm = e.target.closest('[data-remove]');
-      if (rm) {
-        e.stopPropagation();
-        state.saved.splice(+rm.dataset.remove, 1);
-        persistSaved();
-        renderSaved();
-        return;
-      }
-      // Load this theme into Create view
-      state.theme = JSON.parse(JSON.stringify(t));
-      ensureFontsLoaded(t.font);
-      switchMode('create');
-      applyTheme(state.theme);
-    });
-    ui.savedGrid.appendChild(tile);
+  ui.snapStack.hidden = false;
+
+  state.saved.forEach((raw, idx) => {
+    const t = rehydrate(raw);
+    state.saved[idx] = t; // keep state in sync with rehydrated functions
+    ensureFontsLoaded(t.font);
+
+    const page = document.createElement('div');
+    page.className = 'snap-page';
+    page.dataset.idx = String(idx);
+    page.appendChild(buildSavedCard(t, idx));
+    ui.snapStack.appendChild(page);
   });
+
+  // Page-level background follows the visible saved card.
+  savedObserver = new IntersectionObserver((entries) => {
+    let best = null;
+    for (const e of entries) {
+      if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
+    }
+    if (best && best.intersectionRatio > 0.55) {
+      const i = +best.target.dataset.idx;
+      const t = state.saved[i];
+      if (t) updatePageAtmosphere(t.material);
+    }
+  }, { root: ui.snapStack, threshold: [0.4, 0.6, 0.8, 1.0] });
+
+  ui.snapStack.querySelectorAll('.snap-page').forEach((p) => savedObserver.observe(p));
+
+  // Initial: snap to top + sync background.
+  ui.snapStack.scrollTop = 0;
+  if (state.saved[0]) updatePageAtmosphere(state.saved[0].material);
 }
 
 // ---- mode switching ----
@@ -678,7 +792,12 @@ function switchMode(mode) {
   ui.createView.hidden = !isCreate;
   ui.savedView.hidden = isCreate;
   $('#controls').hidden = !isCreate;
-  if (mode === 'saved') renderSaved();
+  if (mode === 'saved') {
+    renderSaved();
+  } else if (state.theme) {
+    // Restore Create-theme atmosphere when returning from Saved
+    updatePageAtmosphere(state.theme.material);
+  }
   // sync top segmented
   ui.topSeg.querySelectorAll('.seg-btn').forEach((b) => {
     const a = b.dataset.mode === mode;
@@ -702,11 +821,14 @@ function showToast(msg) {
 }
 
 // ---- share / export ----
-function openShare() { ui.shareSheet.hidden = false; }
-function closeShare() { ui.shareSheet.hidden = true; }
+function openShare(theme) {
+  state.shareTarget = theme || state.theme;
+  ui.shareSheet.hidden = false;
+}
+function closeShare() { ui.shareSheet.hidden = true; state.shareTarget = null; }
 
 function exportCSS() {
-  const t = state.theme;
+  const t = state.shareTarget || state.theme;
   if (!t) return;
   const css = `:root {
   --font-sans: '${t.font.sans}', system-ui, sans-serif;
@@ -731,7 +853,7 @@ function exportCSS() {
 
 async function exportImage() {
   // Build a self-contained SVG snapshot of the card and download as PNG.
-  const t = state.theme;
+  const t = state.shareTarget || state.theme;
   if (!t) return;
   const W = 800, H = 1100;
   const padding = 56;
@@ -837,7 +959,7 @@ async function exportImage() {
 
 function exportPDF() {
   // Lightweight: use browser print of just the card area.
-  const t = state.theme;
+  const t = state.shareTarget || state.theme;
   if (!t) return;
   const w = window.open('', '_blank', 'noopener,width=820,height=1100');
   if (!w) { showToast('Pop-up blocked'); return; }
@@ -883,7 +1005,7 @@ function init() {
 
   ui.regenBtn.addEventListener('click', () => generate(state.scope));
   ui.starBtn.addEventListener('click', toggleSave);
-  ui.shareBtn.addEventListener('click', openShare);
+  ui.shareBtn.addEventListener('click', () => openShare(state.theme));
 
   ui.shareSheet.addEventListener('click', (e) => {
     if (e.target.matches('[data-close]')) { closeShare(); return; }
