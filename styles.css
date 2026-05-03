@@ -51,8 +51,8 @@
   --font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
   --sans-weight: 700;
   --serif-weight: 700;
-  --sans-size: clamp(1.65rem, min(4.6vw, 4.4vh), 2.6rem);
-  --serif-size: clamp(1.25rem, min(3.4vw, 3.2vh), 1.85rem);
+  --sans-size: clamp(1.25rem, min(3.8vw, 3.6vh), 2.15rem);
+  --serif-size: clamp(0.95rem, min(2.8vw, 2.6vh), 1.45rem);
   --sans-tracking: -0.02em;
   --serif-tracking: -0.005em;
 
@@ -247,7 +247,7 @@ button:focus-visible,
   justify-content: center;
   align-items: stretch;
 }
-.view--create { align-items: center; }
+.view--create { align-items: stretch; }
 .view--saved {
   align-items: stretch;
   overflow: hidden;
