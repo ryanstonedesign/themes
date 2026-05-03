@@ -478,8 +478,8 @@ button:focus-visible,
   border: var(--btn-tertiary-border);
   box-shadow: var(--btn-tertiary-shadow);
 }
-.pv--tertiary:hover { background: rgba(0,0,0,0.02); }
-.pv--tertiary:active { background: rgba(0,0,0,0.04); }
+.pv--tertiary:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.pv--tertiary:active { background: color-mix(in srgb, var(--accent) 16%, transparent); }
 
 /* =========================================================
    Bottom controls

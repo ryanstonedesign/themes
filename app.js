@@ -190,6 +190,64 @@ const MATERIALS = {
     paletteMood: { hueRange: [80, 140], satRange: [30, 55], lightRange: [42, 58], harmony: ['analogous', 'mono'], contrast: 'soft' },
     fontMoods: ['classic', 'minimal'],
   },
+
+  // ----- Dark materials -----
+  Obsidian: {
+    cardBg: 'rgba(20,24,34,0.55)', borderOpacity: 0.7, blur: 32, saturate: 1.6, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(0,0,0,0.55), 0 50px 120px rgba(0,0,0,0.4)',
+    bgBase: '#0a0c14',
+    bgOrbs: ['#202a4a', '#1a2540', '#2a1a3a', '#15182a'],
+    paletteMood: { hueRange: [200, 260], satRange: [55, 80], lightRange: [55, 70], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['minimal', 'modern'],
+  },
+  Midnight: {
+    cardBg: 'rgba(15,22,42,0.55)', borderOpacity: 0.75, blur: 30, saturate: 1.6, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(0,10,40,0.55), 0 50px 120px rgba(0,10,40,0.4)',
+    bgBase: '#070d1c',
+    bgOrbs: ['#1a2a55', '#162540', '#22184a', '#102045'],
+    paletteMood: { hueRange: [210, 270], satRange: [60, 85], lightRange: [55, 70], harmony: ['analogous', 'split'], contrast: 'expressive', mode: 'dark' },
+    fontMoods: ['modern', 'expressive'],
+  },
+  Carbon: {
+    cardBg: 'rgba(28,30,36,0.6)', borderOpacity: 0.55, blur: 28, saturate: 1.4, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 22px 56px rgba(0,0,0,0.5), 0 48px 110px rgba(0,0,0,0.35)',
+    bgBase: '#14161c',
+    bgOrbs: ['#28252e', '#1f1d24', '#2c2a30', '#1c1d22'],
+    paletteMood: { hueRange: [200, 260], satRange: [30, 55], lightRange: [55, 68], harmony: ['mono', 'analogous'], contrast: 'soft', mode: 'dark' },
+    fontMoods: ['minimal'],
+  },
+  Eclipse: {
+    cardBg: 'rgba(28,18,38,0.55)', borderOpacity: 0.8, blur: 30, saturate: 1.7, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(20,0,40,0.55), 0 50px 120px rgba(20,0,40,0.4)',
+    bgBase: '#100620',
+    bgOrbs: ['#3a1850', '#2a1845', '#401a3a', '#20102a'],
+    paletteMood: { hueRange: [280, 340], satRange: [60, 85], lightRange: [58, 72], harmony: ['triadic', 'split'], contrast: 'expressive', mode: 'dark' },
+    fontMoods: ['expressive', 'modern'],
+  },
+  Forest: {
+    cardBg: 'rgba(15,28,22,0.55)', borderOpacity: 0.6, blur: 28, saturate: 1.5, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(0,20,10,0.5), 0 50px 120px rgba(0,20,10,0.35)',
+    bgBase: '#061410',
+    bgOrbs: ['#163025', '#1a2820', '#122a25', '#0e2018'],
+    paletteMood: { hueRange: [110, 170], satRange: [45, 70], lightRange: [52, 68], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['classic', 'minimal'],
+  },
+  Espresso: {
+    cardBg: 'rgba(38,26,20,0.55)', borderOpacity: 0.65, blur: 26, saturate: 1.5, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(40,15,5,0.5), 0 50px 120px rgba(40,15,5,0.35)',
+    bgBase: '#18100a',
+    bgOrbs: ['#3a2418', '#2a1810', '#3a1a08', '#20100a'],
+    paletteMood: { hueRange: [15, 50], satRange: [55, 80], lightRange: [58, 72], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['classic', 'expressive'],
+  },
+  Slate: {
+    cardBg: 'rgba(28,32,40,0.55)', borderOpacity: 0.6, blur: 30, saturate: 1.4, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(0,5,20,0.5), 0 50px 120px rgba(0,5,20,0.35)',
+    bgBase: '#0e1218',
+    bgOrbs: ['#1c2530', '#182028', '#20283a', '#14182a'],
+    paletteMood: { hueRange: [180, 240], satRange: [40, 65], lightRange: [55, 70], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['minimal', 'modern'],
+  },
 };
 const MATERIAL_NAMES = Object.keys(MATERIALS);
 
@@ -199,7 +257,7 @@ const BUTTON_STYLES = [
     name: 'pill',
     radius: '999px',
     primaryGrad: (a, b, c) => `linear-gradient(135deg, ${a} 0%, ${mix(a, b, 0.6)} 100%)`,
-    secondaryGrad: (g1, g2) => `linear-gradient(180deg, #ffffff 0%, ${g2} 100%)`,
+    secondaryGrad: (g1, g2) => `linear-gradient(180deg, ${g1} 0%, ${g2} 100%)`,
     primaryShadow: (a) => `0 8px 22px ${a}55, 0 1px 0 rgba(255,255,255,0.45) inset`,
     secondaryShadow: '0 1px 2px rgba(15,18,25,0.06), 0 6px 18px rgba(15,18,25,0.06)',
     tertiaryBorder: (a) => `1.5px solid ${a}55`,
@@ -219,7 +277,7 @@ const BUTTON_STYLES = [
     name: 'soft-rect',
     radius: '20px',
     primaryGrad: (a, b, c) => `linear-gradient(135deg, ${a} 0%, ${b} 100%)`,
-    secondaryGrad: (g1, g2) => `linear-gradient(135deg, #ffffff 0%, ${g2} 100%)`,
+    secondaryGrad: (g1, g2) => `linear-gradient(135deg, ${g1} 0%, ${g2} 100%)`,
     primaryShadow: (a) => `0 12px 28px ${a}3a, 0 0 0 1px rgba(255,255,255,0.25) inset`,
     secondaryShadow: '0 6px 20px rgba(15,18,25,0.06)',
     tertiaryBorder: (a) => `1px solid ${a}40`,
@@ -307,6 +365,7 @@ function pickFontPair(materialFontMoods) {
 
 function genPalette(material) {
   const mood = material.paletteMood;
+  const isDark = mood.mode === 'dark';
   const harmony = choice(mood.harmony);
   const baseHue = randi(mood.hueRange[0], mood.hueRange[1]);
   const baseSat = randi(mood.satRange[0], mood.satRange[1]);
@@ -342,20 +401,31 @@ function genPalette(material) {
   const satJitter = () => randi(-10, 10);
   const lightJitter = () => randi(-6, 6);
 
-  const c1 = hslToHex(wrap(h1), clamp(baseSat + satJitter(), 30, 90), clamp(baseLight + lightJitter(), 38, 65));
-  const c2 = hslToHex(wrap(h2), clamp(baseSat + satJitter(), 30, 90), clamp(baseLight + lightJitter(), 38, 65));
-  const c3 = hslToHex(wrap(h3), clamp(baseSat + satJitter(), 30, 90), clamp(baseLight + lightJitter(), 38, 65));
+  // Palette accents — light mode caps at 65L, dark mode bumps brighter to pop on dark bg
+  const lMin = isDark ? 50 : 38;
+  const lMax = isDark ? 75 : 65;
+  const c1 = hslToHex(wrap(h1), clamp(baseSat + satJitter(), 30, 90), clamp(baseLight + lightJitter(), lMin, lMax));
+  const c2 = hslToHex(wrap(h2), clamp(baseSat + satJitter(), 30, 90), clamp(baseLight + lightJitter(), lMin, lMax));
+  const c3 = hslToHex(wrap(h3), clamp(baseSat + satJitter(), 30, 90), clamp(baseLight + lightJitter(), lMin, lMax));
 
-  // Grayscale tinted toward base hue (very subtle)
+  // Grayscale + ink invert based on mode (dark themes: dark grays + light ink)
   const grayHue = wrap(h1);
   const graySat = clamp(Math.round(baseSat * 0.12), 0, 12);
-  const g1 = hslToHex(grayHue, graySat, 97);
-  const g2 = hslToHex(grayHue, graySat, 91);
-  const g3 = hslToHex(grayHue, graySat, 83);
 
-  // Typography hex values (dark + mid)
-  const inkStrong = hslToHex(grayHue, clamp(graySat + 12, 8, 28), 14);
-  const inkMute   = hslToHex(grayHue, clamp(graySat + 10, 8, 26), 38);
+  let g1, g2, g3, inkStrong, inkMute;
+  if (isDark) {
+    g1 = hslToHex(grayHue, graySat + 4, 32);
+    g2 = hslToHex(grayHue, graySat + 4, 22);
+    g3 = hslToHex(grayHue, graySat + 4, 14);
+    inkStrong = hslToHex(grayHue, clamp(graySat + 6, 4, 18), 92);
+    inkMute   = hslToHex(grayHue, clamp(graySat + 6, 4, 18), 65);
+  } else {
+    g1 = hslToHex(grayHue, graySat, 97);
+    g2 = hslToHex(grayHue, graySat, 91);
+    g3 = hslToHex(grayHue, graySat, 83);
+    inkStrong = hslToHex(grayHue, clamp(graySat + 12, 8, 28), 14);
+    inkMute   = hslToHex(grayHue, clamp(graySat + 10, 8, 26), 38);
+  }
 
   return {
     palette: [c1, c2, c3],
@@ -363,6 +433,7 @@ function genPalette(material) {
     inkStrong, inkMute,
     accent: c1,
     harmony,
+    mode: isDark ? 'dark' : 'light',
     seed: `${harmony}|${c1}|${c2}|${c3}`,
   };
 }
