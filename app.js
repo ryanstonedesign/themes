@@ -686,8 +686,8 @@ function buildSavedCard(theme, idx) {
     </header>
     <div class="card-body">
       <section class="type-pair" aria-label="Typography">
-        <h2 class="type-sample type-sample--sans">Guess what</h2>
-        <h3 class="type-sample type-sample--serif">Chicken butt</h3>
+        <h2 class="type-sample type-sample--sans">Hello world</h2>
+        <h3 class="type-sample type-sample--serif">Have a nice day</h3>
       </section>
       <section class="swatch-grid" aria-label="Colors">
         ${swatchHTML('palette', a, 0)}
