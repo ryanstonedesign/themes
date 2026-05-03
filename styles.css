@@ -51,14 +51,14 @@
   --font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
   --sans-weight: 700;
   --serif-weight: 700;
-  --sans-size: clamp(2rem, 4.6vw, 2.6rem);
-  --serif-size: clamp(1.5rem, 3.4vw, 1.85rem);
+  --sans-size: clamp(1.65rem, min(4.6vw, 4.4vh), 2.6rem);
+  --serif-size: clamp(1.25rem, min(3.4vw, 3.2vh), 1.85rem);
   --sans-tracking: -0.02em;
   --serif-tracking: -0.005em;
 
   /* Button system (overridden by generator) */
   --btn-radius: 999px;
-  --btn-h: 56px;
+  --btn-h: clamp(44px, 6.4vh, 56px);
   --btn-primary-bg: linear-gradient(135deg, var(--p1), var(--p1));
   --btn-primary-shadow: 0 6px 18px rgba(37, 99, 235, 0.32), 0 1px 0 rgba(255,255,255,0.6) inset;
   --btn-secondary-bg: linear-gradient(180deg, #ffffff, var(--g2));
@@ -82,9 +82,12 @@ body {
   font-family: var(--font-sans);
   color: var(--ctrl-ink);
   background: var(--bg-base);
-  overflow-x: hidden;
-  min-height: 100dvh;
+  overflow: hidden;
+  height: 100dvh;
 }
+
+/* Make sure [hidden] always wins over any display: rules */
+[hidden] { display: none !important; }
 
 button {
   font-family: inherit;
@@ -138,12 +141,13 @@ button:focus-visible,
 .stage {
   --stage-w: min(540px, 92vw);
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  padding: clamp(20px, 4vw, 36px) 20px clamp(20px, 4vw, 32px);
+  gap: clamp(10px, 1.6vh, 18px);
+  padding: clamp(12px, 2.2vh, 32px) 20px clamp(12px, 2vh, 28px);
+  overflow: hidden;
 }
 
 /* =========================================================
@@ -237,8 +241,18 @@ button:focus-visible,
    ========================================================= */
 .view {
   width: var(--stage-w);
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   justify-content: center;
+  align-items: stretch;
+}
+.view--create { align-items: center; }
+.view--saved {
+  align-items: flex-start;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px 8px;
 }
 
 /* =========================================================
@@ -247,12 +261,15 @@ button:focus-visible,
 .card {
   position: relative;
   width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--card-radius);
   background: var(--card-bg);
   -webkit-backdrop-filter: blur(var(--card-blur)) saturate(var(--card-saturate));
   backdrop-filter: blur(var(--card-blur)) saturate(var(--card-saturate));
   box-shadow: var(--card-shadow);
-  padding: 26px 26px 22px;
+  padding: clamp(18px, 2.8vh, 28px) clamp(18px, 4vw, 28px);
   overflow: hidden;
   transition:
     background 600ms cubic-bezier(.2,.7,.2,1),
@@ -307,9 +324,11 @@ button:focus-visible,
 .card-body {
   position: relative;
   z-index: 2;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: clamp(10px, 2.2vh, 22px);
 }
 
 /* =========================================================
@@ -388,7 +407,8 @@ button:focus-visible,
 .swatch-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: clamp(8px, 1.4vh, 12px);
+  flex-shrink: 0;
 }
 .swatch {
   position: relative;
@@ -421,7 +441,7 @@ button:focus-visible,
 /* =========================================================
    Button preview stack
    ========================================================= */
-.btn-stack { display: flex; flex-direction: column; gap: 10px; }
+.btn-stack { display: flex; flex-direction: column; gap: clamp(6px, 1.2vh, 10px); flex-shrink: 0; }
 .pv {
   height: var(--btn-h);
   border-radius: var(--btn-radius);
@@ -487,7 +507,7 @@ button:focus-visible,
   display: flex;
   align-items: stretch;
   gap: 12px;
-  margin-top: auto;
+  flex-shrink: 0;
 }
 .controls .ctrl--regen { height: auto; align-self: stretch; }
 

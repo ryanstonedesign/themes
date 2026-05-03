@@ -683,8 +683,7 @@ function switchMode(mode) {
   const isCreate = mode === 'create';
   ui.createView.hidden = !isCreate;
   ui.savedView.hidden = isCreate;
-  $('#controls').style.visibility = isCreate ? 'visible' : 'hidden';
-  $('#controls').style.pointerEvents = isCreate ? 'auto' : 'none';
+  $('#controls').hidden = !isCreate;
   if (mode === 'saved') renderSaved();
   // sync top segmented
   ui.topSeg.querySelectorAll('.seg-btn').forEach((b) => {
