@@ -223,6 +223,48 @@ const MATERIALS = {
     fontMoods: ['classic', 'minimal'],
   },
 
+  // ----- Metal materials — warm and cool refined surfaces -----
+  Gold: {
+    cardBg: 'rgba(255,248,224,0.6)', borderOpacity: 1.0, blur: 26, saturate: 1.5, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(120,80,10,0.06), 0 24px 60px rgba(120,80,10,0.14), 0 50px 120px rgba(120,80,10,0.10)',
+    bgBase: '#f6ecd0',
+    bgOrbs: ['#f4d98a', '#ffe6a8', '#e8c878', '#fff0c4'],
+    paletteMood: { hueRange: [38, 55], satRange: [60, 88], lightRange: [48, 60], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['classic', 'expressive'],
+  },
+  Copper: {
+    cardBg: 'rgba(252,238,224,0.6)', borderOpacity: 1.0, blur: 26, saturate: 1.5, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(120,55,20,0.06), 0 24px 60px rgba(120,55,20,0.14), 0 50px 120px rgba(120,55,20,0.10)',
+    bgBase: '#f3dcc8',
+    bgOrbs: ['#e8a878', '#f0bc94', '#d8895a', '#f4cca8'],
+    paletteMood: { hueRange: [12, 32], satRange: [55, 80], lightRange: [45, 58], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['classic', 'expressive', 'modern'],
+  },
+  Platinum: {
+    cardBg: 'rgba(248,250,253,0.6)', borderOpacity: 1.0, blur: 30, saturate: 1.3, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(40,50,70,0.05), 0 24px 60px rgba(40,50,70,0.10), 0 50px 120px rgba(40,50,70,0.08)',
+    bgBase: '#e6eaf0',
+    bgOrbs: ['#d4dae4', '#dfe4ec', '#c8d0dc', '#e2e8f0'],
+    paletteMood: { hueRange: [200, 240], satRange: [15, 35], lightRange: [55, 68], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['minimal', 'modern'],
+  },
+  Brass: {
+    cardBg: 'rgba(250,240,210,0.6)', borderOpacity: 1.0, blur: 24, saturate: 1.5, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(110,80,15,0.06), 0 24px 60px rgba(110,80,15,0.14), 0 50px 120px rgba(110,80,15,0.10)',
+    bgBase: '#ecdfa8',
+    bgOrbs: ['#d8c068', '#e4cc80', '#c8a850', '#ecd690'],
+    paletteMood: { hueRange: [42, 60], satRange: [55, 78], lightRange: [42, 55], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['classic', 'expressive'],
+  },
+  Bronze: {
+    cardBg: 'rgba(245,228,200,0.6)', borderOpacity: 1.0, blur: 24, saturate: 1.4, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(90,50,15,0.07), 0 24px 60px rgba(90,50,15,0.16), 0 50px 120px rgba(90,50,15,0.12)',
+    bgBase: '#e6cba0',
+    bgOrbs: ['#c89860', '#d8a878', '#a87848', '#e0b888'],
+    paletteMood: { hueRange: [22, 42], satRange: [50, 75], lightRange: [38, 52], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['classic', 'expressive'],
+  },
+
   // ----- Dark materials -----
   Obsidian: {
     cardBg: 'rgba(20,24,34,0.55)', borderOpacity: 0.7, blur: 32, saturate: 1.6, noise: 0.08,
