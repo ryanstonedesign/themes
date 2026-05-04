@@ -554,6 +554,83 @@ body[data-family="pixel"] .bg-grain {
 }
 
 /* =========================================================
+   Hand-drawn family — paper materials, sketch vs calligraphic
+   ========================================================= */
+.card[data-family="hand"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+/* Reuse ::before as a drawn outline instead of a glass rim */
+.card[data-family="hand"]::before {
+  background: none;
+  padding: 0;
+  -webkit-mask: none;
+          mask: none;
+  border-radius: inherit;
+}
+
+/* --- Sketch sub-style — wobbly, casual --- */
+.card[data-family="hand"][data-style="sketch"] {
+  border-radius: 18px !important;
+}
+.card[data-family="hand"][data-style="sketch"]::before {
+  border: 2px dashed var(--ink-strong);
+  opacity: 0.5;
+}
+.card[data-family="hand"][data-style="sketch"] .swatch {
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1.5px rgba(0,0,0,0.10),
+    2px 3px 0 rgba(0,0,0,0.08);
+}
+.card[data-family="hand"][data-style="sketch"] .pv {
+  border-radius: 14px !important;
+  letter-spacing: 0;
+}
+.card[data-family="hand"][data-style="sketch"] .pv:hover { transform: translate(-1px, -1px); }
+.card[data-family="hand"][data-style="sketch"] .pv:active { transform: translate(1px, 2px); filter: none; }
+
+/* --- Calligraphic sub-style — refined, elegant --- */
+.card[data-family="hand"][data-style="calligraphic"] {
+  border-radius: 8px !important;
+}
+.card[data-family="hand"][data-style="calligraphic"]::before {
+  border: 1px solid var(--ink-strong);
+  opacity: 0.25;
+}
+.card[data-family="hand"][data-style="calligraphic"] .swatch {
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.10),
+    0 6px 16px rgba(0,0,0,0.08);
+}
+.card[data-family="hand"][data-style="calligraphic"] .pv {
+  border-radius: 6px !important;
+}
+
+/* Type — different scales because handwriting vs script have very different
+   perceived sizes per em. */
+.card[data-family="hand"] .type-sample { letter-spacing: 0; line-height: 1.05; }
+.card[data-family="hand"][data-style="sketch"] .type-sample--sans {
+  font-size: clamp(1.5rem, min(4.4vw, 4vh), 2.4rem);
+}
+.card[data-family="hand"][data-style="sketch"] .type-sample--serif {
+  font-size: clamp(1rem, min(2.8vw, 2.6vh), 1.4rem);
+  font-weight: 400;
+}
+.card[data-family="hand"][data-style="calligraphic"] .type-sample--sans {
+  font-size: clamp(2rem, min(5.5vw, 5vh), 3.2rem);
+  line-height: 1;
+}
+.card[data-family="hand"][data-style="calligraphic"] .type-sample--serif {
+  font-size: clamp(1.2rem, min(3.3vw, 3vh), 1.8rem);
+  font-weight: 400;
+}
+
+/* Page background — slightly less blurred than glass to give a paper feel */
+body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
+
+/* =========================================================
    Saved view — full-fidelity cards in a vertical snap stack
    ========================================================= */
 .snap-stack {

@@ -89,7 +89,31 @@ const FONT_PAIRS = [
   { sans: 'Pixelify Sans',        serif: 'Pixelify Sans',      mood: 'pixel',      sw: [500, 700], rw: [500, 700] },
   { sans: 'Jersey 10',            serif: 'Jersey 10',          mood: 'pixel',      sw: [400],      rw: [400] },
   { sans: 'Workbench',            serif: 'Workbench',          mood: 'pixel',      sw: [400],      rw: [400] },
+
+  // Sketch (used only by family: 'hand' + style: 'sketch')
+  { sans: 'Caveat',               serif: 'Caveat',             mood: 'sketch',     sw: [500, 700], rw: [500, 700] },
+  { sans: 'Gloria Hallelujah',    serif: 'Gloria Hallelujah',  mood: 'sketch',     sw: [400],      rw: [400] },
+  { sans: 'Indie Flower',         serif: 'Indie Flower',       mood: 'sketch',     sw: [400],      rw: [400] },
+  { sans: 'Patrick Hand',         serif: 'Patrick Hand',       mood: 'sketch',     sw: [400],      rw: [400] },
+  { sans: 'Architects Daughter',  serif: 'Architects Daughter',mood: 'sketch',     sw: [400],      rw: [400] },
+  { sans: 'Kalam',                serif: 'Kalam',              mood: 'sketch',     sw: [400, 700], rw: [400, 700] },
+  { sans: 'Permanent Marker',     serif: 'Permanent Marker',   mood: 'sketch',     sw: [400],      rw: [400] },
+  { sans: 'Cabin Sketch',         serif: 'Cabin Sketch',       mood: 'sketch',     sw: [400, 700], rw: [400, 700] },
+
+  // Calligraphic (used only by family: 'hand' + style: 'calligraphic')
+  { sans: 'Dancing Script',       serif: 'Dancing Script',     mood: 'calligraphic', sw: [400, 700], rw: [400, 700] },
+  { sans: 'Great Vibes',          serif: 'Great Vibes',        mood: 'calligraphic', sw: [400], rw: [400] },
+  { sans: 'Allura',               serif: 'Allura',             mood: 'calligraphic', sw: [400], rw: [400] },
+  { sans: 'Sacramento',           serif: 'Sacramento',         mood: 'calligraphic', sw: [400], rw: [400] },
+  { sans: 'Parisienne',           serif: 'Parisienne',         mood: 'calligraphic', sw: [400], rw: [400] },
+  { sans: 'Pinyon Script',        serif: 'Pinyon Script',      mood: 'calligraphic', sw: [400], rw: [400] },
+  { sans: 'Mrs Saint Delafield',  serif: 'Mrs Saint Delafield',mood: 'calligraphic', sw: [400], rw: [400] },
+  { sans: 'Pacifico',             serif: 'Pacifico',           mood: 'calligraphic', sw: [400], rw: [400] },
 ];
+
+// Moods that lock pairs to specific material families. A non-family material
+// will never select pairs with these moods, and vice versa.
+const EXCLUSIVE_MOODS = new Set(['pixel', 'sketch', 'calligraphic']);
 
 const TYPE_SCALES = [
   { sansSize: 'clamp(2.0rem, 4.6vw, 2.6rem)', serifSize: 'clamp(1.45rem, 3.4vw, 1.85rem)', sansTrack: '-0.02em', serifTrack: '-0.005em' },
@@ -285,6 +309,118 @@ const MATERIALS = {
     paletteMood: { hueRange: [280, 360], satRange: [70, 95], lightRange: [50, 65], harmony: ['triadic', 'split'], contrast: 'expressive' },
     fontMoods: ['pixel'],
   },
+
+  // ----- Hand-drawn sketch family -----
+  Notebook: {
+    family: 'hand', style: 'sketch',
+    cardBg: 'rgba(248,250,252,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.12,
+    cardShadow: '3px 4px 0 rgba(20,40,80,0.08), 8px 12px 24px rgba(20,40,80,0.08)',
+    bgBase: '#eef3f8',
+    bgOrbs: ['#dbe6f0', '#d4dde8', '#e2eaf2', '#d8e0e8'],
+    paletteMood: { hueRange: [200, 240], satRange: [55, 80], lightRange: [40, 55], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['sketch'],
+  },
+  Sketchpad: {
+    family: 'hand', style: 'sketch',
+    cardBg: 'rgba(252,247,238,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.16,
+    cardShadow: '3px 4px 0 rgba(60,40,20,0.1), 8px 10px 20px rgba(60,40,20,0.08)',
+    bgBase: '#f4ead8',
+    bgOrbs: ['#e8d8c0', '#f0e0c8', '#e4d0b8', '#ebd9c2'],
+    paletteMood: { hueRange: [20, 60], satRange: [40, 65], lightRange: [38, 52], harmony: ['analogous', 'mono'], contrast: 'soft' },
+    fontMoods: ['sketch'],
+  },
+  Doodle: {
+    family: 'hand', style: 'sketch',
+    cardBg: 'rgba(255,255,255,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.1,
+    cardShadow: '5px 5px 0 rgba(0,0,0,0.08), 10px 12px 24px rgba(0,0,0,0.08)',
+    bgBase: '#fff5e1',
+    bgOrbs: ['#ffe8a8', '#ffd2c8', '#c8e8ff', '#d8f0c8'],
+    paletteMood: { hueRange: [0, 360], satRange: [70, 90], lightRange: [48, 62], harmony: ['triadic', 'split'], contrast: 'expressive' },
+    fontMoods: ['sketch'],
+  },
+  Linen: {
+    family: 'hand', style: 'sketch',
+    cardBg: 'rgba(248,242,232,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.18,
+    cardShadow: '2px 3px 0 rgba(80,60,40,0.08), 6px 8px 16px rgba(80,60,40,0.08)',
+    bgBase: '#ebe3d0',
+    bgOrbs: ['#dccebc', '#e2d4bf', '#d4c8b0', '#e8dcc4'],
+    paletteMood: { hueRange: [10, 50], satRange: [30, 55], lightRange: [36, 50], harmony: ['analogous', 'mono'], contrast: 'soft' },
+    fontMoods: ['sketch'],
+  },
+  Graphite: {
+    family: 'hand', style: 'sketch',
+    cardBg: 'rgba(38,40,46,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.1,
+    cardShadow: '3px 4px 0 rgba(0,0,0,0.4), 10px 14px 28px rgba(0,0,0,0.35)',
+    bgBase: '#1c1e22',
+    bgOrbs: ['#2a2c32', '#252a30', '#30333c', '#1f2226'],
+    paletteMood: { hueRange: [200, 260], satRange: [25, 50], lightRange: [55, 70], harmony: ['mono', 'analogous'], contrast: 'soft', mode: 'dark' },
+    fontMoods: ['sketch'],
+  },
+  Watercolor: {
+    family: 'hand', style: 'sketch',
+    cardBg: 'rgba(252,248,252,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.1,
+    cardShadow: '3px 4px 0 rgba(80,60,80,0.06), 8px 12px 24px rgba(80,60,80,0.1)',
+    bgBase: '#f3eaef',
+    bgOrbs: ['#e8d8e8', '#f0e0d8', '#d8e8f0', '#e8e0e8'],
+    paletteMood: { hueRange: [240, 360], satRange: [40, 65], lightRange: [48, 62], harmony: ['analogous', 'split'], contrast: 'soft' },
+    fontMoods: ['sketch'],
+  },
+
+  // ----- Hand-drawn calligraphic family -----
+  Parchment: {
+    family: 'hand', style: 'calligraphic',
+    cardBg: 'rgba(250,240,218,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.16,
+    cardShadow: '0 2px 4px rgba(80,50,20,0.1), 0 14px 36px rgba(80,50,20,0.14)',
+    bgBase: '#ecdfbe',
+    bgOrbs: ['#e0d0a8', '#d8c898', '#e8d8b0', '#dcccab'],
+    paletteMood: { hueRange: [20, 50], satRange: [50, 75], lightRange: [28, 45], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['calligraphic'],
+  },
+  Inkwell: {
+    family: 'hand', style: 'calligraphic',
+    cardBg: 'rgba(22,28,46,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.08,
+    cardShadow: '0 3px 8px rgba(0,0,0,0.4), 0 18px 44px rgba(0,0,10,0.45)',
+    bgBase: '#0d1226',
+    bgOrbs: ['#1c2540', '#252a4a', '#1f2238', '#222a48'],
+    paletteMood: { hueRange: [30, 60], satRange: [60, 85], lightRange: [58, 72], harmony: ['mono', 'analogous'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['calligraphic'],
+  },
+  Letterpress: {
+    family: 'hand', style: 'calligraphic',
+    cardBg: 'rgba(250,246,240,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.12,
+    cardShadow: '0 1px 2px rgba(40,30,15,0.06), 0 14px 36px rgba(40,30,15,0.12)',
+    bgBase: '#eae3d6',
+    bgOrbs: ['#dcd2c0', '#e2d8c8', '#d4cab8', '#e6dcd0'],
+    paletteMood: { hueRange: [340, 30], satRange: [40, 70], lightRange: [28, 45], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['calligraphic'],
+  },
+  Vellum: {
+    family: 'hand', style: 'calligraphic',
+    cardBg: 'rgba(252,245,228,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.14,
+    cardShadow: '0 2px 6px rgba(100,70,20,0.1), 0 16px 40px rgba(100,70,20,0.14)',
+    bgBase: '#efe2c2',
+    bgOrbs: ['#e8d4a0', '#dcc890', '#f0e0b8', '#e4d8a8'],
+    paletteMood: { hueRange: [30, 70], satRange: [55, 80], lightRange: [32, 48], harmony: ['analogous', 'split'], contrast: 'medium' },
+    fontMoods: ['calligraphic'],
+  },
+  Quill: {
+    family: 'hand', style: 'calligraphic',
+    cardBg: 'rgba(28,18,28,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.08,
+    cardShadow: '0 3px 8px rgba(0,0,0,0.4), 0 18px 44px rgba(20,0,15,0.45)',
+    bgBase: '#180d18',
+    bgOrbs: ['#3a1e30', '#2a1825', '#321a2a', '#1c1018'],
+    paletteMood: { hueRange: [340, 30], satRange: [50, 75], lightRange: [58, 74], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['calligraphic'],
+  },
+  Manuscript: {
+    family: 'hand', style: 'calligraphic',
+    cardBg: 'rgba(248,238,222,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0.16,
+    cardShadow: '0 3px 8px rgba(80,40,30,0.12), 0 16px 40px rgba(80,40,30,0.16)',
+    bgBase: '#e8d8b8',
+    bgOrbs: ['#d8b888', '#c89878', '#a86848', '#88486a'],
+    paletteMood: { hueRange: [350, 60], satRange: [60, 85], lightRange: [25, 42], harmony: ['triadic', 'split'], contrast: 'expressive' },
+    fontMoods: ['calligraphic'],
+  },
 };
 const MATERIAL_NAMES = Object.keys(MATERIALS);
 
@@ -362,6 +498,30 @@ const BUTTON_STYLES = [
     tertiaryBorder: (a) => `3px solid ${a}`,
     tertiaryShadow: '4px 4px 0 rgba(0,0,0,0.25)',
   },
+  {
+    // family: 'hand' + style: 'sketch' — solid marker fills, dashed tertiary
+    // outline, small hand-drawn ink offset.
+    name: 'hand-sketch',
+    radius: '14px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a) => `2px 3px 0 ${mix(a, '#000000', 0.4)}`,
+    secondaryShadow: '2px 3px 0 rgba(0,0,0,0.12)',
+    tertiaryBorder: (a) => `2px dashed ${a}`,
+    tertiaryShadow: 'none',
+  },
+  {
+    // family: 'hand' + style: 'calligraphic' — restrained, refined fill,
+    // hairline tertiary border, soft elegant shadow.
+    name: 'hand-calligraphic',
+    radius: '6px',
+    primaryGrad: (a, b) => `linear-gradient(180deg, ${a} 0%, ${mix(a, b, 0.3)} 100%)`,
+    secondaryGrad: (g1, g2) => `linear-gradient(180deg, ${g1} 0%, ${g2} 100%)`,
+    primaryShadow: (a) => `0 2px 4px ${a}30, 0 6px 14px ${a}25`,
+    secondaryShadow: '0 1px 2px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.06)',
+    tertiaryBorder: (a) => `1px solid ${a}`,
+    tertiaryShadow: '0 1px 2px rgba(0,0,0,0.04)',
+  },
 ];
 
 // ----------------------------- non-repetition history -----------------------------
@@ -394,10 +554,15 @@ function pickMaterial() {
 }
 
 function pickFontPair(materialFontMoods) {
-  // Pixel pairs are exclusive — only pixel materials use them and pixel
-  // materials only use them. Filter the candidate pool accordingly.
-  const wantPixel = materialFontMoods.includes('pixel');
-  const candidates = FONT_PAIRS.filter((p) => (p.mood === 'pixel') === wantPixel);
+  // Some moods (pixel/sketch/calligraphic) are exclusive families — pairs
+  // with that mood only show up for materials asking for that mood, and a
+  // material asking for an exclusive mood only sees pairs with that mood.
+  const wantedExclusive = materialFontMoods.find((m) => EXCLUSIVE_MOODS.has(m));
+  const candidates = FONT_PAIRS.filter((p) => {
+    const pairExclusive = EXCLUSIVE_MOODS.has(p.mood);
+    if (wantedExclusive) return p.mood === wantedExclusive;
+    return !pairExclusive;
+  });
 
   const entries = candidates.map((p) => {
     const matches = materialFontMoods.includes(p.mood);
@@ -491,13 +656,19 @@ function genPalette(material) {
   };
 }
 
+// Button styles locked to a family (or family + style). Every other material
+// picks from the remaining "general" pool.
+const FAMILY_BUTTON_STYLES = new Set(['arcade-block', 'hand-sketch', 'hand-calligraphic']);
+
 function pickButtonStyle(material) {
-  // Pixel materials force the arcade-block style; non-pixel materials never
-  // pick it. Keeps the chunky 8-bit look exclusive to the pixel family.
-  if (material && material.family === 'pixel') {
-    return BUTTON_STYLES.find((s) => s.name === 'arcade-block');
+  if (material) {
+    if (material.family === 'pixel') return BUTTON_STYLES.find((s) => s.name === 'arcade-block');
+    if (material.family === 'hand') {
+      const target = material.style === 'sketch' ? 'hand-sketch' : 'hand-calligraphic';
+      return BUTTON_STYLES.find((s) => s.name === target);
+    }
   }
-  const pool = BUTTON_STYLES.filter((s) => s.name !== 'arcade-block').map((s) => s.name);
+  const pool = BUTTON_STYLES.filter((s) => !FAMILY_BUTTON_STYLES.has(s.name)).map((s) => s.name);
   const name = pickFresh(pool, 'button');
   remember('button', name);
   return BUTTON_STYLES.find((s) => s.name === name);
@@ -622,8 +793,12 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--bg-orb-d', m.bgOrbs[3]);
     if (m.family) ui.card.dataset.family = m.family;
     else delete ui.card.dataset.family;
+    if (m.style) ui.card.dataset.style = m.style;
+    else delete ui.card.dataset.style;
     if (m.family) document.body.dataset.family = m.family;
     else delete document.body.dataset.family;
+    if (m.style) document.body.dataset.style = m.style;
+    else delete document.body.dataset.style;
   }
 
   // Update saved star state
@@ -684,11 +859,11 @@ function generate(scope = 'all') {
     button = newButton(material);
   } else if (scope === 'card') {
     material = newMaterial();
-    // Card change can flip between pixel and non-pixel families — keep
-    // font + button consistent with the new material's family.
-    const wasPixel = prev?.material?.family === 'pixel';
-    const nowPixel = material.family === 'pixel';
-    if (wasPixel !== nowPixel) {
+    // Card change can flip between families (pixel / hand / generic) or
+    // between hand sub-styles — re-pick font + button so they stay locked
+    // to the active family.
+    const sigOf = (m) => `${m?.family || ''}|${m?.style || ''}`;
+    if (sigOf(prev?.material) !== sigOf(material)) {
       font = newFont(material);
       button = newButton(material);
     }
@@ -838,6 +1013,7 @@ function buildSavedCard(theme, idx) {
   card.className = 'card saved-card';
   card.dataset.idx = String(idx);
   if (t.material.family) card.dataset.family = t.material.family;
+  if (t.material.style) card.dataset.style = t.material.style;
   Object.entries(vars).forEach(([k, v]) => card.style.setProperty(k, v));
 
   const swatchHTML = (role, hex, i) =>
@@ -905,6 +1081,8 @@ function updatePageAtmosphere(material) {
   root.setProperty('--bg-orb-d', material.bgOrbs[3]);
   if (material.family) document.body.dataset.family = material.family;
   else delete document.body.dataset.family;
+  if (material.style) document.body.dataset.style = material.style;
+  else delete document.body.dataset.style;
 }
 
 function renderSaved() {
