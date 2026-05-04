@@ -537,8 +537,10 @@ const ui = {
 const loadedFontWeights = new Map();
 function ensureFontsLoaded(pair) {
   let dirty = false;
-  // Always include 400 for the subhead which uses font-weight: 400.
-  const sansWeights = [...new Set([400, ...pair.sw])];
+  // pair may be an old saved-theme font object that lacks `sw`. Fall back
+  // to its single sansWeight so we still request something valid.
+  const available = pair.sw || (pair.sansWeight ? [pair.sansWeight] : [400]);
+  const sansWeights = [...new Set([400, ...available])];
   if (!loadedFontWeights.has(pair.sans)) loadedFontWeights.set(pair.sans, new Set());
   const sansSet = loadedFontWeights.get(pair.sans);
   for (const w of sansWeights) {
@@ -660,6 +662,9 @@ function generate(scope = 'all') {
     return {
       sans: pair.sans, serif: pair.serif, mood: pair.mood,
       sansWeight: sw, serifWeight: rw, scale,
+      // Keep the available-weight arrays so ensureFontsLoaded can request
+      // every weight a future regen might pick (and 400 for the subhead).
+      sw: pair.sw, rw: pair.rw,
     };
   };
 
