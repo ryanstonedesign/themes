@@ -716,9 +716,10 @@ function buildSavedCard(theme, idx) {
   const [g1, g2, g3] = t.colors.grays;
 
   const vars = {
-    // Saved cards sit inside a scroll container; bumping alpha hides the
-    // backdrop-blur artifacts caused by orbs/adjacent cards bleeding through.
-    '--card-bg': withAlpha(t.material.cardBg, 0.92),
+    // Saved cards live inside a scroll container; backdrop-filter renders
+    // unreliably there on iOS Safari (visible halos / frame artifacts).
+    // We make the card fully opaque and disable backdrop-filter via CSS.
+    '--card-bg': withAlpha(t.material.cardBg, 1.0),
     '--card-blur': `${t.material.blur}px`,
     '--card-saturate': t.material.saturate,
     '--card-shadow': t.material.cardShadow,

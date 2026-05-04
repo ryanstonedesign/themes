@@ -492,6 +492,15 @@ button:focus-visible,
 }
 .controls .ctrl--regen { height: auto; align-self: stretch; }
 
+/* Saved cards live inside a scroll container; iOS Safari renders
+   backdrop-filter and the gradient border ring unreliably there.
+   Force solid surface and dim the rim highlight to kill corner halos. */
+.saved-card {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.saved-card::before { opacity: 0.35; }
+
 /* =========================================================
    Saved view — full-fidelity cards in a vertical snap stack
    ========================================================= */
