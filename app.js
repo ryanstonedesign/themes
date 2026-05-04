@@ -81,6 +81,14 @@ const FONT_PAIRS = [
   { sans: 'Plus Jakarta Sans',    serif: 'Fraunces',           mood: 'expressive', sw: [700, 800], rw: [600, 700] },
   { sans: 'Outfit',               serif: 'Playfair Display',   mood: 'expressive', sw: [700, 800], rw: [700] },
   { sans: 'DM Sans',              serif: 'Fraunces',           mood: 'expressive', sw: [700],      rw: [600] },
+
+  // Pixel / 8-bit (used only by family: 'pixel' materials)
+  { sans: 'Press Start 2P',       serif: 'Press Start 2P',     mood: 'pixel',      sw: [400],      rw: [400] },
+  { sans: 'VT323',                serif: 'VT323',              mood: 'pixel',      sw: [400],      rw: [400] },
+  { sans: 'Silkscreen',           serif: 'Silkscreen',         mood: 'pixel',      sw: [400, 700], rw: [400, 700] },
+  { sans: 'Pixelify Sans',        serif: 'Pixelify Sans',      mood: 'pixel',      sw: [500, 700], rw: [500, 700] },
+  { sans: 'Jersey 10',            serif: 'Jersey 10',          mood: 'pixel',      sw: [400],      rw: [400] },
+  { sans: 'Workbench',            serif: 'Workbench',          mood: 'pixel',      sw: [400],      rw: [400] },
 ];
 
 const TYPE_SCALES = [
@@ -248,6 +256,35 @@ const MATERIALS = {
     paletteMood: { hueRange: [180, 240], satRange: [40, 65], lightRange: [55, 70], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
     fontMoods: ['minimal', 'modern'],
   },
+
+  // ----- 8-bit / Pixel materials (family: 'pixel') -----
+  Arcade: {
+    family: 'pixel',
+    cardBg: 'rgba(255,248,224,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0,
+    cardShadow: 'none',
+    bgBase: '#5b8dee',
+    bgOrbs: ['#ff6b6b', '#ffe066', '#4ecdc4', '#a78bfa'],
+    paletteMood: { hueRange: [0, 360], satRange: [80, 100], lightRange: [50, 65], harmony: ['triadic', 'split'], contrast: 'expressive' },
+    fontMoods: ['pixel'],
+  },
+  GameBoy: {
+    family: 'pixel',
+    cardBg: 'rgba(155,188,15,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0,
+    cardShadow: 'none',
+    bgBase: '#0f380f',
+    bgOrbs: ['#306230', '#8bac0f', '#0f380f', '#306230'],
+    paletteMood: { hueRange: [80, 130], satRange: [40, 70], lightRange: [22, 48], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['pixel'],
+  },
+  PixelPop: {
+    family: 'pixel',
+    cardBg: 'rgba(255,245,251,1)', borderOpacity: 0, blur: 0, saturate: 1, noise: 0,
+    cardShadow: 'none',
+    bgBase: '#f8c8dc',
+    bgOrbs: ['#ff80c0', '#a78bfa', '#80e8ff', '#ffd180'],
+    paletteMood: { hueRange: [280, 360], satRange: [70, 95], lightRange: [50, 65], harmony: ['triadic', 'split'], contrast: 'expressive' },
+    fontMoods: ['pixel'],
+  },
 };
 const MATERIAL_NAMES = Object.keys(MATERIALS);
 
@@ -313,6 +350,18 @@ const BUTTON_STYLES = [
     tertiaryBorder: (a) => `1.5px solid ${a}80`,
     tertiaryShadow: 'none',
   },
+  {
+    // Used exclusively by family: 'pixel' materials. Hard-edged, solid fills,
+    // chunky offset shadow (no blur) — that classic 8-bit button feel.
+    name: 'arcade-block',
+    radius: '4px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a) => `4px 4px 0 ${mix(a, '#000000', 0.55)}`,
+    secondaryShadow: '4px 4px 0 rgba(0,0,0,0.35)',
+    tertiaryBorder: (a) => `3px solid ${a}`,
+    tertiaryShadow: '4px 4px 0 rgba(0,0,0,0.25)',
+  },
 ];
 
 // ----------------------------- non-repetition history -----------------------------
@@ -345,8 +394,12 @@ function pickMaterial() {
 }
 
 function pickFontPair(materialFontMoods) {
-  // weight: pairs whose mood matches the material get higher weight
-  const entries = FONT_PAIRS.map((p) => {
+  // Pixel pairs are exclusive — only pixel materials use them and pixel
+  // materials only use them. Filter the candidate pool accordingly.
+  const wantPixel = materialFontMoods.includes('pixel');
+  const candidates = FONT_PAIRS.filter((p) => (p.mood === 'pixel') === wantPixel);
+
+  const entries = candidates.map((p) => {
     const matches = materialFontMoods.includes(p.mood);
     const id = `${p.sans}|${p.serif}`;
     const recent = isRecent('font', id);
@@ -438,8 +491,14 @@ function genPalette(material) {
   };
 }
 
-function pickButtonStyle() {
-  const name = pickFresh(BUTTON_STYLES.map((s) => s.name), 'button');
+function pickButtonStyle(material) {
+  // Pixel materials force the arcade-block style; non-pixel materials never
+  // pick it. Keeps the chunky 8-bit look exclusive to the pixel family.
+  if (material && material.family === 'pixel') {
+    return BUTTON_STYLES.find((s) => s.name === 'arcade-block');
+  }
+  const pool = BUTTON_STYLES.filter((s) => s.name !== 'arcade-block').map((s) => s.name);
+  const name = pickFresh(pool, 'button');
   remember('button', name);
   return BUTTON_STYLES.find((s) => s.name === name);
 }
@@ -471,19 +530,28 @@ const ui = {
   savedCount: $('#savedCount'),
 };
 
-// ---- font loading (cumulative, no FOUT after first load) ----
-const loadedFontFamilies = new Set();
+// ---- font loading (cumulative, only request weights that exist) ----
+// Map<fontName, Set<weight>>. Some fonts (Press Start 2P, VT323) only ship
+// a single weight on Google Fonts — requesting unavailable weights returns
+// a 400 from the API and the font silently fails to load.
+const loadedFontWeights = new Map();
 function ensureFontsLoaded(pair) {
-  const need = [pair.sans, pair.serif].filter((f) => !loadedFontFamilies.has(f));
-  if (need.length === 0) return;
-  need.forEach((f) => loadedFontFamilies.add(f));
+  let dirty = false;
+  // Always include 400 for the subhead which uses font-weight: 400.
+  const sansWeights = [...new Set([400, ...pair.sw])];
+  if (!loadedFontWeights.has(pair.sans)) loadedFontWeights.set(pair.sans, new Set());
+  const sansSet = loadedFontWeights.get(pair.sans);
+  for (const w of sansWeights) {
+    if (!sansSet.has(w)) { sansSet.add(w); dirty = true; }
+  }
+  if (!dirty) return;
 
-  const all = Array.from(loadedFontFamilies).map((f) => {
-    const family = f.replace(/ /g, '+');
-    return `family=${family}:wght@400;500;600;700;800`;
-  }).join('&');
-  const href = `https://fonts.googleapis.com/css2?${all}&display=swap`;
-  ui.fontLink.href = href;
+  const families = Array.from(loadedFontWeights.entries()).map(([name, weights]) => {
+    const family = name.replace(/ /g, '+');
+    const sorted = Array.from(weights).sort((a, b) => a - b).join(';');
+    return `family=${family}:wght@${sorted}`;
+  });
+  ui.fontLink.href = `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
 }
 
 // ---- apply theme to DOM ----
@@ -550,6 +618,10 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--bg-orb-b', m.bgOrbs[1]);
     root.setProperty('--bg-orb-c', m.bgOrbs[2]);
     root.setProperty('--bg-orb-d', m.bgOrbs[3]);
+    if (m.family) ui.card.dataset.family = m.family;
+    else delete ui.card.dataset.family;
+    if (m.family) document.body.dataset.family = m.family;
+    else delete document.body.dataset.family;
   }
 
   // Update saved star state
@@ -592,22 +664,29 @@ function generate(scope = 'all') {
   };
 
   const newColors = (mat) => genPalette(mat);
-  const newButton = () => pickButtonStyle();
+  const newButton = (mat) => pickButtonStyle(mat);
 
   if (scope === 'all') {
     material = newMaterial();
     font = newFont(material);
     colors = newColors(material);
-    button = newButton();
+    button = newButton(material);
   } else if (scope === 'font') {
     font = newFont(material);
   } else if (scope === 'colors') {
     colors = newColors(material);
   } else if (scope === 'buttons') {
-    button = newButton();
+    button = newButton(material);
   } else if (scope === 'card') {
     material = newMaterial();
-    // re-bias only material+atmosphere; keep colors and font palette stable
+    // Card change can flip between pixel and non-pixel families — keep
+    // font + button consistent with the new material's family.
+    const wasPixel = prev?.material?.family === 'pixel';
+    const nowPixel = material.family === 'pixel';
+    if (wasPixel !== nowPixel) {
+      font = newFont(material);
+      button = newButton(material);
+    }
   }
 
   const theme = { material, font, colors, button };
@@ -753,6 +832,7 @@ function buildSavedCard(theme, idx) {
   const card = document.createElement('article');
   card.className = 'card saved-card';
   card.dataset.idx = String(idx);
+  if (t.material.family) card.dataset.family = t.material.family;
   Object.entries(vars).forEach(([k, v]) => card.style.setProperty(k, v));
 
   const swatchHTML = (role, hex, i) =>
@@ -818,6 +898,8 @@ function updatePageAtmosphere(material) {
   root.setProperty('--bg-orb-b', material.bgOrbs[1]);
   root.setProperty('--bg-orb-c', material.bgOrbs[2]);
   root.setProperty('--bg-orb-d', material.bgOrbs[3]);
+  if (material.family) document.body.dataset.family = material.family;
+  else delete document.body.dataset.family;
 }
 
 function renderSaved() {
