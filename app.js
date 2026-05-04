@@ -883,6 +883,7 @@ function generate(scope = 'all') {
   const newColors = (mat) => genPalette(mat);
   const newButton = (mat) => pickButtonStyle(mat);
 
+  let cardFamilyChanged = false;
   if (scope === 'all') {
     material = newMaterial();
     font = newFont(material);
@@ -900,7 +901,8 @@ function generate(scope = 'all') {
     // between hand sub-styles — re-pick font + button so they stay locked
     // to the active family.
     const sigOf = (m) => `${m?.family || ''}|${m?.style || ''}`;
-    if (sigOf(prev?.material) !== sigOf(material)) {
+    cardFamilyChanged = sigOf(prev?.material) !== sigOf(material);
+    if (cardFamilyChanged) {
       font = newFont(material);
       button = newButton(material);
     }
@@ -909,10 +911,13 @@ function generate(scope = 'all') {
   const theme = { material, font, colors, button };
   state.theme = theme;
   remember('full', themeId(theme));
+  // When card scope flips families, font + button get re-rolled to stay locked
+  // to the active family — the DOM has to apply them too, otherwise state.theme
+  // and what's on screen drift apart and saved cards don't match the preview.
   applyTheme(theme, {
-    applyFont: scope === 'all' || scope === 'font',
+    applyFont: scope === 'all' || scope === 'font' || cardFamilyChanged,
     applyColors: scope === 'all' || scope === 'colors',
-    applyButtons: scope === 'all' || scope === 'colors' || scope === 'buttons',
+    applyButtons: scope === 'all' || scope === 'colors' || scope === 'buttons' || cardFamilyChanged,
     applyCard: scope === 'all' || scope === 'card',
   });
 
