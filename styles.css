@@ -502,6 +502,58 @@ button:focus-visible,
 .saved-card::before { opacity: 0.35; }
 
 /* =========================================================
+   Pixel / 8-bit family — material-driven hard-edged styling
+   ========================================================= */
+.card[data-family="pixel"] {
+  border-radius: 6px !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow:
+    0 0 0 4px var(--ink-strong),
+    8px 8px 0 var(--ink-strong) !important;
+}
+.card[data-family="pixel"]::before { display: none; }
+.card[data-family="pixel"] .card-noise { display: none; }
+
+.card[data-family="pixel"] .swatch {
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 2px var(--ink-strong),
+    3px 3px 0 var(--ink-strong);
+}
+.card[data-family="pixel"] .swatch-hex {
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  letter-spacing: 0.04em;
+}
+
+.card[data-family="pixel"] .pv {
+  border-radius: 4px !important;
+  letter-spacing: 0.04em;
+}
+.card[data-family="pixel"] .pv:hover { transform: translate(-1px, -1px); }
+.card[data-family="pixel"] .pv:active { transform: translate(2px, 2px); filter: none; }
+
+.card[data-family="pixel"] .type-sample {
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
+  font-smooth: never;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+/* Press Start 2P is huge per em — scale the headline down a touch */
+.card[data-family="pixel"] .type-sample--sans { font-size: clamp(0.95rem, min(2.6vw, 2.4vh), 1.4rem); }
+.card[data-family="pixel"] .type-sample--serif { font-size: clamp(0.7rem, min(1.8vw, 1.6vh), 0.95rem); font-weight: 400; }
+
+/* Pixel page background — drop the soft blur, add a faint grid */
+body[data-family="pixel"] .bg-orb { filter: blur(60px); opacity: 0.55; }
+body[data-family="pixel"] .bg-grain {
+  background:
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* =========================================================
    Saved view — full-fidelity cards in a vertical snap stack
    ========================================================= */
 .snap-stack {
