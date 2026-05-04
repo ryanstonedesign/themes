@@ -701,6 +701,14 @@ function rehydrate(theme) {
   return theme;
 }
 
+// Bump the alpha of an rgba() string. Used to make saved cards more opaque so
+// the backdrop-filter doesn't reveal page bg orbs through the snap-stack.
+function withAlpha(rgba, alpha) {
+  const m = String(rgba).match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  if (!m) return rgba;
+  return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`;
+}
+
 // Build the same card markup the Create view uses, with theme-scoped CSS vars.
 function buildSavedCard(theme, idx) {
   const t = theme;
@@ -708,7 +716,9 @@ function buildSavedCard(theme, idx) {
   const [g1, g2, g3] = t.colors.grays;
 
   const vars = {
-    '--card-bg': t.material.cardBg,
+    // Saved cards sit inside a scroll container; bumping alpha hides the
+    // backdrop-blur artifacts caused by orbs/adjacent cards bleeding through.
+    '--card-bg': withAlpha(t.material.cardBg, 0.92),
     '--card-blur': `${t.material.blur}px`,
     '--card-saturate': t.material.saturate,
     '--card-shadow': t.material.cardShadow,
