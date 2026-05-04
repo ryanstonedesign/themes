@@ -103,7 +103,6 @@ const FONT_PAIRS = [
   // Calligraphic (used only by family: 'hand' + style: 'calligraphic')
   { sans: 'Dancing Script',       serif: 'Dancing Script',     mood: 'calligraphic', sw: [400, 700], rw: [400, 700] },
   { sans: 'Great Vibes',          serif: 'Great Vibes',        mood: 'calligraphic', sw: [400], rw: [400] },
-  { sans: 'Mrs Saint Delafield',  serif: 'Mrs Saint Delafield',mood: 'calligraphic', sw: [400], rw: [400] },
   { sans: 'Pacifico',             serif: 'Pacifico',           mood: 'calligraphic', sw: [400], rw: [400] },
 ];
 
