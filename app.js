@@ -461,6 +461,90 @@ const MATERIALS = {
 };
 const MATERIAL_NAMES = Object.keys(MATERIALS);
 
+// Corner radius per material (applied via --card-radius; family CSS overrides take priority)
+const MATERIAL_CARD_RADIUS = {
+  Chrome: '32px', Frost: '40px', Pearl: '28px', Mist: '44px', Prism: '32px',
+  Porcelain: '36px', Aurora: '28px', Quartz: '36px', Sunstone: '32px', Lagoon: '44px',
+  Nebula: '36px', Sage: '28px',
+  Gold: '32px', Copper: '28px', Platinum: '40px', Brass: '28px', Bronze: '32px',
+  Obsidian: '28px', Midnight: '32px', Carbon: '24px', Eclipse: '36px', Forest: '28px',
+  Espresso: '24px', Slate: '32px',
+  Arcade: '6px', GameBoy: '6px', PixelPop: '6px',
+  Notebook: '18px', Sketchpad: '18px', Doodle: '18px', Linen: '18px',
+  Graphite: '18px', Watercolor: '18px',
+  Parchment: '8px', Inkwell: '8px', Letterpress: '8px', Vellum: '8px',
+  Quill: '8px', Manuscript: '8px',
+};
+
+// Stroke (border ring) tint color per material — light materials use white-ish tints,
+// dark materials use a lighter desaturated color so the ring is visible against the bg
+const MATERIAL_BORDER_COLOR = {
+  Chrome: '#e8f0ff', Frost: '#ddf0f8', Pearl: '#ffe8e4', Mist: '#dce8f4', Prism: '#ead8ff',
+  Porcelain: '#ffffff', Aurora: '#c8f0e8', Quartz: '#ead8ff', Sunstone: '#fff4e0',
+  Lagoon: '#c8e8f4', Nebula: '#d8d0ff', Sage: '#d0e8d0',
+  Gold: '#fff4c0', Copper: '#ffe8d0', Platinum: '#eef0f8', Brass: '#f0e0a0', Bronze: '#f4ddb0',
+  Obsidian: '#7080b0', Midnight: '#6070b8', Carbon: '#606070', Eclipse: '#9070c8',
+  Forest: '#507068', Espresso: '#806040', Slate: '#6070a0',
+  Arcade: '#ffffff', GameBoy: '#ffffff', PixelPop: '#ffffff',
+  Notebook: '#ffffff', Sketchpad: '#ffffff', Doodle: '#ffffff', Linen: '#ffffff',
+  Graphite: '#ffffff', Watercolor: '#ffffff',
+  Parchment: '#ffffff', Inkwell: '#ffffff', Letterpress: '#ffffff', Vellum: '#ffffff',
+  Quill: '#ffffff', Manuscript: '#ffffff',
+};
+
+// Family group used to restrict scope-aware regen to compatible materials
+function getFamilyGroup(mat) {
+  if (!mat) return 'generic';
+  if (mat.family === 'pixel') return 'pixel';
+  if (mat.family === 'hand' && mat.style === 'calligraphic') return 'hand-calligraphic';
+  if (mat.family === 'hand') return 'hand-sketch';
+  return 'generic';
+}
+
+// Merge: take color-surface props from colorMat, keep structural props from prevMat
+function mergeColorFrom(colorMat, prevMat) {
+  if (!prevMat) return colorMat;
+  return {
+    name: colorMat.name,
+    cardBg: colorMat.cardBg,
+    bgBase: colorMat.bgBase,
+    bgOrbs: colorMat.bgOrbs,
+    borderColor: colorMat.borderColor,
+    paletteMood: colorMat.paletteMood,
+    fontMoods: colorMat.fontMoods,
+    cardRadius: prevMat.cardRadius,
+    blur: prevMat.blur,
+    saturate: prevMat.saturate,
+    noise: prevMat.noise,
+    cardShadow: prevMat.cardShadow,
+    borderOpacity: prevMat.borderOpacity,
+    family: prevMat.family,
+    style: prevMat.style,
+  };
+}
+
+// Merge: keep color-surface props from prevMat, take structural props from structMat
+function mergeStructFrom(structMat, prevMat) {
+  if (!prevMat) return structMat;
+  return {
+    name: structMat.name,
+    cardBg: prevMat.cardBg,
+    bgBase: prevMat.bgBase,
+    bgOrbs: prevMat.bgOrbs,
+    borderColor: prevMat.borderColor,
+    paletteMood: prevMat.paletteMood,
+    fontMoods: prevMat.fontMoods,
+    cardRadius: structMat.cardRadius,
+    blur: structMat.blur,
+    saturate: structMat.saturate,
+    noise: structMat.noise,
+    cardShadow: structMat.cardShadow,
+    borderOpacity: structMat.borderOpacity,
+    family: structMat.family,
+    style: structMat.style,
+  };
+}
+
 // ----------------------------- button styles -----------------------------
 const BUTTON_STYLES = [
   {
@@ -587,7 +671,12 @@ const pickFresh = (pool, key, identityFn = (x) => x) => {
 function pickMaterial() {
   const name = pickFresh(MATERIAL_NAMES, 'material');
   remember('material', name);
-  return { name, ...MATERIALS[name] };
+  return {
+    name,
+    ...MATERIALS[name],
+    cardRadius: MATERIAL_CARD_RADIUS[name] || '32px',
+    borderColor: MATERIAL_BORDER_COLOR[name] || '#ffffff',
+  };
 }
 
 function pickFontPair(materialFontMoods) {
@@ -816,18 +905,25 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--btn-tertiary-shadow', b.tertiaryShadow);
   }
 
-  if (opts.applyCard !== false) {
+  // Card color surface: card bg, page atmosphere, stroke color — changes with "colors" regen
+  if (opts.applyCardColors !== false) {
     root.setProperty('--card-bg', m.cardBg);
-    root.setProperty('--card-blur', `${m.blur}px`);
-    root.setProperty('--card-saturate', m.saturate);
-    root.setProperty('--card-shadow', m.cardShadow);
-    root.setProperty('--card-noise-opacity', m.noise);
-    root.setProperty('--card-border-opacity', m.borderOpacity);
     root.setProperty('--bg-base', m.bgBase);
     root.setProperty('--bg-orb-a', m.bgOrbs[0]);
     root.setProperty('--bg-orb-b', m.bgOrbs[1]);
     root.setProperty('--bg-orb-c', m.bgOrbs[2]);
     root.setProperty('--bg-orb-d', m.bgOrbs[3]);
+    root.setProperty('--card-stroke-color', m.borderColor || '#ffffff');
+  }
+
+  // Card structure: blur, shadow, radius, stroke opacity, family — changes with "card" regen
+  if (opts.applyCard !== false) {
+    root.setProperty('--card-blur', `${m.blur}px`);
+    root.setProperty('--card-saturate', m.saturate);
+    root.setProperty('--card-shadow', m.cardShadow);
+    root.setProperty('--card-noise-opacity', m.noise);
+    root.setProperty('--card-border-opacity', m.borderOpacity);
+    root.setProperty('--card-radius', m.cardRadius || '32px');
     if (m.family) ui.card.dataset.family = m.family;
     else delete ui.card.dataset.family;
     if (m.style) ui.card.dataset.style = m.style;
@@ -856,16 +952,6 @@ function generate(scope = 'all') {
   let colors = prev?.colors;
   let button = prev?.button;
 
-  const newMaterial = () => {
-    let m;
-    let tries = 0;
-    do {
-      m = pickMaterial();
-      tries++;
-    } while (prev && m.name === prev.material.name && tries < 5);
-    return m;
-  };
-
   const newFont = (mat) => {
     const pair = pickFontPair(mat.fontMoods);
     const sw = choice(pair.sw);
@@ -874,49 +960,98 @@ function generate(scope = 'all') {
     return {
       sans: pair.sans, serif: pair.serif, mood: pair.mood,
       sansWeight: sw, serifWeight: rw, scale,
-      // Keep the available-weight arrays so ensureFontsLoaded can request
-      // every weight a future regen might pick (and 400 for the subhead).
       sw: pair.sw, rw: pair.rw,
     };
   };
 
   const newColors = (mat) => genPalette(mat);
   const newButton = (mat) => pickButtonStyle(mat);
+  const sigOf = (m) => `${m?.family || ''}|${m?.style || ''}`;
+
+  // Pick a material from a given pool, avoiding the current one and recent picks
+  const pickFromPool = (pool) => {
+    const fresh = pool.filter((n) => !isRecent('material', n) && n !== prev?.material?.name);
+    const candidates = fresh.length > 0 ? fresh : pool.filter((n) => n !== prev?.material?.name);
+    const name = candidates.length > 0 ? choice(candidates) : choice(pool);
+    remember('material', name);
+    return {
+      name,
+      ...MATERIALS[name],
+      cardRadius: MATERIAL_CARD_RADIUS[name] || '32px',
+      borderColor: MATERIAL_BORDER_COLOR[name] || '#ffffff',
+    };
+  };
+
+  // Pool of material names in the same family group as the given material
+  const familyPool = (mat) => {
+    const group = getFamilyGroup(mat);
+    return MATERIAL_NAMES.filter((n) => getFamilyGroup(MATERIALS[n]) === group);
+  };
 
   let cardFamilyChanged = false;
+
   if (scope === 'all') {
-    material = newMaterial();
+    // Full material change from the whole pool
+    let tries = 0;
+    do {
+      material = pickFromPool(MATERIAL_NAMES);
+      tries++;
+    } while (prev && material.name === prev.material.name && tries < 5);
     font = newFont(material);
     colors = newColors(material);
     button = newButton(material);
   } else if (scope === 'font') {
     font = newFont(material);
   } else if (scope === 'colors') {
+    // Colors regen: new card/bg/stroke colors + new palette.
+    // For family materials (pixel/hand) do a full material swap within the family.
+    // For generic materials, merge color-surface from the new material onto the
+    // existing structure so blur/shadow/radius stay the same.
+    const pool = familyPool(prev?.material);
+    const isFamily = getFamilyGroup(prev?.material) !== 'generic';
+    const colorMat = pickFromPool(pool);
+    if (isFamily) {
+      material = colorMat;
+      font = newFont(material);
+      button = newButton(material);
+      cardFamilyChanged = sigOf(prev?.material) !== sigOf(material);
+    } else {
+      material = mergeColorFrom(colorMat, prev.material);
+    }
     colors = newColors(material);
   } else if (scope === 'buttons') {
     button = newButton(material);
   } else if (scope === 'card') {
-    material = newMaterial();
-    // Card change can flip between families (pixel / hand / generic) or
-    // between hand sub-styles — re-pick font + button so they stay locked
-    // to the active family.
-    const sigOf = (m) => `${m?.family || ''}|${m?.style || ''}`;
-    cardFamilyChanged = sigOf(prev?.material) !== sigOf(material);
-    if (cardFamilyChanged) {
-      font = newFont(material);
-      button = newButton(material);
+    // Card regen: new corner radius, stroke opacity, shadow, blur.
+    // For family materials do a full swap within the family (structure is CSS-driven).
+    // For generic materials, merge structural props from the new material onto the
+    // existing color surface so card/bg colors stay the same.
+    const pool = familyPool(prev?.material);
+    const isFamily = getFamilyGroup(prev?.material) !== 'generic';
+    const structMat = pickFromPool(pool);
+    cardFamilyChanged = sigOf(prev?.material) !== sigOf(structMat);
+    if (isFamily) {
+      material = structMat;
+      if (cardFamilyChanged) {
+        font = newFont(material);
+        button = newButton(material);
+      }
+    } else {
+      material = mergeStructFrom(structMat, prev.material);
+      if (cardFamilyChanged) {
+        font = newFont(material);
+        button = newButton(material);
+      }
     }
   }
 
   const theme = { material, font, colors, button };
   state.theme = theme;
   remember('full', themeId(theme));
-  // When card scope flips families, font + button get re-rolled to stay locked
-  // to the active family — the DOM has to apply them too, otherwise state.theme
-  // and what's on screen drift apart and saved cards don't match the preview.
   applyTheme(theme, {
     applyFont: scope === 'all' || scope === 'font' || cardFamilyChanged,
     applyColors: scope === 'all' || scope === 'colors',
+    applyCardColors: scope === 'all' || scope === 'colors',
     applyButtons: scope === 'all' || scope === 'colors' || scope === 'buttons' || cardFamilyChanged,
     applyCard: scope === 'all' || scope === 'card',
   });
@@ -993,11 +1128,21 @@ function toggleSave() {
 }
 
 // Saved themes are persisted as plain JSON; restore live function refs.
+// Material is pure data — no function refs. We expand MATERIALS[name] as defaults
+// then overlay the saved values so mixed materials (colors scope ≠ card scope pick)
+// preserve their mixed state, while old saves get current defaults for new fields.
 function rehydrate(theme) {
   const bs = BUTTON_STYLES.find((s) => s.name === theme.button.name);
   if (bs) theme.button = bs;
-  if (theme.material && MATERIALS[theme.material.name]) {
-    theme.material = { name: theme.material.name, ...MATERIALS[theme.material.name] };
+  if (theme.material?.name && MATERIALS[theme.material.name]) {
+    const name = theme.material.name;
+    const base = {
+      name,
+      ...MATERIALS[name],
+      cardRadius: MATERIAL_CARD_RADIUS[name] || '32px',
+      borderColor: MATERIAL_BORDER_COLOR[name] || '#ffffff',
+    };
+    theme.material = { ...base, ...theme.material };
   }
   return theme;
 }
@@ -1026,6 +1171,8 @@ function buildSavedCard(theme, idx) {
     '--card-shadow': t.material.cardShadow,
     '--card-noise-opacity': t.material.noise,
     '--card-border-opacity': t.material.borderOpacity,
+    '--card-radius': t.material.cardRadius || '32px',
+    '--card-stroke-color': t.material.borderColor || '#ffffff',
 
     '--font-sans': `'${t.font.sans}', system-ui, sans-serif`,
     '--font-serif': `'${t.font.serif}', Georgia, serif`,
