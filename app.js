@@ -1463,73 +1463,138 @@ async function exportImage() {
   const padding = 56;
   const contentW = W - padding * 2;
 
+  // Both type-sample--sans and type-sample--serif use --font-sans in CSS.
   const sansFamily = `'${t.font.sans}', system-ui, sans-serif`;
-  const serifFamily = `'${t.font.serif}', Georgia, serif`;
   const cardBg = t.material.cardBg;
   const baseBg = t.material.bgBase;
+  const family = t.material.family || '';
+  const matStyle = t.material.style || '';
 
-  const swatchW = (contentW - 24) / 3;
-  const swatchH = swatchW;
+  const [a, b, c] = t.colors.palette;
+  const [g1, g2, g3] = t.colors.grays;
 
-  // Background gradients
-  const bg = `<defs>
+  // Convert a CSS linear-gradient() string to an SVG <linearGradient> def.
+  // Returns { def, fill } where fill is either "url(#id)" or a solid color.
+  function parseCssGrad(id, cssVal) {
+    const m = cssVal.match(/linear-gradient\((\d+)deg,\s*(.+)\)$/);
+    if (!m) return { def: '', fill: cssVal };
+    const rad = (parseFloat(m[1]) * Math.PI) / 180;
+    const vx = Math.sin(rad), vy = -Math.cos(rad);
+    const x1 = (0.5 - 0.5 * vx).toFixed(4), y1 = (0.5 - 0.5 * vy).toFixed(4);
+    const x2 = (0.5 + 0.5 * vx).toFixed(4), y2 = (0.5 + 0.5 * vy).toFixed(4);
+    const stops = [];
+    const re = /(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))\s+(\d+%)/g;
+    let sm;
+    while ((sm = re.exec(m[2])) !== null) stops.push(`<stop offset="${sm[2]}" stop-color="${sm[1]}"/>`);
+    if (!stops.length) return { def: '', fill: cssVal };
+    return {
+      def: `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops.join('')}</linearGradient>`,
+      fill: `url(#${id})`,
+    };
+  }
+
+  // Parse a CSS border shorthand like "1.5px solid #abc55" or "2px dashed #abc".
+  function parseBorder(str) {
+    const m = str.match(/^([\d.]+)px\s+(solid|dashed|dotted)\s+(.+)$/);
+    return m ? { width: parseFloat(m[1]), dashed: m[2] === 'dashed', color: m[3].trim() } : { width: 1.5, dashed: false, color: a };
+  }
+
+  const primaryGrad = parseCssGrad('btnP', t.button.primaryGrad(a, b, c));
+  const secondaryGrad = parseCssGrad('btnS', t.button.secondaryGrad(g1, g2, g3));
+  const tertiaryBorder = parseBorder(t.button.tertiaryBorder(a));
+
+  // Card corner radius: CSS overrides per family take precedence over material value.
+  let cardRx;
+  if (family === 'pixel') cardRx = 6;
+  else if (family === 'hand' && matStyle === 'calligraphic') cardRx = 8;
+  else if (family === 'hand' && matStyle === 'sketch') cardRx = 18;
+  else cardRx = parseFloat(t.material.cardRadius) || 32;
+
+  // Card fill: boost opacity for glass (rgba) materials so the card reads well without backdrop-filter.
+  const cardFill = cardBg.startsWith('rgba(') ? cardBg.replace(/[\d.]+\)$/, '0.88)') : cardBg;
+
+  // Card border/shadow per material family.
+  let cardShadowEl = '';
+  let cardStrokeAttrs;
+  if (family === 'pixel') {
+    // Offset hard shadow + thick outline
+    cardShadowEl = `<rect x="${padding + 8}" y="${padding + 8}" width="${contentW}" height="${H - padding * 2}" rx="${cardRx}" fill="${t.colors.inkStrong}"/>`;
+    cardStrokeAttrs = `stroke="${t.colors.inkStrong}" stroke-width="4"`;
+  } else if (family === 'hand' && matStyle === 'sketch') {
+    cardStrokeAttrs = `stroke="${t.colors.inkStrong}" stroke-width="2" stroke-dasharray="8,5" stroke-opacity="0.5"`;
+  } else if (family === 'hand' && matStyle === 'calligraphic') {
+    cardStrokeAttrs = `stroke="${t.colors.inkStrong}" stroke-width="1" stroke-opacity="0.25"`;
+  } else {
+    const strokeColor = t.material.borderColor || '#ffffff';
+    const strokeOpacity = t.material.borderOpacity != null ? t.material.borderOpacity : 0.7;
+    cardStrokeAttrs = `stroke="${strokeColor}" stroke-opacity="${strokeOpacity}" stroke-width="1"`;
+  }
+
+  // Swatch corner radius per family.
+  const swatchRx = family === 'pixel' ? 4 : (family === 'hand' && matStyle === 'calligraphic') ? 6 : (family === 'hand' && matStyle === 'sketch') ? 12 : 18;
+
+  const bgDefs = `
     <radialGradient id="ga" cx="20%" cy="15%" r="60%"><stop offset="0%" stop-color="${t.material.bgOrbs[0]}" stop-opacity="0.95"/><stop offset="100%" stop-color="${t.material.bgOrbs[0]}" stop-opacity="0"/></radialGradient>
     <radialGradient id="gb" cx="80%" cy="25%" r="55%"><stop offset="0%" stop-color="${t.material.bgOrbs[1]}" stop-opacity="0.85"/><stop offset="100%" stop-color="${t.material.bgOrbs[1]}" stop-opacity="0"/></radialGradient>
     <radialGradient id="gc" cx="85%" cy="90%" r="65%"><stop offset="0%" stop-color="${t.material.bgOrbs[2]}" stop-opacity="0.85"/><stop offset="100%" stop-color="${t.material.bgOrbs[2]}" stop-opacity="0"/></radialGradient>
-    <radialGradient id="gd" cx="15%" cy="95%" r="50%"><stop offset="0%" stop-color="${t.material.bgOrbs[3]}" stop-opacity="0.7"/><stop offset="100%" stop-color="${t.material.bgOrbs[3]}" stop-opacity="0"/></radialGradient>
-  </defs>`;
+    <radialGradient id="gd" cx="15%" cy="95%" r="50%"><stop offset="0%" stop-color="${t.material.bgOrbs[3]}" stop-opacity="0.7"/><stop offset="100%" stop-color="${t.material.bgOrbs[3]}" stop-opacity="0"/></radialGradient>`;
 
   let y = padding + 56;
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
-    ${bg}
+    <defs>${bgDefs}${primaryGrad.def}${secondaryGrad.def}</defs>
     <rect width="100%" height="100%" fill="${baseBg}"/>
     <rect width="100%" height="100%" fill="url(#ga)"/>
     <rect width="100%" height="100%" fill="url(#gb)"/>
     <rect width="100%" height="100%" fill="url(#gc)"/>
     <rect width="100%" height="100%" fill="url(#gd)"/>
-    <rect x="${padding}" y="${padding}" width="${contentW}" height="${H - padding * 2}" rx="36" fill="${cardBg.replace(/[\d.]+\)/, '0.85)')}" stroke="rgba(255,255,255,0.7)"/>`;
+    ${cardShadowEl}
+    <rect x="${padding}" y="${padding}" width="${contentW}" height="${H - padding * 2}" rx="${cardRx}" fill="${cardFill}" ${cardStrokeAttrs}/>`;
 
-  // Type
+  // Type — both lines use sansFamily; subhead shows the sans name at muted color (matches live card).
   svg += `<text x="${padding + 28}" y="${y + 20}" font-family="${sansFamily}" font-weight="${t.font.sansWeight}" font-size="46" fill="${t.colors.inkStrong}" letter-spacing="-1.0">${escapeXml(t.font.sans)}</text>`;
   svg += `<text x="${padding + 28}" y="${y + 50}" font-family="${sansFamily}" font-size="14" font-weight="600" fill="${t.colors.inkMute}">${t.colors.inkStrong}</text>`;
   y += 100;
-  svg += `<text x="${padding + 28}" y="${y + 18}" font-family="${serifFamily}" font-weight="${t.font.serifWeight}" font-size="32" fill="${t.colors.inkStrong}">${escapeXml(t.font.serif)}</text>`;
+  svg += `<text x="${padding + 28}" y="${y + 18}" font-family="${sansFamily}" font-weight="400" font-size="32" fill="${t.colors.inkMute}">${escapeXml(t.font.sans)}</text>`;
   svg += `<text x="${padding + 28}" y="${y + 46}" font-family="${sansFamily}" font-size="14" font-weight="600" fill="${t.colors.inkMute}">${t.colors.inkMute}</text>`;
   y += 80;
 
-  // Swatches 3x2
+  // Swatches 3×2
   const startX = padding + 28;
   const cellW = (contentW - 56 - 24) / 3;
   for (let row = 0; row < 2; row++) {
     for (let col = 0; col < 3; col++) {
       const hex = row === 0 ? t.colors.palette[col] : t.colors.grays[col];
-      const x = startX + col * (cellW + 12);
-      const cy = y + row * (cellW + 12);
+      const sx = startX + col * (cellW + 12);
+      const sy = y + row * (cellW + 12);
       const textColor = row === 0 ? '#ffffff' : t.colors.inkStrong;
-      svg += `<rect x="${x}" y="${cy}" width="${cellW}" height="${cellW}" rx="18" fill="${hex}"/>`;
-      svg += `<text x="${x + 12}" y="${cy + cellW - 12}" font-family="${sansFamily}" font-size="12" font-weight="600" fill="${textColor}">${hex}</text>`;
+      svg += `<rect x="${sx}" y="${sy}" width="${cellW}" height="${cellW}" rx="${swatchRx}" fill="${hex}"/>`;
+      svg += `<text x="${sx + 12}" y="${sy + cellW - 12}" font-family="${sansFamily}" font-size="12" font-weight="600" fill="${textColor}">${hex}</text>`;
     }
   }
   y += cellW * 2 + 36;
 
-  // Buttons (simplified)
+  // Buttons — use actual gradient functions and button radius from theme.
   const btnW = contentW - 56;
   const btnH = 56;
   const radNum = parseFloat(t.button.radius) || 999;
+  const btnRx = Math.min(radNum, btnH / 2);
   const btnX = padding + 28;
-  // primary
-  svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${Math.min(radNum, btnH/2)}" fill="${t.colors.palette[0]}"/>`;
-  svg += `<text x="${btnX + btnW/2}" y="${y + btnH/2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="#ffffff" text-anchor="middle">Primary action</text>`;
+
+  svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${btnRx}" fill="${primaryGrad.fill}"/>`;
+  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="#ffffff" text-anchor="middle">Primary action</text>`;
   y += btnH + 10;
-  svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${Math.min(radNum, btnH/2)}" fill="${t.colors.grays[1]}"/>`;
-  svg += `<text x="${btnX + btnW/2}" y="${y + btnH/2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.inkStrong}" text-anchor="middle">Secondary</text>`;
+
+  svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${btnRx}" fill="${secondaryGrad.fill}"/>`;
+  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.inkStrong}" text-anchor="middle">Secondary</text>`;
   y += btnH + 10;
-  svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${Math.min(radNum, btnH/2)}" fill="none" stroke="${t.colors.palette[0]}" stroke-width="1.5"/>`;
-  svg += `<text x="${btnX + btnW/2}" y="${y + btnH/2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.palette[0]}" text-anchor="middle">Tertiary</text>`;
+
+  const tertiaryDash = tertiaryBorder.dashed ? ' stroke-dasharray="6,4"' : '';
+  svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${btnRx}" fill="none" stroke="${tertiaryBorder.color}" stroke-width="${tertiaryBorder.width}"${tertiaryDash}/>`;
+  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.accent}" text-anchor="middle">Tertiary</text>`;
   y += btnH + 24;
 
   // Material label
-  svg += `<text x="${W/2}" y="${H - padding - 16}" font-family="${sansFamily}" font-size="12" font-weight="600" fill="${t.colors.inkMute}" text-anchor="middle" letter-spacing="2">${t.material.name.toUpperCase()}</text>`;
+  svg += `<text x="${W / 2}" y="${H - padding - 16}" font-family="${sansFamily}" font-size="12" font-weight="600" fill="${t.colors.inkMute}" text-anchor="middle" letter-spacing="2">${t.material.name.toUpperCase()}</text>`;
   svg += `</svg>`;
 
   // Convert SVG to PNG via canvas
