@@ -1437,7 +1437,34 @@ function closeShare() { ui.shareSheet.hidden = true; state.shareTarget = null; }
 function exportCSS() {
   const t = state.shareTarget || state.theme;
   if (!t) return;
-  const css = `:root {
+
+  const toGFParam = (name, weight) => `family=${name.replace(/ /g, '+')}:wght@${weight}`;
+  const gfPairs = [toGFParam(t.font.sans, t.font.sansWeight)];
+  if (t.font.serif !== t.font.sans) gfPairs.push(toGFParam(t.font.serif, t.font.serifWeight));
+  const fontUrl = `https://fonts.googleapis.com/css2?${gfPairs.join('&')}&display=swap`;
+
+  const css = `/*
+ * Theme: ${t.material.name}
+ * Button: ${t.button.name}
+ *
+ * Fonts
+ *   Sans:  ${t.font.sans} (weight ${t.font.sansWeight})
+ *   Serif: ${t.font.serif} (weight ${t.font.serifWeight})
+ *
+ * Palette
+ *   Primary 1:  ${t.colors.palette[0]}
+ *   Primary 2:  ${t.colors.palette[1]}
+ *   Primary 3:  ${t.colors.palette[2]}
+ *   Gray 1:     ${t.colors.grays[0]}
+ *   Gray 2:     ${t.colors.grays[1]}
+ *   Gray 3:     ${t.colors.grays[2]}
+ *   Ink strong: ${t.colors.inkStrong}
+ *   Ink mute:   ${t.colors.inkMute}
+ */
+
+@import url("${fontUrl}");
+
+:root {
   --font-sans: '${t.font.sans}', system-ui, sans-serif;
   --font-serif: '${t.font.serif}', Georgia, serif;
   --color-primary-1: ${t.colors.palette[0]};
@@ -1451,7 +1478,14 @@ function exportCSS() {
   --button-radius: ${t.button.radius};
   --material: "${t.material.name}";
 }`;
-  navigator.clipboard?.writeText(css).catch(() => {});
+
+  const blob = new Blob([css], { type: 'text/css;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const dl = document.createElement('a');
+  dl.href = url;
+  dl.download = `theme-${t.material.name.toLowerCase().replace(/\s+/g, '-')}.css`;
+  dl.click();
+  URL.revokeObjectURL(url);
   closeShare();
 }
 
@@ -1624,39 +1658,6 @@ async function exportImage() {
   closeShare();
 }
 
-function exportPDF() {
-  // Lightweight: use browser print of just the card area.
-  const t = state.shareTarget || state.theme;
-  if (!t) return;
-  const w = window.open('', '_blank', 'noopener,width=820,height=1100');
-  if (!w) return;
-  const swatches = (arr, light) => arr.map((h) =>
-    `<div style="aspect-ratio:1/1;border-radius:18px;background:${h};display:flex;align-items:flex-end;padding:10px;color:${light ? '#0b0d12' : '#fff'};font-weight:600;font-size:12px;font-family:Inter,sans-serif">${h}</div>`
-  ).join('');
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${t.material.name} — Palette</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${t.font.sans.replace(/ /g,'+')}:wght@400;600;700&family=${t.font.serif.replace(/ /g,'+')}:wght@400;600;700&family=Inter:wght@400;600;700&display=swap">
-    <style>
-      @page { size: A4; margin: 16mm; }
-      body { font-family: '${t.font.sans}', sans-serif; color: ${t.colors.inkStrong}; margin: 0; padding: 32px; background: ${t.material.bgBase}; }
-      .card { background: rgba(255,255,255,0.92); border-radius: 32px; padding: 36px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); max-width: 700px; margin: 0 auto; }
-      h1 { font-weight:${t.font.sansWeight}; font-size:42px; margin: 0; letter-spacing: -0.02em; }
-      h2 { font-family: '${t.font.serif}', serif; font-weight:${t.font.serifWeight}; font-size:28px; margin: 0; }
-      .hex { color: ${t.colors.inkMute}; font-size:13px; font-weight:600; margin-top:4px; }
-      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
-      .meta { text-align:center; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color: ${t.colors.inkMute}; margin-top: 24px; }
-    </style></head><body>
-    <div class="card">
-      <h1>${t.font.sans}</h1><div class="hex">${t.colors.inkStrong}</div>
-      <h2 style="margin-top:16px">${t.font.serif}</h2><div class="hex">${t.colors.inkMute}</div>
-      <div class="grid">${swatches(t.colors.palette, false)}</div>
-      <div class="grid">${swatches(t.colors.grays, true)}</div>
-      <div class="meta">${t.material.name}</div>
-    </div>
-    <script>window.onload = () => setTimeout(() => window.print(), 300)</script>
-  </body></html>`);
-  w.document.close();
-  closeShare();
-}
 
 function escapeXml(s) {
   return String(s).replace(/[<>&'"]/g, (c) => ({ '<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;' }[c]));
@@ -1683,7 +1684,6 @@ function init() {
     const kind = exp.dataset.export;
     if (kind === 'css') exportCSS();
     else if (kind === 'image') exportImage();
-    else if (kind === 'pdf') exportPDF();
   });
 
   document.addEventListener('keydown', (e) => {
