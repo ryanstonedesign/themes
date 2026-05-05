@@ -751,6 +751,7 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
   box-shadow: 0 30px 80px rgba(0,0,0,0.25);
   padding: 18px;
   animation: sheetIn 280ms cubic-bezier(.2,.85,.2,1);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 .sheet-header {
   display: flex; align-items: center; justify-content: space-between;

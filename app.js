@@ -1690,7 +1690,7 @@ function init() {
   ui.shareBtn.addEventListener('click', () => openShare(state.theme));
 
   ui.shareSheet.addEventListener('click', (e) => {
-    if (e.target.matches('[data-close]')) { closeShare(); return; }
+    if (e.target.closest('[data-close]')) { closeShare(); return; }
     const exp = e.target.closest('[data-export]');
     if (!exp) return;
     const kind = exp.dataset.export;
