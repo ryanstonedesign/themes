@@ -784,6 +784,7 @@ const state = {
   scope: 'all',
   theme: null,
   saved: [],
+  savedEdit: null,
 };
 
 const ui = {
@@ -796,7 +797,6 @@ const ui = {
   topSeg: $('.segmented--top'),
   scopeSeg: $('.segmented--scope'),
   shareSheet: $('#shareSheet'),
-  toast: $('#toast'),
   fontLink: $('#font-link'),
   createView: $('#createView'),
   savedView: $('#savedView'),
@@ -923,8 +923,7 @@ function themeId(t) {
 }
 
 // ---- generation (scope-aware) ----
-function generate(scope = 'all') {
-  const prev = state.theme;
+function buildNextTheme(prev, scope = 'all') {
   let material = prev?.material;
   let font = prev?.font;
   let colors = prev?.colors;
@@ -1000,8 +999,13 @@ function generate(scope = 'all') {
   }
 
   const theme = { material, font, colors, button };
-  state.theme = theme;
   remember('full', themeId(theme));
+  return { theme, regenFontAndBtn };
+}
+
+function generate(scope = 'all') {
+  const { theme, regenFontAndBtn } = buildNextTheme(state.theme, scope);
+  state.theme = theme;
   applyTheme(theme, {
     applyFont: scope === 'all' || scope === 'font' || regenFontAndBtn,
     applyColors: scope === 'all' || scope === 'colors',
@@ -1041,6 +1045,16 @@ function wireSegmented(seg, onChange) {
   });
 }
 
+function setScope(scope) {
+  state.scope = scope;
+  ui.scopeSeg.querySelectorAll('.seg-btn').forEach((b) => {
+    const active = b.dataset.scope === scope;
+    b.classList.toggle('is-active', active);
+    b.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  positionPill(ui.scopeSeg);
+}
+
 // ---- saved themes ----
 const STORAGE_KEY = 'palette.saved.v1';
 
@@ -1071,10 +1085,8 @@ function toggleSave() {
   const idx = state.saved.findIndex((t) => themeId(t) === id);
   if (idx >= 0) {
     state.saved.splice(idx, 1);
-    showToast('Removed from saved');
   } else {
     state.saved.unshift(JSON.parse(JSON.stringify(state.theme)));
-    showToast('Saved');
   }
   persistSaved();
   ui.starBtn.classList.toggle('is-saved', idx < 0);
@@ -1102,25 +1114,15 @@ function rehydrate(theme) {
   return theme;
 }
 
-// Bump the alpha of an rgba() string. Used to make saved cards more opaque so
-// the backdrop-filter doesn't reveal page bg orbs through the snap-stack.
-function withAlpha(rgba, alpha) {
-  const m = String(rgba).match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
-  if (!m) return rgba;
-  return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`;
-}
-
 // Build the same card markup the Create view uses, with theme-scoped CSS vars.
 function buildSavedCard(theme, idx) {
   const t = theme;
+  const isEditingThisCard = isEditingSaved() && state.savedEdit.index === idx;
   const a = t.colors.palette[0], b = t.colors.palette[1], c = t.colors.palette[2];
   const [g1, g2, g3] = t.colors.grays;
 
   const vars = {
-    // Saved cards live inside a scroll container; backdrop-filter renders
-    // unreliably there on iOS Safari (visible halos / frame artifacts).
-    // We make the card fully opaque and disable backdrop-filter via CSS.
-    '--card-bg': withAlpha(t.material.cardBg, 1.0),
+    '--card-bg': t.material.cardBg,
     '--card-blur': `${t.material.blur}px`,
     '--card-saturate': t.material.saturate,
     '--card-shadow': t.material.cardShadow,
@@ -1163,15 +1165,28 @@ function buildSavedCard(theme, idx) {
   const swatchHTML = (role, hex, i) =>
     `<div class="swatch" data-role="${role}" data-i="${i}" style="background:${hex}"><span class="swatch-hex">${hex}</span></div>`;
 
-  card.innerHTML = `
-    <div class="card-noise" aria-hidden="true"></div>
-    <header class="card-actions">
+  const cardActionsHTML = isEditingThisCard
+    ? `
+      <button class="ctrl ctrl--icon" data-action="save-edit" aria-label="Save edited theme" title="Save edits">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
+      <button class="ctrl ctrl--icon" data-action="discard-edit" aria-label="Discard edits" title="Discard edits">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+    `
+    : `
       <button class="ctrl ctrl--icon" data-action="share" aria-label="Share theme" title="Share">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
       </button>
       <button class="ctrl ctrl--icon is-saved" data-action="unsave" aria-label="Remove from saved" title="Saved">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.9 6.3 6.6.6-5 4.6 1.5 6.5L12 17.8 6 21l1.5-6.5-5-4.6 6.6-.6L12 3Z"/></svg>
       </button>
+    `;
+
+  card.innerHTML = `
+    <div class="card-noise" aria-hidden="true"></div>
+    <header class="card-actions">
+      ${cardActionsHTML}
     </header>
     <div class="card-body">
       <section class="type-pair" aria-label="Typography">
@@ -1195,16 +1210,25 @@ function buildSavedCard(theme, idx) {
   `;
 
   // Per-card actions
-  card.querySelector('[data-action="share"]').addEventListener('click', (e) => {
+  card.querySelector('[data-action="share"]')?.addEventListener('click', (e) => {
     e.stopPropagation();
     openShare(theme);
   });
-  card.querySelector('[data-action="unsave"]').addEventListener('click', (e) => {
+  card.querySelector('[data-action="unsave"]')?.addEventListener('click', (e) => {
     e.stopPropagation();
+    state.savedEdit = null;
     state.saved.splice(idx, 1);
     persistSaved();
+    updateControlsVisibility();
     renderSaved();
-    showToast('Removed from saved');
+  });
+  card.querySelector('[data-action="save-edit"]')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    saveSavedEdit();
+  });
+  card.querySelector('[data-action="discard-edit"]')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    discardSavedEdit();
   });
 
   return card;
@@ -1215,6 +1239,52 @@ function escapeHtml(s) {
 }
 
 let savedObserver = null;
+
+function cloneTheme(theme) {
+  return JSON.parse(JSON.stringify(theme));
+}
+
+function isEditingSaved() {
+  return state.mode === 'saved' && state.savedEdit?.index != null;
+}
+
+function syncSavedFrame() {
+  if (!ui.savedView || !ui.snapStack || ui.savedView.hidden) return;
+  const rect = ui.savedView.getBoundingClientRect();
+  const editButtonHeight = ui.regenBtn.getBoundingClientRect().height || 44;
+  const remainingBelowCard = window.innerHeight - rect.bottom;
+  const editButtonTop = rect.bottom + Math.max(0, (remainingBelowCard - editButtonHeight) / 2) + 12;
+  ui.snapStack.style.setProperty('--saved-card-top', `${rect.top}px`);
+  ui.snapStack.style.setProperty('--saved-card-left', `${rect.left}px`);
+  ui.snapStack.style.setProperty('--saved-card-center', `${rect.left + rect.width / 2}px`);
+  ui.snapStack.style.setProperty('--saved-card-width', `${rect.width}px`);
+  ui.snapStack.style.setProperty('--saved-card-height', `${rect.height}px`);
+  ui.snapStack.style.setProperty('--saved-edit-top', `${editButtonTop}px`);
+  ui.snapStack.style.setProperty('--saved-card-transform', 'none');
+}
+
+function updateControlsVisibility() {
+  const controls = $('#controls');
+  const editing = isEditingSaved();
+  const controlsVisible = state.mode === 'create' || editing;
+  controls.hidden = false;
+  controls.classList.toggle('is-hidden', !controlsVisible);
+  controls.classList.toggle('is-saved-edit', editing);
+  controls.setAttribute('aria-hidden', controlsVisible ? 'false' : 'true');
+  ui.topSeg.classList.toggle('is-disabled', editing);
+  ui.topSeg.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.disabled = editing;
+    btn.setAttribute('aria-disabled', editing ? 'true' : 'false');
+  });
+  if (editing && state.scope === 'all') setScope('font');
+  else positionPill(ui.scopeSeg);
+}
+
+function displayedSavedTheme(idx) {
+  return isEditingSaved() && state.savedEdit.index === idx
+    ? state.savedEdit.draft
+    : state.saved[idx];
+}
 
 function updatePageAtmosphere(material) {
   const root = document.documentElement.style;
@@ -1229,10 +1299,61 @@ function updatePageAtmosphere(material) {
   else delete document.body.dataset.style;
 }
 
-function renderSaved() {
+function startSavedEdit(idx) {
+  const theme = state.saved[idx];
+  if (!theme) return;
+  state.savedEdit = {
+    index: idx,
+    draft: rehydrate(cloneTheme(theme)),
+  };
+  setScope(state.scope === 'all' ? 'font' : state.scope);
+  updateControlsVisibility();
+  renderSaved(idx);
+  updatePageAtmosphere(state.savedEdit.draft.material);
+}
+
+function regenerateSavedDraft() {
+  if (!isEditingSaved()) return;
+  const { theme } = buildNextTheme(state.savedEdit.draft, state.scope);
+  state.savedEdit.draft = theme;
+  ensureFontsLoaded(theme.font);
+  renderSaved(state.savedEdit.index);
+  updatePageAtmosphere(theme.material);
+  const card = ui.snapStack.querySelector(`.saved-card[data-idx="${state.savedEdit.index}"]`);
+  if (card) {
+    card.classList.remove('is-flashing');
+    void card.offsetWidth;
+    card.classList.add('is-flashing');
+  }
+}
+
+function saveSavedEdit() {
+  if (!isEditingSaved()) return;
+  const idx = state.savedEdit.index;
+  state.saved[idx] = cloneTheme(state.savedEdit.draft);
+  state.savedEdit = null;
+  persistSaved();
+  updateControlsVisibility();
+  renderSaved(idx);
+}
+
+function discardSavedEdit() {
+  if (!isEditingSaved()) return;
+  const idx = state.savedEdit.index;
+  state.savedEdit = null;
+  updateControlsVisibility();
+  renderSaved(idx);
+  const theme = state.saved[idx];
+  if (theme) updatePageAtmosphere(theme.material);
+}
+
+function renderSaved(focusIndex = 0) {
+  syncSavedFrame();
+
   // tear down prior observer
   if (savedObserver) { savedObserver.disconnect(); savedObserver = null; }
   ui.snapStack.innerHTML = '';
+  ui.snapStack.classList.toggle('is-editing', isEditingSaved());
 
   if (state.saved.length === 0) {
     ui.savedEmpty.hidden = false;
@@ -1243,14 +1364,29 @@ function renderSaved() {
   ui.snapStack.hidden = false;
 
   state.saved.forEach((raw, idx) => {
-    const t = rehydrate(raw);
-    state.saved[idx] = t; // keep state in sync with rehydrated functions
+    const t = isEditingSaved() && state.savedEdit.index === idx
+      ? state.savedEdit.draft
+      : rehydrate(raw);
+    if (!(isEditingSaved() && state.savedEdit.index === idx)) {
+      state.saved[idx] = t; // keep state in sync with rehydrated functions
+    }
     ensureFontsLoaded(t.font);
 
     const page = document.createElement('div');
     page.className = 'snap-page';
     page.dataset.idx = String(idx);
     page.appendChild(buildSavedCard(t, idx));
+    const editBtn = document.createElement('button');
+    editBtn.className = 'ctrl ctrl--icon saved-edit-btn';
+    editBtn.type = 'button';
+    editBtn.setAttribute('aria-label', 'Edit saved theme');
+    editBtn.title = 'Edit';
+    editBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16.5 3.5 4 4L8 20l-5 1 1-5 12.5-12.5Z"/></svg>`;
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startSavedEdit(idx);
+    });
+    page.appendChild(editBtn);
     ui.snapStack.appendChild(page);
   });
 
@@ -1262,7 +1398,7 @@ function renderSaved() {
     }
     if (best && best.intersectionRatio > 0.55) {
       const i = +best.target.dataset.idx;
-      const t = state.saved[i];
+      const t = displayedSavedTheme(i);
       if (t) updatePageAtmosphere(t.material);
     }
   }, { root: ui.snapStack, threshold: [0.4, 0.6, 0.8, 1.0] });
@@ -1270,18 +1406,21 @@ function renderSaved() {
   ui.snapStack.querySelectorAll('.snap-page').forEach((p) => savedObserver.observe(p));
 
   // Initial: snap to top + sync background.
-  ui.snapStack.scrollTop = 0;
-  if (state.saved[0]) updatePageAtmosphere(state.saved[0].material);
+  ui.snapStack.scrollTop = focusIndex * window.innerHeight;
+  const focusedTheme = displayedSavedTheme(focusIndex);
+  if (focusedTheme) updatePageAtmosphere(focusedTheme.material);
 }
 
 // ---- mode switching ----
 function switchMode(mode) {
+  if (mode !== 'saved') state.savedEdit = null;
   state.mode = mode;
   const isCreate = mode === 'create';
   ui.createView.hidden = !isCreate;
   ui.savedView.hidden = isCreate;
-  $('#controls').hidden = !isCreate;
+  updateControlsVisibility();
   if (mode === 'saved') {
+    syncSavedFrame();
     renderSaved();
   } else if (state.theme) {
     // Restore Create-theme atmosphere when returning from Saved
@@ -1294,19 +1433,6 @@ function switchMode(mode) {
     b.setAttribute('aria-selected', a ? 'true' : 'false');
   });
   positionPill(ui.topSeg);
-}
-
-// ---- toast ----
-let toastT;
-function showToast(msg) {
-  ui.toast.textContent = msg;
-  ui.toast.hidden = false;
-  ui.toast.classList.add('is-visible');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => {
-    ui.toast.classList.remove('is-visible');
-    setTimeout(() => { ui.toast.hidden = true; }, 240);
-  }, 1800);
 }
 
 // ---- share / export ----
@@ -1333,10 +1459,7 @@ function exportCSS() {
   --button-radius: ${t.button.radius};
   --material: "${t.material.name}";
 }`;
-  navigator.clipboard?.writeText(css).then(
-    () => showToast('CSS copied to clipboard'),
-    () => showToast('Copy failed')
-  );
+  navigator.clipboard?.writeText(css).catch(() => {});
   closeShare();
 }
 
@@ -1435,13 +1558,11 @@ async function exportImage() {
         dl.download = `palette-${t.material.name.toLowerCase()}.png`;
         dl.click();
         URL.revokeObjectURL(url);
-        showToast('Image downloaded');
       }, 'image/png');
     };
-    img.onerror = () => { showToast('Image export failed'); URL.revokeObjectURL(url); };
+    img.onerror = () => { URL.revokeObjectURL(url); };
     img.src = url;
   } catch (e) {
-    showToast('Image export failed');
   }
   closeShare();
 }
@@ -1451,7 +1572,7 @@ function exportPDF() {
   const t = state.shareTarget || state.theme;
   if (!t) return;
   const w = window.open('', '_blank', 'noopener,width=820,height=1100');
-  if (!w) { showToast('Pop-up blocked'); return; }
+  if (!w) return;
   const swatches = (arr, light) => arr.map((h) =>
     `<div style="aspect-ratio:1/1;border-radius:18px;background:${h};display:flex;align-items:flex-end;padding:10px;color:${light ? '#0b0d12' : '#fff'};font-weight:600;font-size:12px;font-family:Inter,sans-serif">${h}</div>`
   ).join('');
@@ -1478,7 +1599,6 @@ function exportPDF() {
   </body></html>`);
   w.document.close();
   closeShare();
-  showToast('Opening PDF...');
 }
 
 function escapeXml(s) {
@@ -1492,7 +1612,10 @@ function init() {
   wireSegmented(ui.topSeg, (btn) => switchMode(btn.dataset.mode));
   wireSegmented(ui.scopeSeg, (btn) => { state.scope = btn.dataset.scope; });
 
-  ui.regenBtn.addEventListener('click', () => generate(state.scope));
+  ui.regenBtn.addEventListener('click', () => {
+    if (isEditingSaved()) regenerateSavedDraft();
+    else generate(state.scope);
+  });
   ui.starBtn.addEventListener('click', toggleSave);
   ui.shareBtn.addEventListener('click', () => openShare(state.theme));
 
@@ -1520,6 +1643,7 @@ function init() {
   window.addEventListener('resize', () => {
     positionPill(ui.topSeg);
     positionPill(ui.scopeSeg);
+    if (state.mode === 'saved') syncSavedFrame();
   });
 
   // Initial layout — defer pill until layout is settled

@@ -164,7 +164,12 @@ button:focus-visible,
   padding: 6px;
   gap: 0;
 }
-.segmented--top { width: var(--stage-w); max-width: 360px; }
+.segmented--top {
+  width: var(--stage-w);
+  max-width: 360px;
+  z-index: 4;
+  transition: opacity 260ms ease, filter 260ms ease;
+}
 .segmented--scope {
   flex: 1;
   width: 100%;
@@ -191,6 +196,13 @@ button:focus-visible,
 }
 .seg-btn.is-active { color: var(--ctrl-ink); }
 .seg-btn:hover:not(.is-active) { color: #4a4f5a; }
+.segmented--top.is-disabled .seg-btn {
+  pointer-events: none;
+}
+.segmented--top.is-disabled {
+  opacity: 0.75;
+  filter: blur(4px);
+}
 
 .seg-btn--stack {
   flex-direction: column;
@@ -201,6 +213,15 @@ button:focus-visible,
   font-weight: 500;
 }
 .seg-icon { display: block; opacity: 0.95; }
+.seg-icon--type {
+  width: 20px;
+  height: 18px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0;
+}
 
 /* Active raised pill */
 .seg-pill {
@@ -361,10 +382,10 @@ button:focus-visible,
   background: #ffffff;
 }
 
-#starBtn.is-saved {
+.ctrl.is-saved {
   color: #f5b400;
 }
-#starBtn.is-saved svg { fill: currentColor; stroke: currentColor; }
+.ctrl.is-saved svg { fill: currentColor; stroke: currentColor; }
 
 /* =========================================================
    Typography preview
@@ -425,7 +446,7 @@ button:focus-visible,
   transition: background 600ms ease, box-shadow 600ms ease;
 }
 .swatch-hex {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(10px, 1.8vw, 12px);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -486,22 +507,26 @@ button:focus-visible,
    Bottom controls
    ========================================================= */
 .controls {
+  position: relative;
+  z-index: 4;
   width: var(--stage-w);
   display: flex;
   align-items: stretch;
   gap: 12px;
   flex-shrink: 0;
 }
-.controls .ctrl--regen { width: var(--ctrl-h); height: var(--ctrl-h); align-self: center; }
-
-/* Saved cards live inside a scroll container; iOS Safari renders
-   backdrop-filter and the gradient border ring unreliably there.
-   Force solid surface and dim the rim highlight to kill corner halos. */
-.saved-card {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+.controls .ctrl--regen {
+  width: calc(var(--ctrl-h) + 12px);
+  height: auto;
+  align-self: stretch;
+  border-radius: var(--ctrl-radius);
 }
-.saved-card::before { opacity: 0.35; }
+.controls.is-saved-edit [data-scope="all"] { display: none; }
+
+.controls.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
 
 /* =========================================================
    Pixel / 8-bit family — material-driven hard-edged styling
@@ -636,8 +661,11 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
    Saved view — full-fidelity cards in a vertical snap stack
    ========================================================= */
 .snap-stack {
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100vw;
+  height: 100dvh;
   overflow-y: scroll;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -647,18 +675,45 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
   -webkit-overflow-scrolling: touch;
   isolation: isolate;
 }
+.snap-stack.is-editing {
+  overflow: hidden;
+  touch-action: none;
+}
 .snap-stack::-webkit-scrollbar { display: none; }
 
 .snap-page {
   width: 100%;
-  height: 100%;
+  height: 100dvh;
+  position: relative;
   scroll-snap-align: center;
   scroll-snap-stop: always;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  padding-block: 10px;
 }
+
+.saved-card {
+  position: absolute;
+  top: var(--saved-card-top, 0);
+  left: var(--saved-card-left, 50%);
+  width: var(--saved-card-width, var(--stage-w));
+  height: var(--saved-card-height, 100%);
+  max-height: none;
+  transform: var(--saved-card-transform, translateX(-50%));
+}
+
+.saved-edit-btn {
+  position: absolute;
+  z-index: 3;
+  top: var(--saved-edit-top, calc(var(--saved-card-top, 0px) + var(--saved-card-height, 100%) + 12px));
+  left: var(--saved-card-center, 50%);
+  width: var(--ctrl-h);
+  height: var(--ctrl-h);
+  border-radius: var(--ctrl-radius);
+  transform: translateX(-50%);
+}
+.saved-edit-btn:hover,
+.saved-edit-btn:active {
+  transform: translateX(-50%);
+}
+.snap-stack.is-editing .saved-edit-btn { display: none; }
 
 .saved-empty {
   width: 100%;
@@ -727,28 +782,6 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
 
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 @keyframes sheetIn { from { opacity: 0; transform: translateY(8px) scale(0.98) } to { opacity: 1; transform: translateY(0) scale(1) } }
-
-/* =========================================================
-   Toast
-   ========================================================= */
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 32px;
-  transform: translateX(-50%) translateY(8px);
-  background: rgba(11, 13, 18, 0.92);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 220ms ease, transform 220ms ease;
-  z-index: 200;
-}
-.toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 
 /* =========================================================
    Card update animation
