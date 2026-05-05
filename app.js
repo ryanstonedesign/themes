@@ -1253,7 +1253,7 @@ function syncSavedFrame() {
   const rect = ui.savedView.getBoundingClientRect();
   const editButtonHeight = ui.regenBtn.getBoundingClientRect().height || 44;
   const remainingBelowCard = window.innerHeight - rect.bottom;
-  const editButtonTop = rect.bottom + Math.max(0, (remainingBelowCard - editButtonHeight) / 2) + 12;
+  const editButtonTop = rect.bottom + Math.max(0, (remainingBelowCard - editButtonHeight) / 2) + 8;
   ui.snapStack.style.setProperty('--saved-card-top', `${rect.top}px`);
   ui.snapStack.style.setProperty('--saved-card-left', `${rect.left}px`);
   ui.snapStack.style.setProperty('--saved-card-center', `${rect.left + rect.width / 2}px`);
