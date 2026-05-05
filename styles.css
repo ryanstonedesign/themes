@@ -721,6 +721,7 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
   padding: 60px 0;
   text-align: center;
   color: var(--ink-mute);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 .saved-empty p { margin: 0; font-weight: 600; color: var(--ink-strong); }
 .saved-empty-sub { margin-top: 4px !important; font-weight: 500 !important; color: var(--ink-mute) !important; opacity: 0.85; }
