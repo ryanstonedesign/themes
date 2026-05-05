@@ -1443,25 +1443,36 @@ function exportCSS() {
   if (t.font.serif !== t.font.sans) gfPairs.push(toGFParam(t.font.serif, t.font.serifWeight));
   const fontUrl = `https://fonts.googleapis.com/css2?${gfPairs.join('&')}&display=swap`;
 
-  const css = `/*
- * Theme: ${t.material.name}
- * Button: ${t.button.name}
- *
- * Fonts
- *   Sans:  ${t.font.sans} (weight ${t.font.sansWeight})
- *   Serif: ${t.font.serif} (weight ${t.font.serifWeight})
- *
- * Palette
- *   Primary 1:  ${t.colors.palette[0]}
- *   Primary 2:  ${t.colors.palette[1]}
- *   Primary 3:  ${t.colors.palette[2]}
- *   Gray 1:     ${t.colors.grays[0]}
- *   Gray 2:     ${t.colors.grays[1]}
- *   Gray 3:     ${t.colors.grays[2]}
- *   Ink strong: ${t.colors.inkStrong}
- *   Ink mute:   ${t.colors.inkMute}
- */
+  const slug = t.material.name.toLowerCase().replace(/\s+/g, '-');
+  const md = `# Theme: ${t.material.name}
 
+## Material
+- **Style:** ${t.material.name}
+- **Button shape:** ${t.button.name}
+- **Button radius:** ${t.button.radius}
+
+## Typography
+| Role | Family | Weight |
+|------|--------|--------|
+| Sans | ${t.font.sans} | ${t.font.sansWeight} |
+| Serif | ${t.font.serif} | ${t.font.serifWeight} |
+
+**Google Fonts:** \`${fontUrl}\`
+
+## Colors
+| Role | Value |
+|------|-------|
+| Primary 1 | \`${t.colors.palette[0]}\` |
+| Primary 2 | \`${t.colors.palette[1]}\` |
+| Primary 3 | \`${t.colors.palette[2]}\` |
+| Gray 1 | \`${t.colors.grays[0]}\` |
+| Gray 2 | \`${t.colors.grays[1]}\` |
+| Gray 3 | \`${t.colors.grays[2]}\` |
+| Ink strong | \`${t.colors.inkStrong}\` |
+| Ink mute | \`${t.colors.inkMute}\` |
+
+## CSS (web reference)
+\`\`\`css
 @import url("${fontUrl}");
 
 :root {
@@ -1476,14 +1487,15 @@ function exportCSS() {
   --color-ink-strong: ${t.colors.inkStrong};
   --color-ink-mute: ${t.colors.inkMute};
   --button-radius: ${t.button.radius};
-  --material: "${t.material.name}";
-}`;
+}
+\`\`\`
+`;
 
-  const blob = new Blob([css], { type: 'text/css;charset=utf-8' });
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const dl = document.createElement('a');
   dl.href = url;
-  dl.download = `theme-${t.material.name.toLowerCase().replace(/\s+/g, '-')}.css`;
+  dl.download = `theme-${slug}.md`;
   dl.click();
   URL.revokeObjectURL(url);
   closeShare();
