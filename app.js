@@ -983,17 +983,9 @@ function buildNextTheme(prev, scope = 'all') {
     // family (pixel/hand) so structural CSS overrides stay coherent. Generic
     // materials keep the existing blur/shadow/radius (set by the last "all").
     const pool = familyPool(prev?.material);
-    const isFamily = getFamilyGroup(prev?.material) !== 'generic';
     const colorMat = pickFromPool(pool);
     material = mergeColorFrom(colorMat, prev.material);
     colors = newColors(material);
-    if (isFamily) {
-      // Family materials share fontMoods but not fonts — rotate font + button
-      // so the typography refreshes alongside the colors.
-      font = newFont(material);
-      button = newButton(material);
-      regenFontAndBtn = true;
-    }
   } else if (scope === 'buttons') {
     button = newButton(material);
   }
