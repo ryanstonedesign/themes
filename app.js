@@ -523,28 +523,6 @@ function mergeColorFrom(colorMat, prevMat) {
   };
 }
 
-// Merge: keep color-surface props from prevMat, take structural props from structMat
-function mergeStructFrom(structMat, prevMat) {
-  if (!prevMat) return structMat;
-  return {
-    name: structMat.name,
-    cardBg: prevMat.cardBg,
-    bgBase: prevMat.bgBase,
-    bgOrbs: prevMat.bgOrbs,
-    borderColor: prevMat.borderColor,
-    paletteMood: prevMat.paletteMood,
-    fontMoods: prevMat.fontMoods,
-    cardRadius: structMat.cardRadius,
-    blur: structMat.blur,
-    saturate: structMat.saturate,
-    noise: structMat.noise,
-    cardShadow: structMat.cardShadow,
-    borderOpacity: structMat.borderOpacity,
-    family: structMat.family,
-    style: structMat.style,
-  };
-}
-
 // ----------------------------- button styles -----------------------------
 const BUTTON_STYLES = [
   {
@@ -966,7 +944,6 @@ function generate(scope = 'all') {
 
   const newColors = (mat) => genPalette(mat);
   const newButton = (mat) => pickButtonStyle(mat);
-  const sigOf = (m) => `${m?.family || ''}|${m?.style || ''}`;
 
   // Pick a material from a given pool, avoiding the current one and recent picks
   const pickFromPool = (pool) => {
@@ -988,7 +965,7 @@ function generate(scope = 'all') {
     return MATERIAL_NAMES.filter((n) => getFamilyGroup(MATERIALS[n]) === group);
   };
 
-  let cardFamilyChanged = false;
+  let regenFontAndBtn = false;
 
   if (scope === 'all') {
     // Full material change from the whole pool
@@ -1003,57 +980,34 @@ function generate(scope = 'all') {
   } else if (scope === 'font') {
     font = newFont(material);
   } else if (scope === 'colors') {
-    // Colors regen: new card/bg/stroke colors + new palette.
-    // For family materials (pixel/hand) do a full material swap within the family.
-    // For generic materials, merge color-surface from the new material onto the
-    // existing structure so blur/shadow/radius stay the same.
+    // Colors regen: new card/bg/stroke colors + new palette. Within the same
+    // family (pixel/hand) so structural CSS overrides stay coherent. Generic
+    // materials keep the existing blur/shadow/radius (set by the last "all").
     const pool = familyPool(prev?.material);
     const isFamily = getFamilyGroup(prev?.material) !== 'generic';
     const colorMat = pickFromPool(pool);
+    material = mergeColorFrom(colorMat, prev.material);
+    colors = newColors(material);
     if (isFamily) {
-      material = colorMat;
+      // Family materials share fontMoods but not fonts — rotate font + button
+      // so the typography refreshes alongside the colors.
       font = newFont(material);
       button = newButton(material);
-      cardFamilyChanged = sigOf(prev?.material) !== sigOf(material);
-    } else {
-      material = mergeColorFrom(colorMat, prev.material);
+      regenFontAndBtn = true;
     }
-    colors = newColors(material);
   } else if (scope === 'buttons') {
     button = newButton(material);
-  } else if (scope === 'card') {
-    // Card regen: new corner radius, stroke opacity, shadow, blur.
-    // For family materials do a full swap within the family (structure is CSS-driven).
-    // For generic materials, merge structural props from the new material onto the
-    // existing color surface so card/bg colors stay the same.
-    const pool = familyPool(prev?.material);
-    const isFamily = getFamilyGroup(prev?.material) !== 'generic';
-    const structMat = pickFromPool(pool);
-    cardFamilyChanged = sigOf(prev?.material) !== sigOf(structMat);
-    if (isFamily) {
-      material = structMat;
-      if (cardFamilyChanged) {
-        font = newFont(material);
-        button = newButton(material);
-      }
-    } else {
-      material = mergeStructFrom(structMat, prev.material);
-      if (cardFamilyChanged) {
-        font = newFont(material);
-        button = newButton(material);
-      }
-    }
   }
 
   const theme = { material, font, colors, button };
   state.theme = theme;
   remember('full', themeId(theme));
   applyTheme(theme, {
-    applyFont: scope === 'all' || scope === 'font' || cardFamilyChanged,
+    applyFont: scope === 'all' || scope === 'font' || regenFontAndBtn,
     applyColors: scope === 'all' || scope === 'colors',
     applyCardColors: scope === 'all' || scope === 'colors',
-    applyButtons: scope === 'all' || scope === 'colors' || scope === 'buttons' || cardFamilyChanged,
-    applyCard: scope === 'all' || scope === 'card',
+    applyButtons: scope === 'all' || scope === 'colors' || scope === 'buttons' || regenFontAndBtn,
+    applyCard: scope === 'all',
   });
 
   // Subtle flash on the card to acknowledge the change
@@ -1129,8 +1083,9 @@ function toggleSave() {
 
 // Saved themes are persisted as plain JSON; restore live function refs.
 // Material is pure data — no function refs. We expand MATERIALS[name] as defaults
-// then overlay the saved values so mixed materials (colors scope ≠ card scope pick)
-// preserve their mixed state, while old saves get current defaults for new fields.
+// then overlay the saved values so any mixed-state material (colors regen swaps
+// the surface but keeps prev structure) is preserved exactly, while old saves
+// get current defaults for new fields like cardRadius / borderColor.
 function rehydrate(theme) {
   const bs = BUTTON_STYLES.find((s) => s.name === theme.button.name);
   if (bs) theme.button = bs;
