@@ -358,6 +358,7 @@ button:focus-visible,
 
 .ctrl--regen {
   flex: 0 0 auto;
+  background: #ffffff;
 }
 
 #starBtn.is-saved {
@@ -491,7 +492,7 @@ button:focus-visible,
   gap: 12px;
   flex-shrink: 0;
 }
-.controls .ctrl--regen { height: auto; align-self: stretch; }
+.controls .ctrl--regen { width: var(--ctrl-h); height: var(--ctrl-h); align-self: center; }
 
 /* Saved cards live inside a scroll container; iOS Safari renders
    backdrop-filter and the gradient border ring unreliably there.
