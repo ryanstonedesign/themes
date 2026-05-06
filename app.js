@@ -1444,58 +1444,112 @@ function exportCSS() {
   const fontUrl = `https://fonts.googleapis.com/css2?${gfPairs.join('&')}&display=swap`;
 
   const slug = t.material.name.toLowerCase().replace(/\s+/g, '-');
-  const md = `# Theme: ${t.material.name}
+  const cardRadius = t.material.cardRadius || '32px';
 
-## Material
-- **Style:** ${t.material.name}
-- **Button shape:** ${t.button.name}
-- **Button radius:** ${t.button.radius}
+  // Google DESIGN.md format: YAML front matter (machine-readable tokens)
+  // + markdown prose (human/agent-readable rationale).
+  // Spec: https://github.com/google-labs-code/design.md
+  const md = `---
+version: alpha
+name: "${t.material.name}"
+description: "Generated theme — ${t.material.name} material, ${t.button.name} button shape, ${t.font.sans} / ${t.font.serif} type pairing."
+colors:
+  primary: "${t.colors.palette[0]}"
+  secondary: "${t.colors.palette[1]}"
+  tertiary: "${t.colors.palette[2]}"
+  surface: "${t.colors.grays[0]}"
+  surfaceMuted: "${t.colors.grays[1]}"
+  border: "${t.colors.grays[2]}"
+  inkStrong: "${t.colors.inkStrong}"
+  inkMute: "${t.colors.inkMute}"
+typography:
+  display:
+    fontFamily: "${t.font.sans}"
+    fontSize: 48px
+    fontWeight: ${t.font.sansWeight}
+    lineHeight: 1.05
+    letterSpacing: "-0.01em"
+  heading:
+    fontFamily: "${t.font.sans}"
+    fontSize: 32px
+    fontWeight: ${t.font.sansWeight}
+    lineHeight: 1.15
+    letterSpacing: "-0.005em"
+  body:
+    fontFamily: "${t.font.sans}"
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.5
+  serif:
+    fontFamily: "${t.font.serif}"
+    fontSize: 24px
+    fontWeight: ${t.font.serifWeight}
+    lineHeight: 1.3
+rounded:
+  button: ${t.button.radius}
+  card: ${cardRadius}
+components:
+  button-primary:
+    backgroundColor: "{colors.primary}"
+    textColor: "#FFFFFF"
+    rounded: "{rounded.button}"
+  button-secondary:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.inkStrong}"
+    rounded: "{rounded.button}"
+  button-tertiary:
+    backgroundColor: transparent
+    textColor: "{colors.primary}"
+    rounded: "{rounded.button}"
+  card:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.card}"
+---
 
-## Typography
-| Role | Family | Weight |
-|------|--------|--------|
-| Sans | ${t.font.sans} | ${t.font.sansWeight} |
-| Serif | ${t.font.serif} | ${t.font.serifWeight} |
+# ${t.material.name}
 
-**Google Fonts:** \`${fontUrl}\`
+## Overview
+A **${t.material.name}** theme using the **${t.button.name}** button shape. The mood is set by pairing **${t.font.sans}** (sans, weight ${t.font.sansWeight}) with **${t.font.serif}** (serif, weight ${t.font.serifWeight}) over a controlled palette of three primary accents and three neutrals.
+
+Load the typefaces from Google Fonts:
+
+\`\`\`html
+<link rel="stylesheet" href="${fontUrl}">
+\`\`\`
 
 ## Colors
-| Role | Value |
-|------|-------|
-| Primary 1 | \`${t.colors.palette[0]}\` |
-| Primary 2 | \`${t.colors.palette[1]}\` |
-| Primary 3 | \`${t.colors.palette[2]}\` |
-| Gray 1 | \`${t.colors.grays[0]}\` |
-| Gray 2 | \`${t.colors.grays[1]}\` |
-| Gray 3 | \`${t.colors.grays[2]}\` |
-| Ink strong | \`${t.colors.inkStrong}\` |
-| Ink mute | \`${t.colors.inkMute}\` |
+Use \`{colors.primary}\` for the dominant brand action and the single most important call-to-action on a screen. \`{colors.secondary}\` and \`{colors.tertiary}\` are supporting accents — use them sparingly to add chromatic depth without competing with primary. \`{colors.surface}\` is the default container fill; \`{colors.surfaceMuted}\` is for nested or quieter surfaces; \`{colors.border}\` is for hairlines and dividers. \`{colors.inkStrong}\` is for headings and body copy; \`{colors.inkMute}\` is for secondary labels and meta text.
 
-## CSS (web reference)
-\`\`\`css
-@import url("${fontUrl}");
+| Role | Token | Value |
+|------|-------|-------|
+| Primary | \`{colors.primary}\` | \`${t.colors.palette[0]}\` |
+| Secondary | \`{colors.secondary}\` | \`${t.colors.palette[1]}\` |
+| Tertiary | \`{colors.tertiary}\` | \`${t.colors.palette[2]}\` |
+| Surface | \`{colors.surface}\` | \`${t.colors.grays[0]}\` |
+| Surface muted | \`{colors.surfaceMuted}\` | \`${t.colors.grays[1]}\` |
+| Border | \`{colors.border}\` | \`${t.colors.grays[2]}\` |
+| Ink strong | \`{colors.inkStrong}\` | \`${t.colors.inkStrong}\` |
+| Ink mute | \`{colors.inkMute}\` | \`${t.colors.inkMute}\` |
 
-:root {
-  --font-sans: '${t.font.sans}', system-ui, sans-serif;
-  --font-serif: '${t.font.serif}', Georgia, serif;
-  --color-primary-1: ${t.colors.palette[0]};
-  --color-primary-2: ${t.colors.palette[1]};
-  --color-primary-3: ${t.colors.palette[2]};
-  --color-gray-1: ${t.colors.grays[0]};
-  --color-gray-2: ${t.colors.grays[1]};
-  --color-gray-3: ${t.colors.grays[2]};
-  --color-ink-strong: ${t.colors.inkStrong};
-  --color-ink-mute: ${t.colors.inkMute};
-  --button-radius: ${t.button.radius};
-}
-\`\`\`
+## Typography
+The sans family **${t.font.sans}** carries display, heading, and body roles — keep weight at ${t.font.sansWeight} for display/heading and 400 for body. The serif family **${t.font.serif}** is reserved for editorial moments (pull quotes, marquee subheads, accent labels) and should not replace body or heading text.
+
+## Shapes
+- Button corners: \`${t.button.radius}\`
+- Card corners: \`${cardRadius}\`
+
+## Components
+- **button-primary** — solid \`{colors.primary}\` fill with a white label and \`{rounded.button}\` corners. Use for the single most important action on a screen.
+- **button-secondary** — \`{colors.surface}\` fill with an \`{colors.inkStrong}\` label and \`{rounded.button}\` corners. Use for the next-most-important action; pair at most one secondary with each primary.
+- **button-tertiary** — transparent fill with a \`{colors.primary}\` label and a 1px \`{colors.primary}\` outline at \`{rounded.button}\` corners. Use for low-priority links, "Cancel"/"Dismiss"-style actions, and inline navigation.
+- **card** — \`{colors.surface}\` fill with \`{rounded.card}\` corners. Use as the default container for grouped content.
 `;
 
   const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const dl = document.createElement('a');
   dl.href = url;
-  dl.download = `theme-${slug}.md`;
+  dl.download = `DESIGN-${slug}.md`;
   dl.click();
   URL.revokeObjectURL(url);
   closeShare();
