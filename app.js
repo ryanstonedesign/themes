@@ -1465,29 +1465,29 @@ colors:
 typography:
   display:
     fontFamily: "${t.font.sans}"
-    fontSize: 48px
+    fontSize: "48px"
     fontWeight: ${t.font.sansWeight}
     lineHeight: 1.05
     letterSpacing: "-0.01em"
   heading:
     fontFamily: "${t.font.sans}"
-    fontSize: 32px
+    fontSize: "32px"
     fontWeight: ${t.font.sansWeight}
     lineHeight: 1.15
     letterSpacing: "-0.005em"
   body:
     fontFamily: "${t.font.sans}"
-    fontSize: 16px
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.5
-  serif:
+  accent:
     fontFamily: "${t.font.serif}"
-    fontSize: 24px
+    fontSize: "24px"
     fontWeight: ${t.font.serifWeight}
     lineHeight: 1.3
 rounded:
-  button: ${t.button.radius}
-  card: ${cardRadius}
+  button: "${t.button.radius}"
+  card: "${cardRadius}"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -1532,7 +1532,7 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
 | Ink mute | \`{colors.inkMute}\` | \`${t.colors.inkMute}\` |
 
 ## Typography
-The sans family **${t.font.sans}** carries display, heading, and body roles — keep weight at ${t.font.sansWeight} for display/heading and 400 for body. The serif family **${t.font.serif}** is reserved for editorial moments (pull quotes, marquee subheads, accent labels) and should not replace body or heading text.
+**${t.font.sans}** (weight ${t.font.sansWeight}) carries display, heading, and body roles. **${t.font.serif}** (weight ${t.font.serifWeight}) is the accent typeface — use it for editorial moments like pull quotes, marquee subheads, and decorative labels. It may not be a traditional serif; treat it as a stylistic counterpoint to the primary family, not a replacement for body or heading text.
 
 ## Shapes
 - Button corners: \`${t.button.radius}\`
