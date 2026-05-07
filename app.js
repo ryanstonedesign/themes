@@ -2165,6 +2165,14 @@ function buildDesignMarkdown(t) {
   const btnSecondaryShadow = t.button.secondaryShadow;
   const btnTertiaryBorder = t.button.tertiaryBorder(a);
 
+  // mix-blend-mode: overlay on a very dark surface produces no visible noise.
+  // Compute relative luminance from the card background rgba to detect this.
+  const rgbaMatch = m.cardBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  const cardLuminance = rgbaMatch
+    ? 0.2126 * (+rgbaMatch[1] / 255) + 0.7152 * (+rgbaMatch[2] / 255) + 0.0722 * (+rgbaMatch[3] / 255)
+    : 0.5;
+  const noiseVisible = m.noise > 0 && cardLuminance > 0.12;
+
   // Family-specific card values — must match the CSS overrides in styles.css
   let cardYaml, cardCss, cardProse, cardRounded;
   if (m.family === 'pixel') {
@@ -2197,7 +2205,7 @@ function buildDesignMarkdown(t) {
     backdropFilter: "none"
     border: "2px dashed {colors.inkStrong} at 50% opacity (via ::before)"
     shadow: "${m.cardShadow}"
-    noiseOpacity: ${m.noise}`;
+    noiseOpacity: ${noiseVisible ? m.noise : 0}`;
     cardProse = `Hand-drawn sketch surface — solid paper fill (${m.cardBg}), no blur. The border is a 2px dashed ink stroke at 50% opacity, rendered via a \`::before\` pseudo-element. Shadow is a soft offset: \`${m.cardShadow}\`.`;
     cardCss = `\
 .card {
@@ -2225,7 +2233,7 @@ function buildDesignMarkdown(t) {
     backdropFilter: "none"
     border: "1px solid {colors.inkStrong} at 25% opacity (via ::before)"
     shadow: "${m.cardShadow}"
-    noiseOpacity: ${m.noise}`;
+    noiseOpacity: ${noiseVisible ? m.noise : 0}`;
     cardProse = `Calligraphic hand surface — solid paper fill (${m.cardBg}), no blur. The border is a refined 1px solid ink hairline at 25% opacity, rendered via a \`::before\` pseudo-element. Shadow: \`${m.cardShadow}\`.`;
     cardCss = `\
 .card {
@@ -2254,7 +2262,7 @@ function buildDesignMarkdown(t) {
     backdropFilter: "blur(${m.blur}px) saturate(${m.saturate})"
     border: "1px gradient stroke, color ${m.borderColor}, opacity ${m.borderOpacity ?? 1}"
     shadow: "${m.cardShadow}"
-    noiseOpacity: ${m.noise}`;
+    noiseOpacity: ${noiseVisible ? m.noise : 0}`;
     cardProse = `Glassmorphic surface — translucent fill (\`${m.cardBg}\`) over the page background, blurred ${m.blur}px and saturated ${m.saturate}× via \`backdrop-filter\`. Framed by a 1px gradient stroke (\`${m.borderColor}\` at ${Math.round((m.borderOpacity ?? 1) * 100)}% opacity) rendered as a masked \`::before\`, and a layered ambient shadow.`;
     cardCss = `\
 .card {
