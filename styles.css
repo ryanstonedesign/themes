@@ -35,6 +35,21 @@
   --bg-orb-c: #c9b8ff;   /* purple */
   --bg-orb-d: #ffd2e0;   /* pale pink */
   --bg-tint:  #d8dde6;   /* light gray */
+  --page-bg:
+    radial-gradient(circle at 8% 8%, var(--bg-orb-a) 0, transparent 34vw),
+    radial-gradient(circle at 92% 18%, var(--bg-orb-b) 0, transparent 30vw),
+    radial-gradient(circle at 88% 92%, var(--bg-orb-c) 0, transparent 36vw),
+    radial-gradient(circle at 18% 94%, var(--bg-orb-d) 0, transparent 28vw),
+    var(--bg-base);
+  --page-overlay: linear-gradient(180deg, transparent, rgba(255,255,255,0.18) 80%);
+  --page-overlay-opacity: 1;
+  --page-overlay-blend: normal;
+  --page-orb-filter: blur(110px);
+  --page-orb-opacity: 0.85;
+  --page-orb-scale-a: 1;
+  --page-orb-scale-b: 1;
+  --page-orb-scale-c: 1;
+  --page-orb-scale-d: 1;
 
   /* Theme color tokens (overridden by generator) */
   --p1: #2563eb;
@@ -116,28 +131,34 @@ button:focus-visible,
    ========================================================= */
 .bg {
   position: fixed; inset: 0; z-index: -1;
-  background: var(--bg-base);
+  background: var(--page-bg);
+  background-color: var(--bg-base);
   overflow: hidden;
   transition: background 900ms cubic-bezier(.2,.7,.2,1);
 }
 .bg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(110px);
-  opacity: 0.85;
+  filter: var(--page-orb-filter);
+  opacity: var(--page-orb-opacity);
   transition: background 900ms cubic-bezier(.2,.7,.2,1),
               transform 1200ms cubic-bezier(.2,.7,.2,1),
-              opacity 900ms ease;
+              opacity 900ms ease,
+              filter 900ms ease;
   will-change: transform, background;
 }
-.bg-orb--a { width: 60vw; height: 60vw; left: -10vw; top: -15vw; background: var(--bg-orb-a); }
-.bg-orb--b { width: 55vw; height: 55vw; right: -10vw; top: 5vw;  background: var(--bg-orb-b); opacity: 0.7; }
-.bg-orb--c { width: 65vw; height: 65vw; right: -15vw; bottom: -20vw; background: var(--bg-orb-c); opacity: 0.75; }
-.bg-orb--d { width: 50vw; height: 50vw; left: 5vw; bottom: -10vw; background: var(--bg-orb-d); opacity: 0.6; }
+.bg-orb--a { width: 60vw; height: 60vw; left: -10vw; top: -15vw; background: var(--bg-orb-a); transform: scale(var(--page-orb-scale-a)); }
+.bg-orb--b { width: 55vw; height: 55vw; right: -10vw; top: 5vw;  background: var(--bg-orb-b); transform: scale(var(--page-orb-scale-b)); }
+.bg-orb--c { width: 65vw; height: 65vw; right: -15vw; bottom: -20vw; background: var(--bg-orb-c); transform: scale(var(--page-orb-scale-c)); }
+.bg-orb--d { width: 50vw; height: 50vw; left: 5vw; bottom: -10vw; background: var(--bg-orb-d); transform: scale(var(--page-orb-scale-d)); }
 .bg-grain {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.18) 80%);
+  background: var(--page-overlay);
+  background-size: var(--page-overlay-size);
+  opacity: var(--page-overlay-opacity);
+  mix-blend-mode: var(--page-overlay-blend);
   pointer-events: none;
+  transition: background 900ms ease, opacity 900ms ease;
 }
 
 /* =========================================================
@@ -577,13 +598,12 @@ button:focus-visible,
 .card[data-family="pixel"] .type-sample--sans { font-size: clamp(0.95rem, min(2.6vw, 2.4vh), 1.4rem); }
 .card[data-family="pixel"] .type-sample--serif { font-size: clamp(0.7rem, min(1.8vw, 1.6vh), 0.95rem); font-weight: 400; }
 
-/* Pixel page background — drop the soft blur, add a faint grid */
-body[data-family="pixel"] .bg-orb { filter: blur(60px); opacity: 0.55; }
+/* Pixel page background keeps a faint grid by default. Page regen can override it. */
 body[data-family="pixel"] .bg-grain {
-  background:
+  background: var(--page-overlay, 
     linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px));
+  background-size: var(--page-overlay-size, 24px 24px);
 }
 
 /* =========================================================
@@ -660,9 +680,6 @@ body[data-family="pixel"] .bg-grain {
   font-weight: 400;
 }
 
-/* Page background — slightly less blurred than glass to give a paper feel */
-body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
-
 /* =========================================================
    Saved view — full-fidelity cards in a vertical snap stack
    ========================================================= */
@@ -676,10 +693,11 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
   overflow-x: hidden;
   overscroll-behavior: contain;
   scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   isolation: isolate;
+  contain: strict;
 }
 .snap-stack.is-editing {
   overflow: hidden;
@@ -693,6 +711,9 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
   position: relative;
   scroll-snap-align: center;
   scroll-snap-stop: always;
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: 100dvh;
 }
 
 .saved-card {
@@ -703,23 +724,25 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
   height: var(--saved-card-height, 100%);
   max-height: none;
   transform: var(--saved-card-transform, translateX(-50%));
+  backface-visibility: hidden;
+  contain: layout paint style;
 }
 
 .saved-edit-btn {
-  position: absolute;
-  z-index: 3;
+  position: fixed;
+  z-index: 5;
   top: var(--saved-edit-top, calc(var(--saved-card-top, 0px) + var(--saved-card-height, 100%) + 12px));
   left: var(--saved-card-center, 50%);
   width: var(--ctrl-h);
   height: var(--ctrl-h);
   border-radius: var(--ctrl-radius);
   transform: translateX(-50%);
+  will-change: transform;
 }
 .saved-edit-btn:hover,
 .saved-edit-btn:active {
   transform: translateX(-50%);
 }
-.snap-stack.is-editing .saved-edit-btn { display: none; }
 
 .saved-empty {
   width: 100%;
@@ -795,12 +818,12 @@ body[data-family="hand"] .bg-orb { filter: blur(85px); opacity: 0.6; }
    Card update animation
    ========================================================= */
 .card.is-flashing {
-  animation: cardFlash 600ms cubic-bezier(.2,.7,.2,1);
+  animation: cardFlash 250ms ease-out;
 }
 @keyframes cardFlash {
-  0% { transform: translateY(0) scale(1); }
-  35% { transform: translateY(-2px) scale(1.005); }
-  100% { transform: translateY(0) scale(1); }
+  0% { filter: brightness(1); }
+  35% { filter: brightness(1.035); }
+  100% { filter: brightness(1); }
 }
 
 /* =========================================================

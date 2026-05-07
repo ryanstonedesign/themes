@@ -912,6 +912,125 @@ const MATERIAL_BORDER_COLOR = {
   Quill: '#ffffff', Manuscript: '#ffffff',
 };
 
+// Page styles only alter presentation of existing material background colors.
+const PAGE_STYLES = [
+  {
+    name: 'aurora-blur',
+    bg: (m) => `
+      radial-gradient(circle at 8% 8%, ${m.bgOrbs[0]} 0, transparent 34vw),
+      radial-gradient(circle at 92% 18%, ${m.bgOrbs[1]} 0, transparent 30vw),
+      radial-gradient(circle at 88% 92%, ${m.bgOrbs[2]} 0, transparent 36vw),
+      radial-gradient(circle at 18% 94%, ${m.bgOrbs[3]} 0, transparent 28vw),
+      ${m.bgBase}`,
+    overlay: () => 'linear-gradient(180deg, transparent, rgba(255,255,255,0.18) 80%)',
+    overlayOpacity: '1',
+    overlayBlend: 'normal',
+    orbFilter: 'blur(110px)',
+    orbOpacity: '0.85',
+    orbScale: [1, 1, 1, 1],
+  },
+  {
+    name: 'solid-field',
+    bg: (m) => m.bgBase,
+    overlay: () => 'linear-gradient(180deg, rgba(255,255,255,0.08), transparent 55%, rgba(0,0,0,0.04))',
+    overlayOpacity: '0.55',
+    overlayBlend: 'normal',
+    orbFilter: 'blur(90px)',
+    orbOpacity: '0',
+    orbScale: [0.7, 0.7, 0.7, 0.7],
+  },
+  {
+    name: 'soft-corner-wash',
+    bg: (m) => `
+      linear-gradient(135deg, color-mix(in srgb, ${m.bgOrbs[0]} 28%, ${m.bgBase}) 0%, ${m.bgBase} 48%, color-mix(in srgb, ${m.bgOrbs[2]} 24%, ${m.bgBase}) 100%)`,
+    overlay: () => 'radial-gradient(circle at 50% 48%, rgba(255,255,255,0.24), transparent 58%)',
+    overlayOpacity: '0.8',
+    overlayBlend: 'soft-light',
+    orbFilter: 'blur(135px)',
+    orbOpacity: '0.32',
+    orbScale: [1.15, 0.85, 1.05, 0.75],
+  },
+  {
+    name: 'mesh-gradient',
+    bg: (m) => `
+      radial-gradient(circle at 20% 20%, ${m.bgOrbs[0]} 0, transparent 30%),
+      radial-gradient(circle at 82% 18%, ${m.bgOrbs[1]} 0, transparent 28%),
+      radial-gradient(circle at 75% 82%, ${m.bgOrbs[2]} 0, transparent 34%),
+      linear-gradient(135deg, ${m.bgBase}, color-mix(in srgb, ${m.bgOrbs[3]} 24%, ${m.bgBase}))`,
+    overlay: () => 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02))',
+    overlayOpacity: '0.75',
+    overlayBlend: 'normal',
+    orbFilter: 'blur(80px)',
+    orbOpacity: '0.42',
+    orbScale: [0.75, 0.65, 0.85, 0.6],
+  },
+  {
+    name: 'paper-texture',
+    bg: (m) => m.bgBase,
+    overlay: (m) => `
+      radial-gradient(circle at 25% 20%, color-mix(in srgb, ${m.bgOrbs[0]} ${m.paletteMood.mode === 'dark' ? 26 : 18}%, transparent), transparent 34%),
+      radial-gradient(circle at 80% 75%, color-mix(in srgb, ${m.bgOrbs[2]} ${m.paletteMood.mode === 'dark' ? 22 : 14}%, transparent), transparent 36%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.26 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")`,
+    overlayOpacity: (m) => m.paletteMood.mode === 'dark' ? '0.62' : '0.5',
+    overlayBlend: (m) => m.paletteMood.mode === 'dark' ? 'screen' : 'multiply',
+    orbFilter: 'blur(120px)',
+    orbOpacity: '0.14',
+    orbScale: [0.9, 0.7, 0.8, 0.65],
+  },
+  {
+    name: 'fine-grid',
+    bg: (m) => `
+      linear-gradient(135deg, ${m.bgBase}, color-mix(in srgb, ${m.bgOrbs[1]} 12%, ${m.bgBase}))`,
+    overlay: (m) => `
+      linear-gradient(color-mix(in srgb, ${m.bgOrbs[0]} ${m.paletteMood.mode === 'dark' ? 38 : 18}%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, ${m.bgOrbs[2]} ${m.paletteMood.mode === 'dark' ? 32 : 16}%, transparent) 1px, transparent 1px)`,
+    overlayOpacity: (m) => m.paletteMood.mode === 'dark' ? '0.54' : '0.42',
+    overlayBlend: (m) => m.paletteMood.mode === 'dark' ? 'screen' : 'multiply',
+    orbFilter: 'blur(100px)',
+    orbOpacity: '0.18',
+    orbScale: [0.8, 0.8, 0.8, 0.8],
+    overlaySize: '28px 28px',
+  },
+  {
+    name: 'dot-grid',
+    bg: (m) => `
+      linear-gradient(135deg, ${m.bgBase}, color-mix(in srgb, ${m.bgOrbs[1]} 10%, ${m.bgBase}))`,
+    overlay: (m) => `
+      radial-gradient(circle, color-mix(in srgb, ${m.bgOrbs[0]} ${m.paletteMood.mode === 'dark' ? 48 : 28}%, ${m.paletteMood.mode === 'dark' ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.18)'}) 1px, transparent 1.5px)`,
+    overlayOpacity: (m) => m.paletteMood.mode === 'dark' ? '0.5' : '0.42',
+    overlayBlend: (m) => m.paletteMood.mode === 'dark' ? 'screen' : 'multiply',
+    orbFilter: 'blur(115px)',
+    orbOpacity: '0.18',
+    orbScale: [0.8, 0.65, 0.75, 0.55],
+    overlaySize: '18px 18px',
+  },
+  {
+    name: 'spotlight',
+    bg: (m) => `
+      radial-gradient(circle at 50% 42%, color-mix(in srgb, ${m.bgOrbs[0]} 34%, ${m.bgBase}) 0, ${m.bgBase} 48%, color-mix(in srgb, #000 8%, ${m.bgBase}) 100%)`,
+    overlay: () => 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.34), transparent 42%)',
+    overlayOpacity: '0.72',
+    overlayBlend: 'soft-light',
+    orbFilter: 'blur(160px)',
+    orbOpacity: '0.16',
+    orbScale: [1.4, 0.5, 0.7, 0.5],
+  },
+  {
+    name: 'quiet-vignette',
+    bg: (m) => m.bgBase,
+    overlay: () => `
+      radial-gradient(circle at 50% 45%, transparent 0, transparent 44%, rgba(0,0,0,0.12) 100%),
+      linear-gradient(180deg, rgba(255,255,255,0.1), transparent 55%)`,
+    overlayOpacity: '0.7',
+    overlayBlend: 'normal',
+    orbFilter: 'blur(150px)',
+    orbOpacity: '0.22',
+    orbScale: [1, 0.55, 0.9, 0.5],
+  },
+];
+
+const DEFAULT_PAGE_STYLE = PAGE_STYLES[0];
+
 // Family group used to restrict scope-aware regen to compatible materials
 function getFamilyGroup(mat) {
   if (!mat) return 'generic';
@@ -932,11 +1051,11 @@ function mergeColorFrom(colorMat, prevMat) {
     borderColor: colorMat.borderColor,
     paletteMood: colorMat.paletteMood,
     fontMoods: colorMat.fontMoods,
+    cardShadow: colorMat.cardShadow,
     cardRadius: prevMat.cardRadius,
     blur: prevMat.blur,
     saturate: prevMat.saturate,
     noise: prevMat.noise,
-    cardShadow: prevMat.cardShadow,
     borderOpacity: prevMat.borderOpacity,
     family: prevMat.family,
     style: prevMat.style,
@@ -1116,7 +1235,7 @@ const BUTTON_STYLES = [
 // ----------------------------- non-repetition history -----------------------------
 const HISTORY_LIMIT = 6;
 const history = {
-  font: [], material: [], palette: [], button: [], full: []
+  font: [], material: [], palette: [], button: [], page: [], full: []
 };
 const remember = (key, value) => {
   history[key].push(value);
@@ -1304,6 +1423,12 @@ function pickButtonStyle(material) {
   return BUTTON_STYLES.find((s) => s.name === name);
 }
 
+function pickPageStyle() {
+  const name = pickFresh(PAGE_STYLES.map((s) => s.name), 'page');
+  remember('page', name);
+  return PAGE_STYLES.find((s) => s.name === name) || DEFAULT_PAGE_STYLE;
+}
+
 // ----------------------------- application -----------------------------
 const state = {
   mode: 'create',
@@ -1328,6 +1453,7 @@ const ui = {
   savedView: $('#savedView'),
   snapStack: $('#snapStack'),
   savedEmpty: $('#savedEmpty'),
+  savedEditBtn: $('#savedEditBtn'),
   savedCount: $('#savedCount'),
 };
 
@@ -1364,6 +1490,7 @@ function applyTheme(theme, opts = {}) {
   const f = theme.font;
   const c = theme.colors;
   const b = theme.button;
+  const p = theme.page || DEFAULT_PAGE_STYLE;
 
   if (opts.applyFont !== false) {
     ensureFontsLoaded(f);
@@ -1409,7 +1536,7 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--btn-tertiary-shadow', b.tertiaryShadow);
   }
 
-  // Card color surface: card bg, page atmosphere, stroke color — changes with "colors" regen
+  // Card color surface: card bg, page atmosphere, stroke/shadow color — changes with "colors" regen
   if (opts.applyCardColors !== false) {
     root.setProperty('--card-bg', m.cardBg);
     root.setProperty('--bg-base', m.bgBase);
@@ -1418,13 +1545,17 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--bg-orb-c', m.bgOrbs[2]);
     root.setProperty('--bg-orb-d', m.bgOrbs[3]);
     root.setProperty('--card-stroke-color', m.borderColor || '#ffffff');
+    root.setProperty('--card-shadow', m.cardShadow);
   }
 
-  // Card structure: blur, shadow, radius, stroke opacity, family — changes with "card" regen
+  if (opts.applyPage !== false) {
+    applyPageStyle(m, p);
+  }
+
+  // Card structure: blur, radius, stroke opacity, family — changes with "card" regen
   if (opts.applyCard !== false) {
     root.setProperty('--card-blur', `${m.blur}px`);
     root.setProperty('--card-saturate', m.saturate);
-    root.setProperty('--card-shadow', m.cardShadow);
     root.setProperty('--card-noise-opacity', m.noise);
     root.setProperty('--card-border-opacity', m.borderOpacity);
     root.setProperty('--card-radius', m.cardRadius || '32px');
@@ -1445,7 +1576,7 @@ function applyTheme(theme, opts = {}) {
 }
 
 function themeId(t) {
-  return `${t.material.name}|${t.font.sans}-${t.font.serif}|${t.colors.seed}|${t.button.name}`;
+  return `${t.material.name}|${t.font.sans}-${t.font.serif}|${t.colors.seed}|${t.button.name}|${t.page?.name || DEFAULT_PAGE_STYLE.name}`;
 }
 
 // ---- generation (scope-aware) ----
@@ -1454,6 +1585,7 @@ function buildNextTheme(prev, scope = 'all') {
   let font = prev?.font;
   let colors = prev?.colors;
   let button = prev?.button;
+  let page = prev?.page || DEFAULT_PAGE_STYLE;
 
   const newFont = (mat) => {
     const pair = pickFontPair(mat.fontMoods);
@@ -1469,6 +1601,7 @@ function buildNextTheme(prev, scope = 'all') {
 
   const newColors = (mat) => genPalette(mat);
   const newButton = (mat) => pickButtonStyle(mat);
+  const newPage = () => pickPageStyle();
 
   // Pick a material from a given pool, avoiding the current one and recent picks
   const pickFromPool = (pool) => {
@@ -1502,21 +1635,24 @@ function buildNextTheme(prev, scope = 'all') {
     font = newFont(material);
     colors = newColors(material);
     button = newButton(material);
+    page = newPage();
   } else if (scope === 'font') {
     font = newFont(material);
   } else if (scope === 'colors') {
-    // Colors regen: new card/bg/stroke colors + new palette. Within the same
+    // Colors regen: new card/bg/stroke/shadow colors + new palette. Within the same
     // family (pixel/hand) so structural CSS overrides stay coherent. Generic
-    // materials keep the existing blur/shadow/radius (set by the last "all").
+    // materials keep the existing blur/radius (set by the last "all").
     const pool = familyPool(prev?.material);
     const colorMat = pickFromPool(pool);
     material = mergeColorFrom(colorMat, prev.material);
     colors = newColors(material);
   } else if (scope === 'buttons') {
     button = newButton(material);
+  } else if (scope === 'page') {
+    page = newPage();
   }
 
-  const theme = { material, font, colors, button };
+  const theme = { material, font, colors, button, page };
   remember('full', themeId(theme));
   return { theme, regenFontAndBtn };
 }
@@ -1529,6 +1665,7 @@ function generate(scope = 'all') {
     applyColors: scope === 'all' || scope === 'colors',
     applyCardColors: scope === 'all' || scope === 'colors',
     applyButtons: scope === 'all' || scope === 'colors' || scope === 'buttons' || regenFontAndBtn,
+    applyPage: scope === 'all' || scope === 'colors' || scope === 'page',
     applyCard: scope === 'all',
   });
 
@@ -1619,6 +1756,8 @@ function toggleSave() {
 function rehydrate(theme) {
   const bs = BUTTON_STYLES.find((s) => s.name === theme.button.name);
   if (bs) theme.button = bs;
+  const ps = PAGE_STYLES.find((s) => s.name === theme.page?.name);
+  theme.page = ps || DEFAULT_PAGE_STYLE;
   if (theme.material?.name && MATERIALS[theme.material.name]) {
     const name = theme.material.name;
     const base = {
@@ -1757,6 +1896,9 @@ function escapeHtml(s) {
 }
 
 let savedObserver = null;
+let savedActiveIndex = null;
+let savedAtmosphereFrame = 0;
+const savedIntersectionRatios = new Map();
 
 function cloneTheme(theme) {
   return JSON.parse(JSON.stringify(theme));
@@ -1772,23 +1914,27 @@ function syncSavedFrame() {
   const editButtonHeight = ui.regenBtn.getBoundingClientRect().height || 44;
   const remainingBelowCard = window.innerHeight - rect.bottom;
   const editButtonTop = rect.bottom + Math.max(0, (remainingBelowCard - editButtonHeight) / 2) + 8;
-  ui.snapStack.style.setProperty('--saved-card-top', `${rect.top}px`);
-  ui.snapStack.style.setProperty('--saved-card-left', `${rect.left}px`);
-  ui.snapStack.style.setProperty('--saved-card-center', `${rect.left + rect.width / 2}px`);
-  ui.snapStack.style.setProperty('--saved-card-width', `${rect.width}px`);
-  ui.snapStack.style.setProperty('--saved-card-height', `${rect.height}px`);
-  ui.snapStack.style.setProperty('--saved-edit-top', `${editButtonTop}px`);
-  ui.snapStack.style.setProperty('--saved-card-transform', 'none');
+  const root = document.documentElement.style;
+  root.setProperty('--saved-card-top', `${rect.top}px`);
+  root.setProperty('--saved-card-left', `${rect.left}px`);
+  root.setProperty('--saved-card-center', `${rect.left + rect.width / 2}px`);
+  root.setProperty('--saved-card-width', `${rect.width}px`);
+  root.setProperty('--saved-card-height', `${rect.height}px`);
+  root.setProperty('--saved-edit-top', `${editButtonTop}px`);
+  root.setProperty('--saved-card-transform', 'none');
 }
 
 function updateControlsVisibility() {
   const controls = $('#controls');
   const editing = isEditingSaved();
   const controlsVisible = state.mode === 'create' || editing;
+  const savedEditVisible = state.mode === 'saved' && state.saved.length > 0 && !editing;
   controls.hidden = false;
   controls.classList.toggle('is-hidden', !controlsVisible);
   controls.classList.toggle('is-saved-edit', editing);
   controls.setAttribute('aria-hidden', controlsVisible ? 'false' : 'true');
+  ui.savedEditBtn.hidden = !savedEditVisible;
+  ui.savedEditBtn.setAttribute('aria-hidden', savedEditVisible ? 'false' : 'true');
   ui.topSeg.classList.toggle('is-disabled', editing);
   ui.topSeg.querySelectorAll('.seg-btn').forEach((btn) => {
     btn.disabled = editing;
@@ -1804,13 +1950,35 @@ function displayedSavedTheme(idx) {
     : state.saved[idx];
 }
 
-function updatePageAtmosphere(material) {
+function activeSavedIndex() {
+  const fallback = Math.round(ui.snapStack.scrollTop / Math.max(1, window.innerHeight));
+  return clamp(savedActiveIndex ?? fallback, 0, Math.max(0, state.saved.length - 1));
+}
+
+function applyPageStyle(material, pageStyle = DEFAULT_PAGE_STYLE) {
+  const root = document.documentElement.style;
+  const p = pageStyle || DEFAULT_PAGE_STYLE;
+  root.setProperty('--page-bg', p.bg(material).replace(/\s+/g, ' ').trim());
+  root.setProperty('--page-overlay', p.overlay(material).replace(/\s+/g, ' ').trim());
+  root.setProperty('--page-overlay-opacity', typeof p.overlayOpacity === 'function' ? p.overlayOpacity(material) : (p.overlayOpacity || '1'));
+  root.setProperty('--page-overlay-blend', typeof p.overlayBlend === 'function' ? p.overlayBlend(material) : (p.overlayBlend || 'normal'));
+  root.setProperty('--page-orb-filter', p.orbFilter || 'blur(110px)');
+  root.setProperty('--page-orb-opacity', p.orbOpacity || '0.85');
+  root.setProperty('--page-orb-scale-a', p.orbScale?.[0] ?? 1);
+  root.setProperty('--page-orb-scale-b', p.orbScale?.[1] ?? 1);
+  root.setProperty('--page-orb-scale-c', p.orbScale?.[2] ?? 1);
+  root.setProperty('--page-orb-scale-d', p.orbScale?.[3] ?? 1);
+  root.setProperty('--page-overlay-size', p.overlaySize || 'auto');
+}
+
+function updatePageAtmosphere(material, pageStyle = DEFAULT_PAGE_STYLE) {
   const root = document.documentElement.style;
   root.setProperty('--bg-base', material.bgBase);
   root.setProperty('--bg-orb-a', material.bgOrbs[0]);
   root.setProperty('--bg-orb-b', material.bgOrbs[1]);
   root.setProperty('--bg-orb-c', material.bgOrbs[2]);
   root.setProperty('--bg-orb-d', material.bgOrbs[3]);
+  applyPageStyle(material, pageStyle);
   if (material.family) document.body.dataset.family = material.family;
   else delete document.body.dataset.family;
   if (material.style) document.body.dataset.style = material.style;
@@ -1827,7 +1995,7 @@ function startSavedEdit(idx) {
   setScope(state.scope === 'all' ? 'font' : state.scope);
   updateControlsVisibility();
   renderSaved(idx);
-  updatePageAtmosphere(state.savedEdit.draft.material);
+  updatePageAtmosphere(state.savedEdit.draft.material, state.savedEdit.draft.page);
 }
 
 function regenerateSavedDraft() {
@@ -1836,7 +2004,7 @@ function regenerateSavedDraft() {
   state.savedEdit.draft = theme;
   ensureFontsLoaded(theme.font);
   renderSaved(state.savedEdit.index);
-  updatePageAtmosphere(theme.material);
+  updatePageAtmosphere(theme.material, theme.page);
   const card = ui.snapStack.querySelector(`.saved-card[data-idx="${state.savedEdit.index}"]`);
   if (card) {
     card.classList.remove('is-flashing');
@@ -1862,7 +2030,7 @@ function discardSavedEdit() {
   updateControlsVisibility();
   renderSaved(idx);
   const theme = state.saved[idx];
-  if (theme) updatePageAtmosphere(theme.material);
+  if (theme) updatePageAtmosphere(theme.material, theme.page);
 }
 
 function renderSaved(focusIndex = 0) {
@@ -1870,6 +2038,10 @@ function renderSaved(focusIndex = 0) {
 
   // tear down prior observer
   if (savedObserver) { savedObserver.disconnect(); savedObserver = null; }
+  if (savedAtmosphereFrame) cancelAnimationFrame(savedAtmosphereFrame);
+  savedAtmosphereFrame = 0;
+  savedActiveIndex = null;
+  savedIntersectionRatios.clear();
   ui.snapStack.innerHTML = '';
   ui.snapStack.classList.toggle('is-editing', isEditingSaved());
 
@@ -1894,39 +2066,42 @@ function renderSaved(focusIndex = 0) {
     page.className = 'snap-page';
     page.dataset.idx = String(idx);
     page.appendChild(buildSavedCard(t, idx));
-    const editBtn = document.createElement('button');
-    editBtn.className = 'ctrl ctrl--icon saved-edit-btn';
-    editBtn.type = 'button';
-    editBtn.setAttribute('aria-label', 'Edit saved theme');
-    editBtn.title = 'Edit';
-    editBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16.5 3.5 4 4L8 20l-5 1 1-5 12.5-12.5Z"/></svg>`;
-    editBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      startSavedEdit(idx);
-    });
-    page.appendChild(editBtn);
     ui.snapStack.appendChild(page);
   });
 
-  // Page-level background follows the visible saved card.
+  // Page-level background follows the visible saved card, batched to animation
+  // frames so quick scrolls do not trigger multiple atmosphere updates.
   savedObserver = new IntersectionObserver((entries) => {
-    let best = null;
     for (const e of entries) {
-      if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
+      savedIntersectionRatios.set(+e.target.dataset.idx, e.intersectionRatio);
     }
-    if (best && best.intersectionRatio > 0.55) {
-      const i = +best.target.dataset.idx;
-      const t = displayedSavedTheme(i);
-      if (t) updatePageAtmosphere(t.material);
-    }
-  }, { root: ui.snapStack, threshold: [0.4, 0.6, 0.8, 1.0] });
+    if (savedAtmosphereFrame) return;
+    savedAtmosphereFrame = requestAnimationFrame(() => {
+      savedAtmosphereFrame = 0;
+      let bestIndex = null;
+      let bestRatio = 0;
+      savedIntersectionRatios.forEach((ratio, idx) => {
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          bestIndex = idx;
+        }
+      });
+      if (bestIndex == null || bestRatio < 0.52 || bestIndex === savedActiveIndex) return;
+      savedActiveIndex = bestIndex;
+      ui.savedEditBtn.disabled = false;
+      const t = displayedSavedTheme(bestIndex);
+      if (t) updatePageAtmosphere(t.material, t.page);
+    });
+  }, { root: ui.snapStack, threshold: [0, 0.25, 0.52, 0.75, 1] });
 
   ui.snapStack.querySelectorAll('.snap-page').forEach((p) => savedObserver.observe(p));
 
   // Initial: snap to top + sync background.
   ui.snapStack.scrollTop = focusIndex * window.innerHeight;
   const focusedTheme = displayedSavedTheme(focusIndex);
-  if (focusedTheme) updatePageAtmosphere(focusedTheme.material);
+  savedActiveIndex = focusIndex;
+  updateControlsVisibility();
+  if (focusedTheme) updatePageAtmosphere(focusedTheme.material, focusedTheme.page);
 }
 
 // ---- mode switching ----
@@ -1942,7 +2117,7 @@ function switchMode(mode) {
     renderSaved();
   } else if (state.theme) {
     // Restore Create-theme atmosphere when returning from Saved
-    updatePageAtmosphere(state.theme.material);
+    updatePageAtmosphere(state.theme.material, state.theme.page);
   }
   // sync top segmented
   ui.topSeg.querySelectorAll('.seg-btn').forEach((b) => {
@@ -1977,6 +2152,8 @@ function exportCSS() {
 version: alpha
 name: "${t.material.name}"
 description: "Generated theme — ${t.material.name} material, ${t.button.name} button shape, ${t.font.sans} typeface."
+page:
+  style: "${t.page?.name || DEFAULT_PAGE_STYLE.name}"
 colors:
   primary: "${t.colors.palette[0]}"
   secondary: "${t.colors.palette[1]}"
@@ -2056,6 +2233,7 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
 ## Shapes
 - Button corners: \`${t.button.radius}\`
 - Card corners: \`${cardRadius}\`
+- Page background: \`${t.page?.name || DEFAULT_PAGE_STYLE.name}\`
 
 ## Components
 - **button-primary** — solid \`{colors.primary}\` fill with a white label and \`{rounded.button}\` corners. Use for the single most important action on a screen.
@@ -2265,6 +2443,7 @@ function init() {
   });
   ui.starBtn.addEventListener('click', toggleSave);
   ui.shareBtn.addEventListener('click', () => openShare(state.theme));
+  ui.savedEditBtn.addEventListener('click', () => startSavedEdit(activeSavedIndex()));
 
   ui.shareSheet.addEventListener('click', (e) => {
     if (e.target.closest('[data-close]')) { closeShare(); return; }
