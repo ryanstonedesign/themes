@@ -1464,6 +1464,7 @@ const ui = {
   topSeg: $('.segmented--top'),
   scopeSeg: $('.segmented--scope'),
   shareSheet: $('#shareSheet'),
+  toast: $('#toast'),
   fontLink: $('#font-link'),
   createView: $('#createView'),
   savedView: $('#savedView'),
@@ -2151,20 +2152,15 @@ function openShare(theme) {
 }
 function closeShare() { ui.shareSheet.hidden = true; state.shareTarget = null; }
 
-function exportCSS() {
-  const t = state.shareTarget || state.theme;
-  if (!t) return;
-
+function buildDesignMarkdown(t) {
   const toGFParam = (name, weight) => `family=${name.replace(/ /g, '+')}:wght@${weight}`;
   const fontUrl = `https://fonts.googleapis.com/css2?${toGFParam(t.font.sans, t.font.sansWeight)}&display=swap`;
-
-  const slug = t.material.name.toLowerCase().replace(/\s+/g, '-');
   const cardRadius = t.material.cardRadius || '32px';
 
   // Google DESIGN.md format: YAML front matter (machine-readable tokens)
   // + markdown prose (human/agent-readable rationale).
   // Spec: https://github.com/google-labs-code/design.md
-  const md = `---
+  return `---
 version: alpha
 name: "${t.material.name}"
 description: "Generated theme — ${t.material.name} material, ${t.button.name} button shape, ${t.font.sans} typeface."
@@ -2257,7 +2253,14 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
 - **button-tertiary** — transparent fill with a \`{colors.primary}\` label and a 1px \`{colors.primary}\` outline at \`{rounded.button}\` corners. Use for low-priority links, "Cancel"/"Dismiss"-style actions, and inline navigation.
 - **card** — \`{colors.surface}\` fill with \`{rounded.card}\` corners. Use as the default container for grouped content.
 `;
+}
 
+function exportCSS() {
+  const t = state.shareTarget || state.theme;
+  if (!t) return;
+
+  const slug = t.material.name.toLowerCase().replace(/\s+/g, '-');
+  const md = buildDesignMarkdown(t);
   const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const dl = document.createElement('a');
@@ -2266,6 +2269,51 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
   dl.click();
   URL.revokeObjectURL(url);
   closeShare();
+}
+
+function showToast(message = 'Copied') {
+  if (!ui.toast) return;
+  window.clearTimeout(showToast.timer);
+  ui.toast.textContent = message;
+  ui.toast.classList.add('is-visible');
+  showToast.timer = window.setTimeout(() => {
+    ui.toast.classList.remove('is-visible');
+  }, 2000);
+}
+
+function fallbackCopyText(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  const copied = document.execCommand('copy');
+  ta.remove();
+  if (!copied) throw new Error('Copy failed');
+}
+
+async function copyDesignMarkdown() {
+  const t = state.shareTarget || state.theme;
+  if (!t) return;
+  const md = buildDesignMarkdown(t);
+
+  try {
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(md);
+    else fallbackCopyText(md);
+  } catch (err) {
+    try {
+      fallbackCopyText(md);
+    } catch (fallbackErr) {
+      console.warn('Unable to copy DESIGN.md to clipboard', fallbackErr || err);
+      return;
+    }
+  }
+
+  closeShare();
+  showToast('Copied');
 }
 
 async function exportImage() {
@@ -2468,6 +2516,7 @@ function init() {
     const kind = exp.dataset.export;
     if (kind === 'css') exportCSS();
     else if (kind === 'image') exportImage();
+    else if (kind === 'clipboard') copyDesignMarkdown();
   });
 
   document.addEventListener('keydown', (e) => {
