@@ -76,6 +76,7 @@ html {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
 }
 
 body {
@@ -97,6 +98,9 @@ button {
   color: inherit;
   cursor: pointer;
   padding: 0;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -163,6 +167,7 @@ button:focus-visible,
   box-shadow: var(--ctrl-shadow);
   padding: 6px;
   gap: 0;
+  touch-action: manipulation;
 }
 .segmented--top {
   width: var(--stage-w);
@@ -514,6 +519,7 @@ button:focus-visible,
   align-items: stretch;
   gap: 12px;
   flex-shrink: 0;
+  touch-action: manipulation;
 }
 .controls .ctrl--regen {
   width: calc(var(--ctrl-h) + 12px);

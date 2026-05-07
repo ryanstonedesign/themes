@@ -1726,6 +1726,10 @@ function escapeXml(s) {
 function init() {
   loadSaved();
 
+  document.addEventListener('dblclick', (e) => {
+    if (e.target.closest('button, .segmented, .controls')) e.preventDefault();
+  }, { capture: true });
+
   wireSegmented(ui.topSeg, (btn) => switchMode(btn.dataset.mode));
   wireSegmented(ui.scopeSeg, (btn) => { state.scope = btn.dataset.scope; });
 
