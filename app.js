@@ -82,6 +82,37 @@ const FONT_PAIRS = [
   { sans: 'Outfit',               serif: 'Playfair Display',   mood: 'expressive', sw: [700, 800], rw: [700] },
   { sans: 'DM Sans',              serif: 'Fraunces',           mood: 'expressive', sw: [700],      rw: [600] },
 
+  // Editorial / magazine
+  { sans: 'Cormorant Garamond',   serif: 'Instrument Serif',   mood: 'editorial',  sw: [600, 700], rw: [400] },
+  { sans: 'Libre Baskerville',    serif: 'Newsreader',         mood: 'editorial',  sw: [700],      rw: [500, 600] },
+  { sans: 'DM Serif Display',     serif: 'Instrument Serif',   mood: 'editorial',  sw: [400],      rw: [400] },
+
+  // Technical / mono
+  { sans: 'IBM Plex Mono',        serif: 'IBM Plex Sans',      mood: 'technical',  sw: [500, 600], rw: [600, 700] },
+  { sans: 'JetBrains Mono',       serif: 'Inter',              mood: 'technical',  sw: [500, 700], rw: [600, 700] },
+  { sans: 'Roboto Mono',          serif: 'Public Sans',        mood: 'technical',  sw: [500, 700], rw: [600, 700] },
+  { sans: 'Space Mono',           serif: 'Space Grotesk',      mood: 'technical',  sw: [700],      rw: [600, 700] },
+
+  // Swiss / severe systems
+  { sans: 'Archivo',              serif: 'Source Serif 4',     mood: 'swiss',      sw: [600, 700], rw: [600, 700] },
+  { sans: 'Azeret Mono',          serif: 'IBM Plex Serif',     mood: 'swiss',      sw: [600, 700], rw: [500, 600] },
+
+  // Soft product
+  { sans: 'Nunito Sans',          serif: 'Lora',               mood: 'soft',       sw: [700, 800], rw: [600] },
+  { sans: 'Afacad',               serif: 'Newsreader',         mood: 'soft',       sw: [600, 700], rw: [500, 600] },
+  { sans: 'Urbanist',             serif: 'Fraunces',           mood: 'soft',       sw: [700, 800], rw: [600, 700] },
+
+  // Luxury display
+  { sans: 'Bodoni Moda',          serif: 'Prata',              mood: 'luxury',     sw: [600, 700], rw: [400] },
+  { sans: 'Italiana',             serif: 'Baskervville',       mood: 'luxury',     sw: [400],      rw: [400] },
+  { sans: 'Playfair Display',     serif: 'Prata',              mood: 'luxury',     sw: [700, 800], rw: [400] },
+
+  // Condensed / poster
+  { sans: 'Oswald',               serif: 'Merriweather',       mood: 'condensed',  sw: [600, 700], rw: [700] },
+  { sans: 'Barlow Condensed',     serif: 'Bitter',             mood: 'condensed',  sw: [600, 700], rw: [600, 700] },
+  { sans: 'Roboto Condensed',     serif: 'Libre Baskerville',  mood: 'condensed',  sw: [700],      rw: [700] },
+  { sans: 'Archivo Narrow',       serif: 'Source Serif 4',     mood: 'condensed',  sw: [600, 700], rw: [600, 700] },
+
   // Pixel / 8-bit (used only by family: 'pixel' materials)
   { sans: 'Press Start 2P',       serif: 'Press Start 2P',     mood: 'pixel',      sw: [400],      rw: [400] },
   { sans: 'VT323',                serif: 'VT323',              mood: 'pixel',      sw: [400],      rw: [400] },
@@ -318,6 +349,375 @@ const MATERIALS = {
     fontMoods: ['minimal', 'modern'],
   },
 
+  // ----- Editorial / magazine -----
+  Ivory: {
+    cardBg: 'rgba(255,252,244,0.74)', borderOpacity: 0.75, blur: 18, saturate: 1.15, noise: 0.05,
+    cardShadow: '0 1px 1px rgba(40,30,20,0.04), 0 18px 46px rgba(40,30,20,0.08), 0 36px 90px rgba(40,30,20,0.06)',
+    bgBase: '#f5efe2',
+    bgOrbs: ['#efe2c8', '#f8ead6', '#e6dac6', '#fff6e2'],
+    paletteMood: { hueRange: [32, 62], satRange: [18, 38], lightRange: [32, 48], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['editorial', 'classic', 'luxury'],
+    buttonStyles: ['editorial-line', 'outline-pill', 'inset-soft'],
+  },
+  Newsprint: {
+    cardBg: 'rgba(248,246,238,0.88)', borderOpacity: 0.55, blur: 10, saturate: 1, noise: 0.12,
+    cardShadow: '0 1px 1px rgba(20,18,14,0.04), 0 12px 32px rgba(20,18,14,0.08), 0 30px 70px rgba(20,18,14,0.06)',
+    bgBase: '#ece7dc',
+    bgOrbs: ['#d8d0c0', '#eee7d8', '#cfc8ba', '#f7efe2'],
+    paletteMood: { hueRange: [20, 55], satRange: [8, 26], lightRange: [26, 42], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['editorial', 'condensed'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'sharp-rect'],
+  },
+  Gallery: {
+    cardBg: 'rgba(255,255,252,0.86)', borderOpacity: 0.65, blur: 16, saturate: 1.1, noise: 0.03,
+    cardShadow: '0 1px 1px rgba(10,10,12,0.04), 0 20px 52px rgba(10,10,12,0.08), 0 46px 100px rgba(10,10,12,0.06)',
+    bgBase: '#f2f0ea',
+    bgOrbs: ['#e8e4da', '#f4f0e6', '#dcd8d0', '#fffaf0'],
+    paletteMood: { hueRange: [0, 360], satRange: [12, 28], lightRange: [30, 46], harmony: ['mono', 'analogous'], contrast: 'medium' },
+    fontMoods: ['editorial', 'swiss', 'minimal'],
+    buttonStyles: ['outline-pill', 'editorial-line', 'glass-pill'],
+  },
+  Runway: {
+    cardBg: 'rgba(18,16,18,0.58)', borderOpacity: 0.65, blur: 24, saturate: 1.25, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(0,0,0,0.5), 0 50px 120px rgba(0,0,0,0.34)',
+    bgBase: '#0d0b0d',
+    bgOrbs: ['#34212c', '#1a161c', '#4a3a30', '#171217'],
+    paletteMood: { hueRange: [330, 390], satRange: [30, 60], lightRange: [58, 74], harmony: ['mono', 'analogous'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'editorial', 'condensed'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'sharp-rect'],
+  },
+
+  // ----- Clinical / technical -----
+  Sterile: {
+    cardBg: 'rgba(250,253,255,0.78)', borderOpacity: 0.8, blur: 18, saturate: 1.1, noise: 0.02,
+    cardShadow: '0 1px 1px rgba(20,40,55,0.04), 0 18px 46px rgba(20,40,55,0.08), 0 40px 90px rgba(20,40,55,0.06)',
+    bgBase: '#eef5f7',
+    bgOrbs: ['#d8edf2', '#e8f6f8', '#d2e6ee', '#f2fbfc'],
+    paletteMood: { hueRange: [175, 215], satRange: [22, 48], lightRange: [42, 56], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['technical', 'minimal', 'swiss'],
+    buttonStyles: ['outline-pill', 'inset-soft', 'rounded-rect'],
+  },
+  Blueprint: {
+    cardBg: 'rgba(226,238,255,0.62)', borderOpacity: 0.8, blur: 18, saturate: 1.25, noise: 0.05,
+    cardShadow: '0 1px 1px rgba(0,40,90,0.08), 0 22px 54px rgba(0,40,90,0.14), 0 44px 100px rgba(0,40,90,0.1)',
+    bgBase: '#0f3f78',
+    bgOrbs: ['#2f6db2', '#174f90', '#6fb4ff', '#14396a'],
+    paletteMood: { hueRange: [195, 225], satRange: [55, 88], lightRange: [54, 72], harmony: ['mono', 'analogous'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['technical', 'swiss'],
+    buttonStyles: ['outline-rect', 'terminal-block', 'sharp-rect'],
+  },
+  Diagnostic: {
+    cardBg: 'rgba(244,252,250,0.7)', borderOpacity: 0.75, blur: 22, saturate: 1.3, noise: 0.03,
+    cardShadow: '0 1px 1px rgba(0,70,70,0.05), 0 24px 58px rgba(0,70,70,0.12), 0 48px 110px rgba(0,70,70,0.08)',
+    bgBase: '#e5f4f1',
+    bgOrbs: ['#b9ece2', '#c8e8ff', '#d8f2e8', '#a8d8d0'],
+    paletteMood: { hueRange: [150, 205], satRange: [45, 72], lightRange: [42, 58], harmony: ['analogous', 'split'], contrast: 'medium' },
+    fontMoods: ['technical', 'minimal'],
+    buttonStyles: ['outline-pill', 'glass-pill', 'rounded-rect'],
+  },
+  Instrument: {
+    cardBg: 'rgba(238,242,244,0.72)', borderOpacity: 0.7, blur: 14, saturate: 1.05, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(10,15,18,0.06), 0 18px 48px rgba(10,15,18,0.1), 0 42px 96px rgba(10,15,18,0.08)',
+    bgBase: '#dfe5e8',
+    bgOrbs: ['#c7d0d6', '#eef3f5', '#b8c2ca', '#d6dde2'],
+    paletteMood: { hueRange: [185, 235], satRange: [12, 36], lightRange: [36, 54], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['technical', 'swiss'],
+    buttonStyles: ['inset-soft', 'outline-rect', 'sharp-rect'],
+  },
+
+  // ----- Neon / nightlife -----
+  Neon: {
+    cardBg: 'rgba(8,10,20,0.62)', borderOpacity: 0.85, blur: 24, saturate: 1.8, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 70px rgba(0,255,220,0.14), 0 50px 130px rgba(255,0,180,0.12)',
+    bgBase: '#050612',
+    bgOrbs: ['#00f5ff', '#ff2bd6', '#8cff00', '#551bff'],
+    paletteMood: { hueRange: [0, 360], satRange: [82, 100], lightRange: [58, 74], harmony: ['triadic', 'split'], contrast: 'expressive', mode: 'dark' },
+    fontMoods: ['technical', 'modern', 'condensed'],
+    buttonStyles: ['glass-pill', 'duotone-pill', 'outline-pill'],
+  },
+  Afterhours: {
+    cardBg: 'rgba(12,8,28,0.58)', borderOpacity: 0.75, blur: 28, saturate: 1.75, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.55), 0 24px 70px rgba(70,20,160,0.26), 0 52px 130px rgba(0,0,0,0.38)',
+    bgBase: '#090416',
+    bgOrbs: ['#6b2bff', '#0dd6ff', '#ff2b8a', '#1a0d36'],
+    paletteMood: { hueRange: [250, 330], satRange: [70, 95], lightRange: [58, 74], harmony: ['split', 'triadic'], contrast: 'expressive', mode: 'dark' },
+    fontMoods: ['modern', 'expressive', 'technical'],
+    buttonStyles: ['duotone-pill', 'glass-pill', 'flat-pill'],
+  },
+  Synthwave: {
+    cardBg: 'rgba(24,8,36,0.6)', borderOpacity: 0.75, blur: 26, saturate: 1.8, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.55), 0 24px 70px rgba(255,50,180,0.18), 0 52px 130px rgba(0,180,255,0.12)',
+    bgBase: '#160820',
+    bgOrbs: ['#ff3cac', '#784bff', '#2bd9ff', '#ffb000'],
+    paletteMood: { hueRange: [285, 380], satRange: [72, 96], lightRange: [56, 72], harmony: ['split', 'triadic'], contrast: 'expressive', mode: 'dark' },
+    fontMoods: ['condensed', 'modern', 'technical'],
+    buttonStyles: ['duotone-pill', 'glass-pill', 'sharp-rect'],
+  },
+  Laser: {
+    cardBg: 'rgba(4,8,12,0.64)', borderOpacity: 0.8, blur: 22, saturate: 1.9, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.6), 0 22px 68px rgba(50,255,140,0.16), 0 50px 120px rgba(255,40,40,0.12)',
+    bgBase: '#030609',
+    bgOrbs: ['#39ff14', '#ff204e', '#00e5ff', '#101820'],
+    paletteMood: { hueRange: [90, 180], satRange: [85, 100], lightRange: [56, 72], harmony: ['triadic', 'split'], contrast: 'expressive', mode: 'dark' },
+    fontMoods: ['technical', 'condensed'],
+    buttonStyles: ['terminal-block', 'outline-rect', 'flat-pill'],
+  },
+
+  // ----- Earth / organic -----
+  Clay: {
+    cardBg: 'rgba(238,214,190,0.66)', borderOpacity: 0.8, blur: 22, saturate: 1.2, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(80,45,25,0.06), 0 24px 58px rgba(80,45,25,0.12), 0 48px 110px rgba(80,45,25,0.09)',
+    bgBase: '#dcc3aa',
+    bgOrbs: ['#c9805a', '#d8a078', '#a86648', '#e6c0a0'],
+    paletteMood: { hueRange: [12, 38], satRange: [35, 62], lightRange: [36, 52], harmony: ['analogous', 'mono'], contrast: 'soft' },
+    fontMoods: ['soft', 'classic', 'editorial'],
+    buttonStyles: ['inset-soft', 'soft-rect', 'outline-pill'],
+  },
+  Moss: {
+    cardBg: 'rgba(226,236,214,0.64)', borderOpacity: 0.8, blur: 22, saturate: 1.18, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(35,55,25,0.06), 0 24px 58px rgba(35,55,25,0.12), 0 48px 110px rgba(35,55,25,0.08)',
+    bgBase: '#d7dfc8',
+    bgOrbs: ['#9fb27a', '#c0d29a', '#718a5a', '#e0e7ce'],
+    paletteMood: { hueRange: [65, 125], satRange: [24, 50], lightRange: [34, 52], harmony: ['analogous', 'mono'], contrast: 'soft' },
+    fontMoods: ['soft', 'classic', 'minimal'],
+    buttonStyles: ['inset-soft', 'soft-rect', 'flat-pill'],
+  },
+  Terracotta: {
+    cardBg: 'rgba(246,222,204,0.66)', borderOpacity: 0.85, blur: 20, saturate: 1.25, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(110,50,28,0.07), 0 24px 60px rgba(110,50,28,0.14), 0 50px 110px rgba(110,50,28,0.1)',
+    bgBase: '#e7b99c',
+    bgOrbs: ['#c95f3f', '#e08b62', '#9f4a36', '#f0c0a0'],
+    paletteMood: { hueRange: [8, 28], satRange: [48, 75], lightRange: [40, 58], harmony: ['analogous', 'mono'], contrast: 'medium' },
+    fontMoods: ['classic', 'soft', 'expressive'],
+    buttonStyles: ['soft-rect', 'inset-soft', 'rounded-rect'],
+  },
+  Basalt: {
+    cardBg: 'rgba(42,44,42,0.62)', borderOpacity: 0.55, blur: 20, saturate: 1.1, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.5), 0 24px 60px rgba(0,0,0,0.5), 0 50px 120px rgba(0,0,0,0.34)',
+    bgBase: '#171918',
+    bgOrbs: ['#313630', '#232826', '#4a4237', '#141615'],
+    paletteMood: { hueRange: [28, 80], satRange: [12, 32], lightRange: [52, 68], harmony: ['mono', 'analogous'], contrast: 'soft', mode: 'dark' },
+    fontMoods: ['minimal', 'technical', 'soft'],
+    buttonStyles: ['inset-soft', 'outline-rect', 'sharp-rect'],
+  },
+  Olive: {
+    cardBg: 'rgba(235,235,210,0.64)', borderOpacity: 0.78, blur: 20, saturate: 1.16, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(55,60,25,0.06), 0 24px 58px rgba(55,60,25,0.12), 0 48px 110px rgba(55,60,25,0.08)',
+    bgBase: '#deddb8',
+    bgOrbs: ['#a5a05e', '#c8c28a', '#7d834b', '#e6e0b8'],
+    paletteMood: { hueRange: [45, 95], satRange: [30, 58], lightRange: [36, 54], harmony: ['analogous', 'mono'], contrast: 'soft' },
+    fontMoods: ['classic', 'soft', 'minimal'],
+    buttonStyles: ['flat-pill', 'inset-soft', 'outline-pill'],
+  },
+
+  // ----- Candy / toy -----
+  Bubblegum: {
+    cardBg: 'rgba(255,240,250,0.72)', borderOpacity: 0.95, blur: 24, saturate: 1.5, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(160,50,120,0.05), 0 24px 60px rgba(160,50,120,0.12), 0 50px 120px rgba(160,50,120,0.08)',
+    bgBase: '#ffe0f0',
+    bgOrbs: ['#ff9ad5', '#b9a8ff', '#8ee8ff', '#ffd37a'],
+    paletteMood: { hueRange: [300, 380], satRange: [58, 88], lightRange: [56, 70], harmony: ['split', 'triadic'], contrast: 'expressive' },
+    fontMoods: ['soft', 'expressive'],
+    buttonStyles: ['duotone-pill', 'soft-rect', 'glass-pill'],
+  },
+  Sorbet: {
+    cardBg: 'rgba(255,248,240,0.72)', borderOpacity: 0.95, blur: 24, saturate: 1.45, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(160,90,60,0.05), 0 24px 60px rgba(160,90,60,0.12), 0 50px 120px rgba(160,90,60,0.08)',
+    bgBase: '#fff0dc',
+    bgOrbs: ['#ffbf8a', '#ffe080', '#a8eadc', '#f6a6c8'],
+    paletteMood: { hueRange: [5, 75], satRange: [55, 85], lightRange: [55, 70], harmony: ['analogous', 'split'], contrast: 'soft' },
+    fontMoods: ['soft', 'modern'],
+    buttonStyles: ['soft-rect', 'duotone-pill', 'pill'],
+  },
+  Confetti: {
+    cardBg: 'rgba(255,255,255,0.68)', borderOpacity: 1, blur: 22, saturate: 1.55, noise: 0.05,
+    cardShadow: '0 1px 1px rgba(80,60,120,0.05), 0 24px 60px rgba(80,60,120,0.12), 0 50px 120px rgba(80,60,120,0.08)',
+    bgBase: '#f3f1ff',
+    bgOrbs: ['#ff6b9d', '#ffd166', '#06d6a0', '#4d96ff'],
+    paletteMood: { hueRange: [0, 360], satRange: [68, 92], lightRange: [50, 66], harmony: ['triadic', 'split'], contrast: 'expressive' },
+    fontMoods: ['soft', 'expressive', 'modern'],
+    buttonStyles: ['duotone-pill', 'rounded-rect', 'soft-rect'],
+  },
+  Gelato: {
+    cardBg: 'rgba(250,252,250,0.74)', borderOpacity: 0.95, blur: 24, saturate: 1.35, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(80,120,100,0.05), 0 24px 60px rgba(80,120,100,0.11), 0 50px 120px rgba(80,120,100,0.08)',
+    bgBase: '#eaf4ee',
+    bgOrbs: ['#b8f0d0', '#ffc8d8', '#d8c8ff', '#fff0b8'],
+    paletteMood: { hueRange: [120, 220], satRange: [42, 70], lightRange: [54, 68], harmony: ['analogous', 'split'], contrast: 'soft' },
+    fontMoods: ['soft', 'minimal'],
+    buttonStyles: ['soft-rect', 'pill', 'glass-pill'],
+  },
+
+  // ----- Brutalist / utility -----
+  Concrete: {
+    cardBg: 'rgba(226,226,220,0.82)', borderOpacity: 0.35, blur: 4, saturate: 1, noise: 0.12,
+    cardShadow: '8px 8px 0 rgba(20,20,18,0.18), 0 20px 50px rgba(20,20,18,0.12)',
+    bgBase: '#d5d4cc',
+    bgOrbs: ['#bfc0ba', '#e4e2d8', '#a9aaa4', '#d0cec4'],
+    paletteMood: { grayscale: true, accentLightRange: [22, 42], grayLightRange: [96, 86, 74], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['swiss', 'technical', 'condensed'],
+    buttonStyles: ['brutal-block', 'outline-rect', 'sharp-rect'],
+  },
+  Terminal: {
+    cardBg: 'rgba(6,18,12,0.82)', borderOpacity: 0.4, blur: 0, saturate: 1.3, noise: 0.04,
+    cardShadow: '0 0 0 1px rgba(80,255,140,0.2), 0 20px 60px rgba(0,0,0,0.5)',
+    bgBase: '#020806',
+    bgOrbs: ['#0d3b22', '#113018', '#04140c', '#46ff7a'],
+    paletteMood: { hueRange: [95, 155], satRange: [60, 100], lightRange: [52, 72], harmony: ['mono', 'analogous'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['technical'],
+    buttonStyles: ['terminal-block'],
+  },
+  Wireframe: {
+    cardBg: 'rgba(252,252,250,0.78)', borderOpacity: 0.28, blur: 8, saturate: 1, noise: 0.02,
+    cardShadow: '0 0 0 1px rgba(10,10,10,0.08), 0 18px 42px rgba(10,10,10,0.08)',
+    bgBase: '#f4f4f0',
+    bgOrbs: ['#ffffff', '#e8e8e4', '#d8d8d2', '#f8f8f4'],
+    paletteMood: { grayscale: true, accentLightRange: [20, 38], grayLightRange: [98, 92, 82], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['swiss', 'technical', 'minimal'],
+    buttonStyles: ['outline-rect', 'brutal-block', 'editorial-line'],
+  },
+  Mono: {
+    cardBg: 'rgba(245,245,242,0.82)', borderOpacity: 0.45, blur: 8, saturate: 1, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.04), 0 18px 42px rgba(0,0,0,0.08), 0 36px 88px rgba(0,0,0,0.06)',
+    bgBase: '#e9e9e4',
+    bgOrbs: ['#d8d8d2', '#f4f4f0', '#c8c8c2', '#ffffff'],
+    paletteMood: { grayscale: true, accentLightRange: [18, 42], grayLightRange: [96, 90, 80], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['swiss', 'minimal', 'technical'],
+    buttonStyles: ['outline-pill', 'outline-rect', 'sharp-rect'],
+  },
+
+  // ----- Luxury dark warm -----
+  Velvet: {
+    cardBg: 'rgba(36,12,30,0.62)', borderOpacity: 0.65, blur: 26, saturate: 1.5, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.55), 0 24px 70px rgba(60,0,40,0.5), 0 50px 120px rgba(0,0,0,0.35)',
+    bgBase: '#180818',
+    bgOrbs: ['#4a1238', '#2a0d24', '#7a244e', '#1a0c16'],
+    paletteMood: { hueRange: [315, 370], satRange: [45, 72], lightRange: [58, 74], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'editorial', 'expressive'],
+    buttonStyles: ['editorial-line', 'glass-pill', 'outline-pill'],
+  },
+  Burgundy: {
+    cardBg: 'rgba(42,12,18,0.62)', borderOpacity: 0.65, blur: 24, saturate: 1.45, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.55), 0 24px 70px rgba(80,0,10,0.46), 0 50px 120px rgba(0,0,0,0.35)',
+    bgBase: '#1d070b',
+    bgOrbs: ['#5a1420', '#321018', '#7a2430', '#241014'],
+    paletteMood: { hueRange: [345, 385], satRange: [50, 78], lightRange: [56, 72], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'classic', 'editorial'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'glass-pill'],
+  },
+  Lacquer: {
+    cardBg: 'rgba(18,8,8,0.64)', borderOpacity: 0.75, blur: 24, saturate: 1.6, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.6), 0 24px 70px rgba(120,0,0,0.28), 0 50px 120px rgba(0,0,0,0.42)',
+    bgBase: '#0c0404',
+    bgOrbs: ['#5a0505', '#240606', '#9a1f12', '#140606'],
+    paletteMood: { hueRange: [0, 30], satRange: [58, 88], lightRange: [56, 72], harmony: ['mono', 'analogous'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'condensed', 'editorial'],
+    buttonStyles: ['glass-pill', 'editorial-line', 'sharp-rect'],
+  },
+  Mahogany: {
+    cardBg: 'rgba(48,24,14,0.62)', borderOpacity: 0.65, blur: 24, saturate: 1.4, noise: 0.08,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.55), 0 24px 70px rgba(70,25,10,0.45), 0 50px 120px rgba(0,0,0,0.34)',
+    bgBase: '#20100a',
+    bgOrbs: ['#5a2a16', '#36180d', '#7a3a20', '#180c08'],
+    paletteMood: { hueRange: [12, 42], satRange: [48, 75], lightRange: [56, 72], harmony: ['analogous', 'mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'classic', 'expressive'],
+    buttonStyles: ['editorial-line', 'inset-soft', 'outline-pill'],
+  },
+
+  // ----- High-fashion monochrome -----
+  Noir: {
+    cardBg: 'rgba(12,12,12,0.66)', borderOpacity: 0.55, blur: 22, saturate: 1, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.6), 0 24px 70px rgba(0,0,0,0.55), 0 50px 120px rgba(0,0,0,0.42)',
+    bgBase: '#050505',
+    bgOrbs: ['#202020', '#101010', '#333333', '#080808'],
+    paletteMood: { grayscale: true, accentLightRange: [62, 78], grayLightRange: [30, 20, 12], harmony: ['mono'], contrast: 'soft', mode: 'dark' },
+    fontMoods: ['luxury', 'editorial', 'swiss'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'sharp-rect'],
+  },
+  Bone: {
+    cardBg: 'rgba(252,249,240,0.86)', borderOpacity: 0.45, blur: 10, saturate: 1, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(20,18,14,0.04), 0 18px 46px rgba(20,18,14,0.08), 0 36px 88px rgba(20,18,14,0.06)',
+    bgBase: '#eee9de',
+    bgOrbs: ['#ded8ca', '#faf4e8', '#cbc4b8', '#ffffff'],
+    paletteMood: { grayscale: true, accentLightRange: [18, 36], grayLightRange: [98, 91, 80], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['editorial', 'luxury', 'swiss'],
+    buttonStyles: ['editorial-line', 'outline-pill', 'outline-rect'],
+  },
+  Ink: {
+    cardBg: 'rgba(8,12,18,0.66)', borderOpacity: 0.6, blur: 22, saturate: 1.1, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.6), 0 24px 70px rgba(0,10,25,0.55), 0 50px 120px rgba(0,0,0,0.42)',
+    bgBase: '#04070d',
+    bgOrbs: ['#111827', '#0b1220', '#1f2937', '#070a10'],
+    paletteMood: { grayscale: true, accentLightRange: [60, 76], grayLightRange: [28, 18, 10], harmony: ['mono'], contrast: 'soft', mode: 'dark' },
+    fontMoods: ['editorial', 'swiss', 'minimal'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'terminal-block'],
+  },
+  EditorialBlack: {
+    cardBg: 'rgba(18,18,16,0.64)', borderOpacity: 0.65, blur: 20, saturate: 1.05, noise: 0.06,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.6), 0 24px 70px rgba(0,0,0,0.55), 0 50px 120px rgba(0,0,0,0.42)',
+    bgBase: '#090908',
+    bgOrbs: ['#2a2925', '#111110', '#4a4036', '#0d0c0b'],
+    paletteMood: { grayscale: true, accentLightRange: [58, 74], grayLightRange: [32, 22, 14], harmony: ['mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'editorial', 'condensed'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'brutal-block'],
+  },
+
+  // ----- True grayscale -----
+  Ash: {
+    cardBg: 'rgba(238,238,236,0.78)', borderOpacity: 0.5, blur: 14, saturate: 1, noise: 0.05,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.04), 0 18px 46px rgba(0,0,0,0.08), 0 38px 88px rgba(0,0,0,0.06)',
+    bgBase: '#dedede',
+    bgOrbs: ['#c8c8c8', '#eeeeee', '#b6b6b6', '#f8f8f8'],
+    paletteMood: { grayscale: true, accentLightRange: [24, 46], grayLightRange: [96, 88, 76], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['swiss', 'minimal', 'technical'],
+    buttonStyles: ['outline-pill', 'inset-soft', 'sharp-rect'],
+  },
+  Silvergel: {
+    cardBg: 'rgba(246,247,248,0.68)', borderOpacity: 0.85, blur: 30, saturate: 1, noise: 0.03,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.04), 0 24px 60px rgba(0,0,0,0.09), 0 50px 120px rgba(0,0,0,0.07)',
+    bgBase: '#e8e9ea',
+    bgOrbs: ['#d7d9dc', '#f5f6f7', '#c3c6ca', '#ffffff'],
+    paletteMood: { grayscale: true, accentLightRange: [34, 58], grayLightRange: [98, 91, 82], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['minimal', 'swiss', 'modern'],
+    buttonStyles: ['glass-pill', 'outline-pill', 'inset-soft'],
+  },
+  Charcoal: {
+    cardBg: 'rgba(28,28,28,0.66)', borderOpacity: 0.55, blur: 18, saturate: 1, noise: 0.07,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.6), 0 24px 70px rgba(0,0,0,0.55), 0 50px 120px rgba(0,0,0,0.4)',
+    bgBase: '#101010',
+    bgOrbs: ['#2e2e2e', '#1a1a1a', '#3a3a3a', '#080808'],
+    paletteMood: { grayscale: true, accentLightRange: [56, 74], grayLightRange: [34, 23, 14], harmony: ['mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['swiss', 'technical', 'minimal'],
+    buttonStyles: ['outline-rect', 'brutal-block', 'terminal-block'],
+  },
+  Paperwhite: {
+    cardBg: 'rgba(255,255,252,0.9)', borderOpacity: 0.35, blur: 6, saturate: 1, noise: 0.05,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.03), 0 12px 34px rgba(0,0,0,0.06), 0 28px 70px rgba(0,0,0,0.05)',
+    bgBase: '#f3f3f0',
+    bgOrbs: ['#ffffff', '#eeeeec', '#ddddda', '#f8f8f6'],
+    paletteMood: { grayscale: true, accentLightRange: [16, 34], grayLightRange: [99, 94, 84], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['editorial', 'swiss', 'minimal'],
+    buttonStyles: ['editorial-line', 'outline-pill', 'outline-rect'],
+  },
+  Onyx: {
+    cardBg: 'rgba(4,4,4,0.72)', borderOpacity: 0.7, blur: 16, saturate: 1, noise: 0.04,
+    cardShadow: '0 1px 1px rgba(0,0,0,0.7), 0 24px 70px rgba(0,0,0,0.65), 0 50px 120px rgba(0,0,0,0.5)',
+    bgBase: '#000000',
+    bgOrbs: ['#181818', '#080808', '#303030', '#000000'],
+    paletteMood: { grayscale: true, accentLightRange: [68, 84], grayLightRange: [24, 16, 8], harmony: ['mono'], contrast: 'medium', mode: 'dark' },
+    fontMoods: ['luxury', 'swiss', 'condensed'],
+    buttonStyles: ['editorial-line', 'outline-rect', 'glass-pill'],
+  },
+  Halftone: {
+    cardBg: 'rgba(242,242,240,0.82)', borderOpacity: 0.45, blur: 4, saturate: 1, noise: 0.16,
+    cardShadow: '6px 6px 0 rgba(0,0,0,0.12), 0 18px 42px rgba(0,0,0,0.08)',
+    bgBase: '#e2e2df',
+    bgOrbs: ['#d0d0cd', '#f0f0ee', '#b8b8b5', '#ffffff'],
+    paletteMood: { grayscale: true, accentLightRange: [18, 40], grayLightRange: [95, 87, 72], harmony: ['mono'], contrast: 'soft' },
+    fontMoods: ['condensed', 'swiss', 'editorial'],
+    buttonStyles: ['brutal-block', 'editorial-line', 'outline-rect'],
+  },
+
   // ----- 8-bit / Pixel materials (family: 'pixel') -----
   Arcade: {
     family: 'pixel',
@@ -469,6 +869,16 @@ const MATERIAL_CARD_RADIUS = {
   Gold: '32px', Copper: '28px', Platinum: '40px', Brass: '28px', Bronze: '32px',
   Obsidian: '28px', Midnight: '32px', Carbon: '24px', Eclipse: '36px', Forest: '28px',
   Espresso: '24px', Slate: '32px',
+  Ivory: '22px', Newsprint: '10px', Gallery: '20px', Runway: '12px',
+  Sterile: '24px', Blueprint: '10px', Diagnostic: '24px', Instrument: '12px',
+  Neon: '22px', Afterhours: '28px', Synthwave: '22px', Laser: '8px',
+  Clay: '26px', Moss: '28px', Terracotta: '24px', Basalt: '18px', Olive: '24px',
+  Bubblegum: '30px', Sorbet: '30px', Confetti: '24px', Gelato: '30px',
+  Concrete: '4px', Terminal: '4px', Wireframe: '2px', Mono: '8px',
+  Velvet: '24px', Burgundy: '22px', Lacquer: '18px', Mahogany: '20px',
+  Noir: '8px', Bone: '12px', Ink: '10px', EditorialBlack: '6px',
+  Ash: '16px', Silvergel: '34px', Charcoal: '14px', Paperwhite: '6px',
+  Onyx: '10px', Halftone: '2px',
   Arcade: '6px', GameBoy: '6px', PixelPop: '6px',
   Notebook: '18px', Sketchpad: '18px', Doodle: '18px', Linen: '18px',
   Graphite: '18px', Watercolor: '18px',
@@ -485,6 +895,16 @@ const MATERIAL_BORDER_COLOR = {
   Gold: '#fff4c0', Copper: '#ffe8d0', Platinum: '#eef0f8', Brass: '#f0e0a0', Bronze: '#f4ddb0',
   Obsidian: '#7080b0', Midnight: '#6070b8', Carbon: '#606070', Eclipse: '#9070c8',
   Forest: '#507068', Espresso: '#806040', Slate: '#6070a0',
+  Ivory: '#fff7e8', Newsprint: '#d8d0c0', Gallery: '#ffffff', Runway: '#b89a82',
+  Sterile: '#e4f8ff', Blueprint: '#8fc8ff', Diagnostic: '#b8f4e8', Instrument: '#dce4e8',
+  Neon: '#00f5ff', Afterhours: '#7a58ff', Synthwave: '#ff5fc8', Laser: '#39ff14',
+  Clay: '#e8c4a8', Moss: '#c6d8a8', Terracotta: '#f0b090', Basalt: '#787870', Olive: '#d8d09a',
+  Bubblegum: '#ffd6ee', Sorbet: '#ffe4c4', Confetti: '#ffffff', Gelato: '#d8f4e8',
+  Concrete: '#2a2a28', Terminal: '#46ff7a', Wireframe: '#111111', Mono: '#111111',
+  Velvet: '#a85880', Burgundy: '#a84858', Lacquer: '#c83024', Mahogany: '#a86a40',
+  Noir: '#f5f5f0', Bone: '#f8f0e0', Ink: '#d8e4f0', EditorialBlack: '#d8c2a8',
+  Ash: '#f4f4f4', Silvergel: '#ffffff', Charcoal: '#d8d8d8', Paperwhite: '#ffffff',
+  Onyx: '#f0f0f0', Halftone: '#111111',
   Arcade: '#ffffff', GameBoy: '#ffffff', PixelPop: '#ffffff',
   Notebook: '#ffffff', Sketchpad: '#ffffff', Doodle: '#ffffff', Linen: '#ffffff',
   Graphite: '#ffffff', Watercolor: '#ffffff',
@@ -584,6 +1004,76 @@ const BUTTON_STYLES = [
     secondaryShadow: '0 1px 0 rgba(15,18,25,0.06), 0 2px 6px rgba(15,18,25,0.04)',
     tertiaryBorder: (a) => `1.5px solid ${a}80`,
     tertiaryShadow: 'none',
+  },
+  {
+    name: 'brutal-block',
+    radius: '2px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a) => `5px 5px 0 ${mix(a, '#000000', 0.68)}, 0 0 0 2px rgba(0,0,0,0.85)`,
+    secondaryShadow: '5px 5px 0 rgba(0,0,0,0.22), 0 0 0 2px rgba(0,0,0,0.75)',
+    tertiaryBorder: (a) => `2px solid ${mix(a, '#000000', 0.35)}`,
+    tertiaryShadow: '4px 4px 0 rgba(0,0,0,0.18)',
+  },
+  {
+    name: 'outline-pill',
+    radius: '999px',
+    primaryGrad: (a, b) => `linear-gradient(180deg, ${a} 0%, ${mix(a, b, 0.18)} 100%)`,
+    secondaryGrad: (g1, g2) => `linear-gradient(180deg, ${g1} 0%, ${g2} 100%)`,
+    primaryShadow: (a) => `0 0 0 2px ${a}, 0 8px 18px ${a}24`,
+    secondaryShadow: '0 0 0 1.5px rgba(15,18,25,0.12), 0 6px 16px rgba(15,18,25,0.04)',
+    tertiaryBorder: (a) => `1.5px solid ${a}`,
+    tertiaryShadow: 'none',
+  },
+  {
+    name: 'outline-rect',
+    radius: '8px',
+    primaryGrad: (a, b) => `linear-gradient(180deg, ${a} 0%, ${mix(a, b, 0.18)} 100%)`,
+    secondaryGrad: (g1, g2) => g1,
+    primaryShadow: (a) => `0 0 0 2px ${a}, 0 6px 14px ${a}22`,
+    secondaryShadow: '0 0 0 1.5px rgba(15,18,25,0.16)',
+    tertiaryBorder: (a) => `1.5px solid ${a}`,
+    tertiaryShadow: 'none',
+  },
+  {
+    name: 'glass-pill',
+    radius: '999px',
+    primaryGrad: (a, b, c) => `linear-gradient(135deg, ${a}aa 0%, ${(c || b)}66 100%)`,
+    secondaryGrad: (g1, g2, g3) => `linear-gradient(135deg, ${g1}cc 0%, ${g2}88 100%)`,
+    primaryShadow: (a) => `0 10px 26px ${a}36, 0 1px 0 rgba(255,255,255,0.55) inset, 0 0 0 1px rgba(255,255,255,0.28) inset`,
+    secondaryShadow: '0 8px 22px rgba(15,18,25,0.08), 0 1px 0 rgba(255,255,255,0.55) inset, 0 0 0 1px rgba(255,255,255,0.25) inset',
+    tertiaryBorder: (a) => `1px solid ${a}88`,
+    tertiaryShadow: '0 6px 16px rgba(15,18,25,0.05)',
+  },
+  {
+    name: 'editorial-line',
+    radius: '2px',
+    primaryGrad: (a) => `linear-gradient(180deg, ${a} 0%, ${mix(a, '#000000', 0.18)} 100%)`,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a) => `0 1px 0 rgba(255,255,255,0.25) inset, 0 0 0 1px ${mix(a, '#000000', 0.25)}`,
+    secondaryShadow: '0 0 0 1px rgba(15,18,25,0.14)',
+    tertiaryBorder: (a) => `1px solid ${a}`,
+    tertiaryShadow: 'none',
+  },
+  {
+    name: 'inset-soft',
+    radius: '18px',
+    primaryGrad: (a, b) => `linear-gradient(145deg, ${mix(a, '#ffffff', 0.18)} 0%, ${a} 100%)`,
+    secondaryGrad: (g1, g2) => `linear-gradient(145deg, ${g1} 0%, ${g2} 100%)`,
+    primaryShadow: (a) => `0 10px 24px ${a}28, 0 2px 5px rgba(255,255,255,0.35) inset, 0 -4px 8px rgba(0,0,0,0.12) inset`,
+    secondaryShadow: '0 8px 20px rgba(15,18,25,0.06), 0 2px 5px rgba(255,255,255,0.65) inset, 0 -4px 8px rgba(15,18,25,0.08) inset',
+    tertiaryBorder: (a) => `1px solid ${a}55`,
+    tertiaryShadow: '0 2px 5px rgba(255,255,255,0.35) inset',
+  },
+  {
+    name: 'terminal-block',
+    radius: '0px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1, g2) => g2,
+    primaryShadow: (a) => `0 0 0 1px ${a}, 0 0 18px ${a}44`,
+    secondaryShadow: '0 0 0 1px rgba(100,255,160,0.28)',
+    tertiaryBorder: (a) => `1px solid ${a}`,
+    tertiaryShadow: '0 0 14px rgba(100,255,160,0.18)',
   },
   {
     // Used exclusively by family: 'pixel' materials. Hard-edged, solid fills,
@@ -688,6 +1178,34 @@ function pickFontPair(materialFontMoods) {
 function genPalette(material) {
   const mood = material.paletteMood;
   const isDark = mood.mode === 'dark';
+
+  if (mood.grayscale) {
+    const toGray = (light) => hslToHex(0, 0, clamp(light, 0, 100));
+    const [minAccent, maxAccent] = mood.accentLightRange || (isDark ? [58, 76] : [18, 42]);
+    const base = randi(minAccent, maxAccent);
+    const palette = [
+      toGray(base),
+      toGray(base + randi(isDark ? 8 : 10, isDark ? 18 : 20)),
+      toGray(base + randi(isDark ? -18 : -16, isDark ? -8 : -6)),
+    ].sort((a, b) => luminance(a) - luminance(b));
+    if (isDark) palette.reverse();
+
+    const grayStops = mood.grayLightRange || (isDark ? [32, 22, 14] : [97, 91, 83]);
+    const grays = grayStops.map(toGray);
+    const inkStrong = toGray(isDark ? 92 : 12);
+    const inkMute = toGray(isDark ? 68 : 38);
+
+    return {
+      palette,
+      grays,
+      inkStrong, inkMute,
+      accent: palette[0],
+      harmony: 'grayscale',
+      mode: isDark ? 'dark' : 'light',
+      seed: `grayscale|${palette[0]}|${palette[1]}|${palette[2]}`,
+    };
+  }
+
   const harmony = choice(mood.harmony);
   const baseHue = randi(mood.hueRange[0], mood.hueRange[1]);
   const baseSat = randi(mood.satRange[0], mood.satRange[1]);
@@ -770,6 +1288,14 @@ function pickButtonStyle(material) {
     if (material.family === 'hand') {
       const target = material.style === 'sketch' ? 'hand-sketch' : 'hand-calligraphic';
       return BUTTON_STYLES.find((s) => s.name === target);
+    }
+    if (Array.isArray(material.buttonStyles) && material.buttonStyles.length) {
+      const pool = material.buttonStyles.filter((name) => BUTTON_STYLES.some((s) => s.name === name));
+      if (pool.length) {
+        const name = pickFresh(pool, 'button');
+        remember('button', name);
+        return BUTTON_STYLES.find((s) => s.name === name);
+      }
     }
   }
   const pool = BUTTON_STYLES.filter((s) => !FAMILY_BUTTON_STYLES.has(s.name)).map((s) => s.name);
