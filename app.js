@@ -2156,7 +2156,6 @@ function closeShare() { ui.shareSheet.hidden = true; state.shareTarget = null; }
 function buildDesignMarkdown(t) {
   const toGFParam = (name, weight) => `family=${name.replace(/ /g, '+')}:wght@${weight}`;
   const fontUrl = `https://fonts.googleapis.com/css2?${toGFParam(t.font.sans, t.font.sansWeight)}&display=swap`;
-  const cardRadius = t.material.cardRadius || '32px';
   const m = t.material;
   const [a, b2, c2] = t.colors.palette;
   const [g1, g2, g3] = t.colors.grays;
@@ -2165,14 +2164,127 @@ function buildDesignMarkdown(t) {
   const btnPrimaryShadow = t.button.primaryShadow(a, b2);
   const btnSecondaryShadow = t.button.secondaryShadow;
   const btnTertiaryBorder = t.button.tertiaryBorder(a);
-  const family = m.family || 'glass';
-  const familyDesc = m.family === 'pixel'
-    ? 'Hard-edged 8-bit/pixel surface — no blur, no translucency. Solid fill with 4px outer ink ring and an offset 8px ink shadow (no soft glow).'
-    : m.family === 'hand' && m.style === 'sketch'
-      ? 'Hand-drawn sketch surface — solid paper fill with a hand-inked stroke and offset hand-shadow. No backdrop blur.'
-      : m.family === 'hand' && m.style === 'calligraphic'
-        ? 'Calligraphic hand surface — refined paper fill with a soft hairline stroke. No backdrop blur.'
-        : `Glassmorphic surface — translucent fill (${m.cardBg}) over the page background, blurred ${m.blur}px and saturated ${m.saturate}× via backdrop-filter, framed by a 1px gradient stroke (${m.borderColor} at ${Math.round((m.borderOpacity ?? 1) * 100)}% opacity) and a layered ambient shadow.`;
+
+  // Family-specific card values — must match the CSS overrides in styles.css
+  let cardYaml, cardCss, cardProse, cardRounded;
+  if (m.family === 'pixel') {
+    cardRounded = '6px';
+    const inkShadow = `0 0 0 4px ${t.colors.inkStrong}, 8px 8px 0 ${t.colors.inkStrong}`;
+    cardYaml = `\
+    family: "pixel"
+    background: "${m.cardBg}"
+    rounded: "${cardRounded}"
+    backdropFilter: "none"
+    border: "none (::before hidden; outer ring is via box-shadow)"
+    shadow: "${inkShadow}"
+    noiseOpacity: 0`;
+    cardProse = `Hard-edged 8-bit/pixel surface — solid fill (${m.cardBg}), no blur, no translucency. The border is a 4px solid ink ring and there is an 8px hard offset ink shadow; both are rendered as \`box-shadow\` using \`{colors.inkStrong}\`. No gradient stroke, no ambient glow.`;
+    cardCss = `\
+.card {
+  background: ${m.cardBg};
+  border-radius: ${cardRounded};
+  box-shadow: ${inkShadow};
+  position: relative;
+  overflow: hidden;
+}
+/* No ::before stroke for pixel family */`;
+  } else if (m.family === 'hand' && m.style === 'sketch') {
+    cardRounded = '18px';
+    cardYaml = `\
+    family: "hand-sketch"
+    background: "${m.cardBg}"
+    rounded: "${cardRounded}"
+    backdropFilter: "none"
+    border: "2px dashed {colors.inkStrong} at 50% opacity (via ::before)"
+    shadow: "${m.cardShadow}"
+    noiseOpacity: ${m.noise}`;
+    cardProse = `Hand-drawn sketch surface — solid paper fill (${m.cardBg}), no blur. The border is a 2px dashed ink stroke at 50% opacity, rendered via a \`::before\` pseudo-element. Shadow is a soft offset: \`${m.cardShadow}\`.`;
+    cardCss = `\
+.card {
+  background: ${m.cardBg};
+  border-radius: ${cardRounded};
+  box-shadow: ${m.cardShadow};
+  position: relative;
+  overflow: hidden;
+}
+/* Dashed ink border via ::before */
+.card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  border: 2px dashed ${t.colors.inkStrong};
+  opacity: 0.5;
+  pointer-events: none;
+}`;
+  } else if (m.family === 'hand' && m.style === 'calligraphic') {
+    cardRounded = '8px';
+    cardYaml = `\
+    family: "hand-calligraphic"
+    background: "${m.cardBg}"
+    rounded: "${cardRounded}"
+    backdropFilter: "none"
+    border: "1px solid {colors.inkStrong} at 25% opacity (via ::before)"
+    shadow: "${m.cardShadow}"
+    noiseOpacity: ${m.noise}`;
+    cardProse = `Calligraphic hand surface — solid paper fill (${m.cardBg}), no blur. The border is a refined 1px solid ink hairline at 25% opacity, rendered via a \`::before\` pseudo-element. Shadow: \`${m.cardShadow}\`.`;
+    cardCss = `\
+.card {
+  background: ${m.cardBg};
+  border-radius: ${cardRounded};
+  box-shadow: ${m.cardShadow};
+  position: relative;
+  overflow: hidden;
+}
+/* Hairline ink border via ::before */
+.card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  border: 1px solid ${t.colors.inkStrong};
+  opacity: 0.25;
+  pointer-events: none;
+}`;
+  } else {
+    // Default glass family
+    cardRounded = m.cardRadius || '32px';
+    cardYaml = `\
+    family: "glass"
+    background: "${m.cardBg}"
+    rounded: "{rounded.card}"
+    backdropFilter: "blur(${m.blur}px) saturate(${m.saturate})"
+    border: "1px gradient stroke, color ${m.borderColor}, opacity ${m.borderOpacity ?? 1}"
+    shadow: "${m.cardShadow}"
+    noiseOpacity: ${m.noise}`;
+    cardProse = `Glassmorphic surface — translucent fill (\`${m.cardBg}\`) over the page background, blurred ${m.blur}px and saturated ${m.saturate}× via \`backdrop-filter\`. Framed by a 1px gradient stroke (\`${m.borderColor}\` at ${Math.round((m.borderOpacity ?? 1) * 100)}% opacity) rendered as a masked \`::before\`, and a layered ambient shadow.`;
+    cardCss = `\
+.card {
+  background: ${m.cardBg};
+  border-radius: ${cardRounded};
+  backdrop-filter: blur(${m.blur}px) saturate(${m.saturate});
+  -webkit-backdrop-filter: blur(${m.blur}px) saturate(${m.saturate});
+  box-shadow: ${m.cardShadow};
+  position: relative;
+  overflow: hidden;
+}
+/* 1px gradient stroke (masked ::before — not a hard border) */
+.card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(150deg,
+    color-mix(in srgb, ${m.borderColor} 85%, transparent) 0%,
+    color-mix(in srgb, ${m.borderColor} 25%, transparent) 30%,
+    transparent 55%,
+    color-mix(in srgb, ${m.borderColor} 18%, transparent) 80%,
+    color-mix(in srgb, ${m.borderColor} 55%, transparent) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: ${m.borderOpacity ?? 1};
+  pointer-events: none;
+}`;
+  }
 
   // Google DESIGN.md format: YAML front matter (machine-readable tokens)
   // + markdown prose (human/agent-readable rationale).
@@ -2214,16 +2326,10 @@ typography:
     lineHeight: 1.5
 rounded:
   button: "${t.button.radius}"
-  card: "${cardRadius}"
+  card: "${cardRounded}"
 components:
   card:
-    family: "${family}"
-    background: "${m.cardBg}"
-    rounded: "{rounded.card}"
-    backdropFilter: "${m.family ? 'none' : `blur(${m.blur}px) saturate(${m.saturate})`}"
-    border: "1px gradient stroke, color ${m.borderColor}, opacity ${m.borderOpacity ?? 1}"
-    shadow: "${m.cardShadow}"
-    noiseOpacity: ${m.noise}
+${cardYaml}
   button-primary:
     background: "${btnPrimaryBg}"
     textColor: "#FFFFFF"
@@ -2271,42 +2377,14 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
 
 ## Shapes
 - Button corners: \`${t.button.radius}\`
-- Card corners: \`${cardRadius}\`
+- Card corners: \`${cardRounded}\`
 - Page background: \`${t.page?.name || DEFAULT_PAGE_STYLE.name}\`
 
 ## Card surface
-${familyDesc}
-
-The card is **not** a flat color — its fill is intentionally translucent and (for the default glass family) sits over a blurred copy of whatever is behind it. To reproduce it accurately:
+${cardProse}
 
 \`\`\`css
-.card {
-  background: ${m.cardBg};
-  border-radius: ${cardRadius};
-  ${m.family ? '/* no backdrop-filter for this family */' : `backdrop-filter: blur(${m.blur}px) saturate(${m.saturate});
-  -webkit-backdrop-filter: blur(${m.blur}px) saturate(${m.saturate});`}
-  box-shadow: ${m.cardShadow};
-  position: relative;
-  overflow: hidden;
-}
-/* 1px gradient stroke (rendered as a masked ::before, not a hard border) */
-.card::before {
-  content: "";
-  position: absolute; inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(150deg,
-    color-mix(in srgb, ${m.borderColor} 85%, transparent) 0%,
-    color-mix(in srgb, ${m.borderColor} 25%, transparent) 30%,
-    transparent 55%,
-    color-mix(in srgb, ${m.borderColor} 18%, transparent) 80%,
-    color-mix(in srgb, ${m.borderColor} 55%, transparent) 100%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  opacity: ${m.borderOpacity ?? 1};
-  pointer-events: none;
-}
+${cardCss}
 \`\`\`
 
 ## Components
