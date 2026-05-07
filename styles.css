@@ -395,7 +395,7 @@ button:focus-visible,
   transition: transform 160ms ease, box-shadow 220ms ease;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
-.ctrl:hover { transform: translateY(-1px); }
+@media (hover: hover) { .ctrl:hover { transform: translateY(-1px); } }
 .ctrl:active { transform: translateY(0); }
 
 .ctrl--icon {
@@ -503,7 +503,7 @@ button:focus-visible,
               background 400ms ease, color 400ms ease, border 400ms ease;
   will-change: transform;
 }
-.pv:hover { transform: translateY(-1px); filter: brightness(1.04); }
+@media (hover: hover) { .pv:hover { transform: translateY(-1px); filter: brightness(1.04); } }
 .pv:active { transform: translateY(1px) scale(0.995); filter: brightness(0.96); transition-duration: 60ms; }
 .pv:focus-visible { outline: 2px solid rgba(0,0,0,0.25); outline-offset: 3px; }
 
@@ -584,7 +584,7 @@ button:focus-visible,
   border-radius: 4px !important;
   letter-spacing: 0.04em;
 }
-.card[data-family="pixel"] .pv:hover { transform: translate(-1px, -1px); }
+@media (hover: hover) { .card[data-family="pixel"] .pv:hover { transform: translate(-1px, -1px); } }
 .card[data-family="pixel"] .pv:active { transform: translate(2px, 2px); filter: none; }
 
 .card[data-family="pixel"] .type-sample {
@@ -640,7 +640,7 @@ body[data-family="pixel"] .bg-grain {
   border-radius: 14px !important;
   letter-spacing: 0;
 }
-.card[data-family="hand"][data-style="sketch"] .pv:hover { transform: translate(-1px, -1px); }
+@media (hover: hover) { .card[data-family="hand"][data-style="sketch"] .pv:hover { transform: translate(-1px, -1px); } }
 .card[data-family="hand"][data-style="sketch"] .pv:active { transform: translate(1px, 2px); filter: none; }
 
 /* --- Calligraphic sub-style — refined, elegant --- */
