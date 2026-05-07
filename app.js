@@ -1185,6 +1185,21 @@ const BUTTON_STYLES = [
     tertiaryShadow: '0 2px 5px rgba(255,255,255,0.35) inset',
   },
   {
+    name: 'radial-glow',
+    radius: '18px',
+    primaryGrad: (a, b, c) => `
+      radial-gradient(ellipse at 50% 42%, ${mix(a, '#ffffff', 0.42)} 0%, ${mix(a, '#ffffff', 0.18)} 26%, transparent 58%),
+      radial-gradient(ellipse at 50% 115%, ${mix(a, '#000000', 0.48)} 0%, transparent 54%),
+      linear-gradient(180deg, ${mix(a, b || a, 0.18)} 0%, ${mix(a, '#000000', 0.18)} 54%, ${mix(a, '#000000', 0.42)} 100%)`,
+    secondaryGrad: (g1, g2, g3) => `
+      radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.28) 30%, transparent 60%),
+      linear-gradient(180deg, ${g1} 0%, ${g2} 58%, ${g3} 100%)`,
+    primaryShadow: (a) => `0 10px 26px ${a}34, 0 1px 0 rgba(255,255,255,0.38) inset, 0 -10px 22px rgba(0,0,0,0.14) inset`,
+    secondaryShadow: '0 8px 22px rgba(15,18,25,0.07), 0 1px 0 rgba(255,255,255,0.7) inset, 0 -8px 18px rgba(15,18,25,0.08) inset',
+    tertiaryBorder: (a) => `1px solid ${a}66`,
+    tertiaryShadow: '0 1px 2px rgba(15,18,25,0.04)',
+  },
+  {
     name: 'terminal-block',
     radius: '0px',
     primaryGrad: (a) => a,
