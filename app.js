@@ -2157,16 +2157,34 @@ function buildDesignMarkdown(t) {
   const toGFParam = (name, weight) => `family=${name.replace(/ /g, '+')}:wght@${weight}`;
   const fontUrl = `https://fonts.googleapis.com/css2?${toGFParam(t.font.sans, t.font.sansWeight)}&display=swap`;
   const cardRadius = t.material.cardRadius || '32px';
+  const m = t.material;
+  const [a, b2, c2] = t.colors.palette;
+  const [g1, g2, g3] = t.colors.grays;
+  const btnPrimaryBg = t.button.primaryGrad(a, b2, c2);
+  const btnSecondaryBg = t.button.secondaryGrad(g1, g2, g3);
+  const btnPrimaryShadow = t.button.primaryShadow(a, b2);
+  const btnSecondaryShadow = t.button.secondaryShadow;
+  const btnTertiaryBorder = t.button.tertiaryBorder(a);
+  const family = m.family || 'glass';
+  const familyDesc = m.family === 'pixel'
+    ? 'Hard-edged 8-bit/pixel surface — no blur, no translucency. Solid fill with 4px outer ink ring and an offset 8px ink shadow (no soft glow).'
+    : m.family === 'hand' && m.style === 'sketch'
+      ? 'Hand-drawn sketch surface — solid paper fill with a hand-inked stroke and offset hand-shadow. No backdrop blur.'
+      : m.family === 'hand' && m.style === 'calligraphic'
+        ? 'Calligraphic hand surface — refined paper fill with a soft hairline stroke. No backdrop blur.'
+        : `Glassmorphic surface — translucent fill (${m.cardBg}) over the page background, blurred ${m.blur}px and saturated ${m.saturate}× via backdrop-filter, framed by a 1px gradient stroke (${m.borderColor} at ${Math.round((m.borderOpacity ?? 1) * 100)}% opacity) and a layered ambient shadow.`;
 
   // Google DESIGN.md format: YAML front matter (machine-readable tokens)
   // + markdown prose (human/agent-readable rationale).
   // Spec: https://github.com/google-labs-code/design.md
   return `---
 version: alpha
-name: "${t.material.name}"
-description: "Generated theme — ${t.material.name} material, ${t.button.name} button shape, ${t.font.sans} typeface."
+name: "${m.name}"
+description: "Generated theme — ${m.name} material, ${t.button.name} button shape, ${t.font.sans} typeface."
 page:
   style: "${t.page?.name || DEFAULT_PAGE_STYLE.name}"
+  background: "${m.bgBase}"
+  orbs: ["${m.bgOrbs[0]}", "${m.bgOrbs[1]}", "${m.bgOrbs[2]}", "${m.bgOrbs[3]}"]
 colors:
   primary: "${t.colors.palette[0]}"
   secondary: "${t.colors.palette[1]}"
@@ -2198,27 +2216,35 @@ rounded:
   button: "${t.button.radius}"
   card: "${cardRadius}"
 components:
+  card:
+    family: "${family}"
+    background: "${m.cardBg}"
+    rounded: "{rounded.card}"
+    backdropFilter: "${m.family ? 'none' : `blur(${m.blur}px) saturate(${m.saturate})`}"
+    border: "1px gradient stroke, color ${m.borderColor}, opacity ${m.borderOpacity ?? 1}"
+    shadow: "${m.cardShadow}"
+    noiseOpacity: ${m.noise}
   button-primary:
-    backgroundColor: "{colors.primary}"
+    background: "${btnPrimaryBg}"
     textColor: "#FFFFFF"
     rounded: "{rounded.button}"
+    shadow: "${btnPrimaryShadow}"
   button-secondary:
-    backgroundColor: "{colors.surface}"
+    background: "${btnSecondaryBg}"
     textColor: "{colors.inkStrong}"
     rounded: "{rounded.button}"
+    shadow: "${btnSecondaryShadow}"
   button-tertiary:
-    backgroundColor: transparent
+    background: transparent
     textColor: "{colors.primary}"
     rounded: "{rounded.button}"
-  card:
-    backgroundColor: "{colors.surface}"
-    rounded: "{rounded.card}"
+    border: "${btnTertiaryBorder}"
 ---
 
-# ${t.material.name}
+# ${m.name}
 
 ## Overview
-A **${t.material.name}** theme using the **${t.button.name}** button shape and **${t.font.sans}** (weight ${t.font.sansWeight}) across all type roles, over a controlled palette of three primary accents and three neutrals.
+A **${m.name}** theme using the **${t.button.name}** button shape and **${t.font.sans}** (weight ${t.font.sansWeight}) across all type roles, over a controlled palette of three primary accents and three neutrals.
 
 Load the typefaces from Google Fonts:
 
@@ -2248,11 +2274,46 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
 - Card corners: \`${cardRadius}\`
 - Page background: \`${t.page?.name || DEFAULT_PAGE_STYLE.name}\`
 
+## Card surface
+${familyDesc}
+
+The card is **not** a flat color — its fill is intentionally translucent and (for the default glass family) sits over a blurred copy of whatever is behind it. To reproduce it accurately:
+
+\`\`\`css
+.card {
+  background: ${m.cardBg};
+  border-radius: ${cardRadius};
+  ${m.family ? '/* no backdrop-filter for this family */' : `backdrop-filter: blur(${m.blur}px) saturate(${m.saturate});
+  -webkit-backdrop-filter: blur(${m.blur}px) saturate(${m.saturate});`}
+  box-shadow: ${m.cardShadow};
+  position: relative;
+  overflow: hidden;
+}
+/* 1px gradient stroke (rendered as a masked ::before, not a hard border) */
+.card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(150deg,
+    color-mix(in srgb, ${m.borderColor} 85%, transparent) 0%,
+    color-mix(in srgb, ${m.borderColor} 25%, transparent) 30%,
+    transparent 55%,
+    color-mix(in srgb, ${m.borderColor} 18%, transparent) 80%,
+    color-mix(in srgb, ${m.borderColor} 55%, transparent) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: ${m.borderOpacity ?? 1};
+  pointer-events: none;
+}
+\`\`\`
+
 ## Components
-- **button-primary** — solid \`{colors.primary}\` fill with a white label and \`{rounded.button}\` corners. Use for the single most important action on a screen.
-- **button-secondary** — \`{colors.surface}\` fill with an \`{colors.inkStrong}\` label and \`{rounded.button}\` corners. Use for the next-most-important action; pair at most one secondary with each primary.
-- **button-tertiary** — transparent fill with a \`{colors.primary}\` label and a 1px \`{colors.primary}\` outline at \`{rounded.button}\` corners. Use for low-priority links, "Cancel"/"Dismiss"-style actions, and inline navigation.
-- **card** — \`{colors.surface}\` fill with \`{rounded.card}\` corners. Use as the default container for grouped content.
+- **button-primary** — \`${btnPrimaryBg}\` background with a white label, \`{rounded.button}\` corners, and \`box-shadow: ${btnPrimaryShadow}\`. Use for the single most important action on a screen.
+- **button-secondary** — \`${btnSecondaryBg}\` background with an \`{colors.inkStrong}\` label, \`{rounded.button}\` corners, and \`box-shadow: ${btnSecondaryShadow}\`. Use for the next-most-important action; pair at most one secondary with each primary.
+- **button-tertiary** — transparent fill with a \`{colors.primary}\` label and a \`${btnTertiaryBorder}\` border at \`{rounded.button}\` corners. Use for low-priority links, "Cancel"/"Dismiss"-style actions, and inline navigation.
+- **card** — see "Card surface" above. Use as the default container for grouped content.
 `;
 }
 
