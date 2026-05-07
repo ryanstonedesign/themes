@@ -1439,9 +1439,7 @@ function exportCSS() {
   if (!t) return;
 
   const toGFParam = (name, weight) => `family=${name.replace(/ /g, '+')}:wght@${weight}`;
-  const gfPairs = [toGFParam(t.font.sans, t.font.sansWeight)];
-  if (t.font.serif !== t.font.sans) gfPairs.push(toGFParam(t.font.serif, t.font.serifWeight));
-  const fontUrl = `https://fonts.googleapis.com/css2?${gfPairs.join('&')}&display=swap`;
+  const fontUrl = `https://fonts.googleapis.com/css2?${toGFParam(t.font.sans, t.font.sansWeight)}&display=swap`;
 
   const slug = t.material.name.toLowerCase().replace(/\s+/g, '-');
   const cardRadius = t.material.cardRadius || '32px';
@@ -1452,7 +1450,7 @@ function exportCSS() {
   const md = `---
 version: alpha
 name: "${t.material.name}"
-description: "Generated theme — ${t.material.name} material, ${t.button.name} button shape, ${t.font.sans} / ${t.font.serif} type pairing."
+description: "Generated theme — ${t.material.name} material, ${t.button.name} button shape, ${t.font.sans} typeface."
 colors:
   primary: "${t.colors.palette[0]}"
   secondary: "${t.colors.palette[1]}"
@@ -1480,11 +1478,6 @@ typography:
     fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.5
-  accent:
-    fontFamily: "${t.font.serif}"
-    fontSize: "24px"
-    fontWeight: ${t.font.serifWeight}
-    lineHeight: 1.3
 rounded:
   button: "${t.button.radius}"
   card: "${cardRadius}"
@@ -1509,7 +1502,7 @@ components:
 # ${t.material.name}
 
 ## Overview
-A **${t.material.name}** theme using the **${t.button.name}** button shape. The mood is set by pairing **${t.font.sans}** (sans, weight ${t.font.sansWeight}) with **${t.font.serif}** (serif, weight ${t.font.serifWeight}) over a controlled palette of three primary accents and three neutrals.
+A **${t.material.name}** theme using the **${t.button.name}** button shape and **${t.font.sans}** (weight ${t.font.sansWeight}) across all type roles, over a controlled palette of three primary accents and three neutrals.
 
 Load the typefaces from Google Fonts:
 
@@ -1532,7 +1525,7 @@ Use \`{colors.primary}\` for the dominant brand action and the single most impor
 | Ink mute | \`{colors.inkMute}\` | \`${t.colors.inkMute}\` |
 
 ## Typography
-**${t.font.sans}** (weight ${t.font.sansWeight}) carries display, heading, and body roles. **${t.font.serif}** (weight ${t.font.serifWeight}) is the accent typeface — use it for editorial moments like pull quotes, marquee subheads, and decorative labels. It may not be a traditional serif; treat it as a stylistic counterpoint to the primary family, not a replacement for body or heading text.
+**${t.font.sans}** is the single typeface across all roles. Use weight ${t.font.sansWeight} for display and heading, and weight 400 for body copy.
 
 ## Shapes
 - Button corners: \`${t.button.radius}\`
