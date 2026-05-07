@@ -1472,6 +1472,7 @@ const ui = {
   savedEmpty: $('#savedEmpty'),
   savedEditBtn: $('#savedEditBtn'),
   savedCount: $('#savedCount'),
+  controls: $('#controls'),
 };
 
 // ---- font loading (cumulative, only request weights that exist) ----
@@ -2271,6 +2272,13 @@ function exportCSS() {
   closeShare();
 }
 
+function updateToastPosition() {
+  if (!ui.controls) return;
+  const rect = ui.controls.getBoundingClientRect();
+  const bottomOffset = window.innerHeight - rect.top + 20;
+  document.documentElement.style.setProperty('--toast-bottom', `${bottomOffset}px`);
+}
+
 function showToast(message = 'Copied') {
   if (!ui.toast) return;
   window.clearTimeout(showToast.timer);
@@ -2533,6 +2541,7 @@ function init() {
   window.addEventListener('resize', () => {
     positionPill(ui.topSeg);
     positionPill(ui.scopeSeg);
+    updateToastPosition();
     if (state.mode === 'saved') syncSavedFrame();
   });
 
@@ -2540,6 +2549,7 @@ function init() {
   const layoutPills = () => {
     positionPill(ui.topSeg);
     positionPill(ui.scopeSeg);
+    updateToastPosition();
   };
   requestAnimationFrame(layoutPills);
   if (document.fonts && document.fonts.ready) {
