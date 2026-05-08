@@ -1887,7 +1887,7 @@ function buildSavedCard(theme, idx) {
   // Per-card actions
   card.querySelector('[data-action="share"]')?.addEventListener('click', (e) => {
     e.stopPropagation();
-    openShare(theme);
+    toggleShare(theme, e.currentTarget);
   });
   card.querySelector('[data-action="unsave"]')?.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -2147,9 +2147,15 @@ function switchMode(mode) {
 }
 
 // ---- share / export ----
-function openShare(theme) {
+function toggleShare(theme, anchorEl) {
+  if (!ui.shareSheet.hidden) { closeShare(); return; }
   state.shareTarget = theme || state.theme;
   ui.shareSheet.hidden = false;
+  if (anchorEl) {
+    const r = anchorEl.getBoundingClientRect();
+    ui.shareSheet.style.top = (r.bottom + 6) + 'px';
+    ui.shareSheet.style.right = (window.innerWidth - r.right) + 'px';
+  }
 }
 function closeShare() { ui.shareSheet.hidden = true; state.shareTarget = null; }
 
@@ -2661,17 +2667,22 @@ function init() {
     else generate(state.scope);
   });
   ui.starBtn.addEventListener('click', toggleSave);
-  ui.shareBtn.addEventListener('click', () => openShare(state.theme));
+  ui.shareBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleShare(state.theme, ui.shareBtn); });
   ui.savedEditBtn.addEventListener('click', () => startSavedEdit(activeSavedIndex()));
 
   ui.shareSheet.addEventListener('click', (e) => {
-    if (e.target.closest('[data-close]')) { closeShare(); return; }
+    e.stopPropagation();
     const exp = e.target.closest('[data-export]');
     if (!exp) return;
     const kind = exp.dataset.export;
+    closeShare();
     if (kind === 'css') exportCSS();
     else if (kind === 'image') exportImage();
     else if (kind === 'clipboard') copyDesignMarkdown();
+  });
+
+  document.addEventListener('click', () => {
+    if (!ui.shareSheet.hidden) closeShare();
   });
 
   document.addEventListener('keydown', (e) => {

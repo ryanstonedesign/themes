@@ -125,38 +125,22 @@
       </div>
     </main>
 
-    <!-- Share sheet -->
-    <div class="sheet" id="shareSheet" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
-      <div class="sheet-backdrop" data-close></div>
-      <div class="sheet-panel" role="document">
-        <header class="sheet-header">
-          <h2 id="shareTitle">Export</h2>
-          <button class="ctrl ctrl--icon sheet-close" data-close aria-label="Close">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
-        </header>
-        <div class="sheet-options">
-          <button class="ctrl ctrl--row" data-export="image">
-            <span class="row-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
-            </span>
-            <span class="row-text"><strong>Image</strong><em>PNG</em></span>
-          </button>
-          <button class="ctrl ctrl--row" data-export="css">
-            <span class="row-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            </span>
-            <span class="row-text"><strong>DESIGN.md</strong><em>Spec file for your repo</em></span>
-          </button>
-          <button class="ctrl ctrl--row" data-export="clipboard">
-            <span class="row-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
-            </span>
-            <span class="row-text"><strong>Clipboard</strong><em>Copy and paste design.md to agent</em></span>
-          </button>
-        </div>
-      </div>
+    <!-- Share popover -->
+    <div class="share-popover" id="shareSheet" hidden>
+      <button class="share-popover-row" data-export="image">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+        <span>PNG</span>
+      </button>
+      <button class="share-popover-row" data-export="css">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>DESIGN.md</span>
+      </button>
+      <button class="share-popover-row" data-export="clipboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+        <span>Clipboard</span>
+      </button>
     </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">Copied</div>
 
     <script src="./app.js" type="module"></script>
