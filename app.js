@@ -1208,15 +1208,9 @@ const BUTTON_STYLES = [
       2px 2px 10px rgba(0,0,0,0.22),
       -2px -2px 10px rgba(255,255,255,0.58)`,
     tertiaryBorder: (a) => `5px solid ${a}`,
-    tertiaryShadow: (isDark) => isDark ? `
-      inset 6px 6px 10px rgba(255,255,255,0.55),
-      inset -6px -6px 10px rgba(0,0,0,0.22),
-      2px 2px 10px rgba(0,0,0,0.35),
-      -2px -2px 10px rgba(0,0,0,0.16)` : `
-      inset 6px 6px 10px rgba(255,255,255,0.55),
-      inset -6px -6px 10px rgba(0,0,0,0.22),
-      2px 2px 10px rgba(0,0,0,0.2),
-      -2px -2px 10px rgba(255,255,255,0.5)`,
+    tertiaryShadow: (isDark) => isDark
+      ? `2px 2px 10px rgba(0,0,0,0.35), -2px -2px 10px rgba(0,0,0,0.16)`
+      : `2px 2px 10px rgba(0,0,0,0.2), -2px -2px 10px rgba(255,255,255,0.5)`,
   },
   {
     name: 'radial-glow',
