@@ -1189,18 +1189,30 @@ const BUTTON_STYLES = [
     radius: '30px',
     primaryGrad: (a) => a,
     secondaryGrad: (g1, g2) => g2,
-    primaryShadow: () => `
+    primaryShadow: (a, b, isDark) => isDark ? `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.3),
+      2px 2px 10px rgba(0,0,0,0.45),
+      -2px -2px 10px rgba(0,0,0,0.2)` : `
       inset 6px 6px 10px rgba(255,255,255,0.6),
       inset -6px -6px 10px rgba(0,0,0,0.3),
       2px 2px 10px rgba(0,0,0,0.3),
       -2px -2px 10px rgba(255,255,255,0.5)`,
-    secondaryShadow: `
+    secondaryShadow: (isDark) => isDark ? `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.22),
+      2px 2px 10px rgba(0,0,0,0.38),
+      -2px -2px 10px rgba(0,0,0,0.18)` : `
       inset 6px 6px 10px rgba(255,255,255,0.6),
       inset -6px -6px 10px rgba(0,0,0,0.22),
       2px 2px 10px rgba(0,0,0,0.22),
       -2px -2px 10px rgba(255,255,255,0.58)`,
     tertiaryBorder: (a) => `5px solid ${a}`,
-    tertiaryShadow: `
+    tertiaryShadow: (isDark) => isDark ? `
+      inset 6px 6px 10px rgba(255,255,255,0.55),
+      inset -6px -6px 10px rgba(0,0,0,0.22),
+      2px 2px 10px rgba(0,0,0,0.35),
+      -2px -2px 10px rgba(0,0,0,0.16)` : `
       inset 6px 6px 10px rgba(255,255,255,0.55),
       inset -6px -6px 10px rgba(0,0,0,0.22),
       2px 2px 10px rgba(0,0,0,0.2),
@@ -1568,15 +1580,16 @@ function applyTheme(theme, opts = {}) {
   if (opts.applyButtons !== false) {
     const [a, bb, ccc] = c.palette;
     const [, g2, g3] = c.grays;
+    const isDark = c.mode === 'dark';
     ui.card.dataset.button = b.name;
     document.body.dataset.button = b.name;
     root.setProperty('--btn-radius', b.radius);
     root.setProperty('--btn-primary-bg', b.primaryGrad(a, bb, ccc));
     root.setProperty('--btn-secondary-bg', b.secondaryGrad(c.grays[0], g2, g3));
-    root.setProperty('--btn-primary-shadow', b.primaryShadow(a, bb));
-    root.setProperty('--btn-secondary-shadow', b.secondaryShadow);
+    root.setProperty('--btn-primary-shadow', b.primaryShadow(a, bb, isDark));
+    root.setProperty('--btn-secondary-shadow', typeof b.secondaryShadow === 'function' ? b.secondaryShadow(isDark) : b.secondaryShadow);
     root.setProperty('--btn-tertiary-border', b.tertiaryBorder(a));
-    root.setProperty('--btn-tertiary-shadow', b.tertiaryShadow);
+    root.setProperty('--btn-tertiary-shadow', typeof b.tertiaryShadow === 'function' ? b.tertiaryShadow(isDark) : b.tertiaryShadow);
   }
 
   // Card color surface: card bg, page atmosphere, stroke/shadow color — changes with "colors" regen
@@ -1849,10 +1862,10 @@ function buildSavedCard(theme, idx) {
     '--btn-radius': t.button.radius,
     '--btn-primary-bg': t.button.primaryGrad(a, b, c),
     '--btn-secondary-bg': t.button.secondaryGrad(g1, g2, g3),
-    '--btn-primary-shadow': t.button.primaryShadow(a, b),
-    '--btn-secondary-shadow': t.button.secondaryShadow,
+    '--btn-primary-shadow': t.button.primaryShadow(a, b, t.colors.mode === 'dark'),
+    '--btn-secondary-shadow': typeof t.button.secondaryShadow === 'function' ? t.button.secondaryShadow(t.colors.mode === 'dark') : t.button.secondaryShadow,
     '--btn-tertiary-border': t.button.tertiaryBorder(a),
-    '--btn-tertiary-shadow': t.button.tertiaryShadow,
+    '--btn-tertiary-shadow': typeof t.button.tertiaryShadow === 'function' ? t.button.tertiaryShadow(t.colors.mode === 'dark') : t.button.tertiaryShadow,
   };
 
   const card = document.createElement('article');
@@ -2193,8 +2206,9 @@ function buildDesignMarkdown(t) {
   const [g1, g2, g3] = t.colors.grays;
   const btnPrimaryBg = t.button.primaryGrad(a, b2, c2);
   const btnSecondaryBg = t.button.secondaryGrad(g1, g2, g3);
-  const btnPrimaryShadow = t.button.primaryShadow(a, b2);
-  const btnSecondaryShadow = t.button.secondaryShadow;
+  const isDark = t.colors.mode === 'dark';
+  const btnPrimaryShadow = t.button.primaryShadow(a, b2, isDark);
+  const btnSecondaryShadow = typeof t.button.secondaryShadow === 'function' ? t.button.secondaryShadow(isDark) : t.button.secondaryShadow;
   const btnTertiaryBorder = t.button.tertiaryBorder(a);
 
   // mix-blend-mode: overlay on a very dark surface produces no visible noise.
