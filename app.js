@@ -1185,6 +1185,28 @@ const BUTTON_STYLES = [
     tertiaryShadow: '0 2px 5px rgba(255,255,255,0.35) inset',
   },
   {
+    name: 'rubberized',
+    radius: '30px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1, g2) => g2,
+    primaryShadow: () => `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.3),
+      2px 2px 10px rgba(0,0,0,0.3),
+      -2px -2px 10px rgba(255,255,255,0.5)`,
+    secondaryShadow: `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.22),
+      2px 2px 10px rgba(0,0,0,0.22),
+      -2px -2px 10px rgba(255,255,255,0.58)`,
+    tertiaryBorder: (a) => `5px solid ${a}`,
+    tertiaryShadow: `
+      inset 6px 6px 10px rgba(255,255,255,0.55),
+      inset -6px -6px 10px rgba(0,0,0,0.22),
+      2px 2px 10px rgba(0,0,0,0.2),
+      -2px -2px 10px rgba(255,255,255,0.5)`,
+  },
+  {
     name: 'radial-glow',
     radius: '18px',
     primaryGrad: (a, b, c) => `
@@ -1425,7 +1447,8 @@ function pickButtonStyle(material) {
       return BUTTON_STYLES.find((s) => s.name === target);
     }
     if (Array.isArray(material.buttonStyles) && material.buttonStyles.length) {
-      const pool = material.buttonStyles.filter((name) => BUTTON_STYLES.some((s) => s.name === name));
+      const pool = [...new Set([...material.buttonStyles, 'rubberized'])]
+        .filter((name) => BUTTON_STYLES.some((s) => s.name === name));
       if (pool.length) {
         const name = pickFresh(pool, 'button');
         remember('button', name);
@@ -1545,6 +1568,8 @@ function applyTheme(theme, opts = {}) {
   if (opts.applyButtons !== false) {
     const [a, bb, ccc] = c.palette;
     const [, g2, g3] = c.grays;
+    ui.card.dataset.button = b.name;
+    document.body.dataset.button = b.name;
     root.setProperty('--btn-radius', b.radius);
     root.setProperty('--btn-primary-bg', b.primaryGrad(a, bb, ccc));
     root.setProperty('--btn-secondary-bg', b.secondaryGrad(c.grays[0], g2, g3));
@@ -1835,6 +1860,7 @@ function buildSavedCard(theme, idx) {
   card.dataset.idx = String(idx);
   if (t.material.family) card.dataset.family = t.material.family;
   if (t.material.style) card.dataset.style = t.material.style;
+  card.dataset.button = t.button.name;
   Object.entries(vars).forEach(([k, v]) => card.style.setProperty(k, v));
 
   const swatchHTML = (role, hex, i) =>
@@ -1877,9 +1903,9 @@ function buildSavedCard(theme, idx) {
         ${swatchHTML('gray', g3, 2)}
       </section>
       <section class="btn-stack" aria-label="Button preview">
-        <button class="pv pv--primary" type="button">Primary action</button>
-        <button class="pv pv--secondary" type="button">Secondary</button>
-        <button class="pv pv--tertiary" type="button">Tertiary</button>
+        <button class="pv pv--primary" type="button"><span>Primary action</span></button>
+        <button class="pv pv--secondary" type="button"><span>Secondary</span></button>
+        <button class="pv pv--tertiary" type="button"><span>Tertiary</span></button>
       </section>
     </div>
   `;

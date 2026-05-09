@@ -490,6 +490,9 @@ button:focus-visible,
 .btn-stack { display: flex; flex-direction: column; gap: clamp(6px, 1.2vh, 10px); flex-shrink: 0; }
 .pv {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: var(--btn-h);
   border-radius: var(--btn-radius);
   font-family: var(--font-sans);
@@ -502,6 +505,12 @@ button:focus-visible,
               box-shadow 220ms ease, filter 220ms ease,
               background 400ms ease, color 400ms ease, border 400ms ease;
   will-change: transform;
+}
+.pv > span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  transform: none;
 }
 @media (hover: hover) { .pv:hover { transform: translateY(-1px); filter: brightness(1.04); } }
 .pv:active { transform: translateY(1px) scale(0.995); filter: brightness(0.96); transition-duration: 60ms; }
@@ -529,6 +538,68 @@ button:focus-visible,
 .pv--tertiary:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .pv--tertiary:active { background: color-mix(in srgb, var(--accent) 16%, transparent); }
 
+.card[data-button="rubberized"] .pv {
+  overflow: hidden;
+  isolation: isolate;
+  z-index: 0;
+  border: 5px solid var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 900;
+  font-size: clamp(11px, 1.5vh, 13px);
+  color: color-mix(in srgb, var(--accent) 88%, #000000);
+  text-shadow:
+    1px 1px 1px rgba(255,255,255,0.4),
+    -1px -1px 1px rgba(0,0,0,0.4);
+  transform: none;
+  transition: box-shadow 0.3s ease,
+              transform 0.1s ease,
+              background 320ms ease,
+              color 0.3s ease,
+              border 320ms ease,
+              text-shadow 0.3s ease;
+  will-change: box-shadow, transform;
+}
+.card[data-button="rubberized"] .pv--secondary {
+  border-color: color-mix(in srgb, var(--g3) 78%, var(--ink-mute));
+}
+.card[data-button="rubberized"] .pv--primary {
+  color: var(--g1);
+}
+.card[data-button="rubberized"] .pv::before,
+.card[data-button="rubberized"] .pv::after {
+  display: none;
+}
+.card[data-button="rubberized"] .pv > span {
+  padding: 0 4px;
+  transform: none;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+@media (hover: hover) {
+  .card[data-button="rubberized"] .pv:hover {
+    transform: none;
+    filter: none;
+  }
+  .card[data-button="rubberized"] .pv:hover > span {
+    color: color-mix(in srgb, var(--accent) 84%, #000000);
+  }
+  .card[data-button="rubberized"] .pv--primary:hover > span {
+    color: color-mix(in srgb, var(--g1) 82%, var(--accent));
+  }
+  .card[data-button="rubberized"] .pv--tertiary:hover {
+    background: transparent;
+  }
+}
+.card[data-button="rubberized"] .pv:active {
+  box-shadow:
+    inset 2px 2px 1px rgba(0,0,0,0.3),
+    inset -2px -2px 1px rgba(255,255,255,0.5);
+  color: color-mix(in srgb, var(--accent) 94%, #ffffff);
+  text-shadow:
+    1px 1px 1px rgba(255,255,255,0.5),
+    -1px -1px 2px rgba(0,0,0,0.5);
+  transform: none;
+}
 /* =========================================================
    Bottom controls
    ========================================================= */
