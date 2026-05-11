@@ -2822,7 +2822,6 @@ function init() {
     const exp = e.target.closest('[data-export]');
     if (!exp) return;
     const kind = exp.dataset.export;
-    closeShare();
     if (kind === 'css') exportCSS();
     else if (kind === 'image') exportImage();
     else if (kind === 'clipboard') copyDesignMarkdown();
