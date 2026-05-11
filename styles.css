@@ -513,10 +513,12 @@ button:focus-visible,
   transform: none;
 }
 @media (hover: hover) { .pv:hover { transform: translateY(-1px); filter: brightness(1.04); } }
-.pv:active { transform: translateY(1px) scale(0.995); filter: brightness(0.96); transition-duration: 60ms; }
+.pv:active,
+.pv.is-pressed { transform: translateY(1px) scale(0.995); filter: brightness(0.96); transition-duration: 60ms; }
 .pv:focus-visible { outline: 2px solid rgba(0,0,0,0.25); outline-offset: 3px; }
 
 .pv--primary {
+  z-index: 3;
   background: var(--btn-primary-bg);
   color: #ffffff;
   box-shadow: var(--btn-primary-shadow);
@@ -524,19 +526,22 @@ button:focus-visible,
 }
 .pv--primary:hover { box-shadow: var(--btn-primary-shadow), 0 12px 28px rgba(0,0,0,0.06); }
 .pv--secondary {
+  z-index: 2;
   background: var(--btn-secondary-bg);
   color: var(--ink-strong);
   box-shadow: var(--btn-secondary-shadow);
   border: var(--btn-secondary-border, none);
 }
 .pv--tertiary {
+  z-index: 1;
   background: transparent;
   color: var(--accent);
   border: var(--btn-tertiary-border);
   box-shadow: var(--btn-tertiary-shadow);
 }
 .pv--tertiary:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.pv--tertiary:active { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.pv--tertiary:active,
+.pv--tertiary.is-pressed { background: color-mix(in srgb, var(--accent) 16%, transparent); }
 
 .card[data-button="rubberized"] .pv {
   overflow: hidden;
@@ -590,7 +595,8 @@ button:focus-visible,
     background: transparent;
   }
 }
-.card[data-button="rubberized"] .pv:active {
+.card[data-button="rubberized"] .pv:active,
+.card[data-button="rubberized"] .pv.is-pressed {
   box-shadow:
     inset 2px 2px 1px rgba(0,0,0,0.3),
     inset -2px -2px 1px rgba(255,255,255,0.5);
@@ -599,13 +605,16 @@ button:focus-visible,
     -1px -1px 2px rgba(0,0,0,0.5);
   transform: none;
 }
-.card[data-button="rubberized"] .pv--primary:active > span {
+.card[data-button="rubberized"] .pv--primary:active > span,
+.card[data-button="rubberized"] .pv--primary.is-pressed > span {
   color: var(--btn-primary-active-text);
 }
-.card[data-button="rubberized"] .pv--secondary:active > span {
+.card[data-button="rubberized"] .pv--secondary:active > span,
+.card[data-button="rubberized"] .pv--secondary.is-pressed > span {
   color: var(--btn-secondary-active-text);
 }
-.card[data-button="rubberized"] .pv--tertiary:active > span {
+.card[data-button="rubberized"] .pv--tertiary:active > span,
+.card[data-button="rubberized"] .pv--tertiary.is-pressed > span {
   color: var(--btn-tertiary-active-text);
 }
 /* =========================================================
@@ -664,7 +673,8 @@ button:focus-visible,
   letter-spacing: 0.04em;
 }
 @media (hover: hover) { .card[data-family="pixel"] .pv:hover { transform: translate(-1px, -1px); } }
-.card[data-family="pixel"] .pv:active { transform: translate(2px, 2px); filter: none; }
+.card[data-family="pixel"] .pv:active,
+.card[data-family="pixel"] .pv.is-pressed { transform: translate(2px, 2px); filter: none; }
 
 .card[data-family="pixel"] .type-sample {
   -webkit-font-smoothing: none;
@@ -683,6 +693,93 @@ body[data-family="pixel"] .bg-grain {
     linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px));
   background-size: var(--page-overlay-size, 24px 24px);
+}
+
+/* =========================================================
+   Neumorphic family — low-contrast raised surfaces
+   ========================================================= */
+.card[data-family="neumorph"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--card-bg) !important;
+  border: 0 !important;
+  box-shadow:
+    12px 12px 22px var(--neo-shadow-color),
+    -12px -12px 22px var(--neo-highlight-color) !important;
+}
+.card[data-family="neumorph"]::before,
+.card[data-family="neumorph"] .card-noise {
+  display: none;
+}
+.card[data-family="neumorph"] .swatch {
+  border-radius: 22px;
+  box-shadow:
+    5px 5px 9px color-mix(in srgb, var(--neo-shadow-color) 72%, transparent),
+    -5px -5px 9px color-mix(in srgb, var(--neo-highlight-color) 84%, transparent),
+    inset 1px 1px 0 color-mix(in srgb, var(--neo-highlight-color) 72%, transparent);
+}
+.card[data-button^="neumorphism"] .pv {
+  border: 0;
+  color: color-mix(in srgb, var(--accent) 72%, var(--ink-strong));
+  letter-spacing: 0;
+}
+.card[data-button^="neumorphism"] .pv--primary {
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.14);
+}
+.card[data-button^="neumorphism"] .pv--secondary {
+  background: var(--btn-neo-secondary-bg);
+  color: var(--ink-strong);
+}
+.card[data-button^="neumorphism"] .pv--tertiary {
+  background: transparent;
+  box-shadow: none;
+  color: var(--accent);
+}
+@media (hover: hover) {
+  .card[data-button^="neumorphism"] .pv:hover {
+    transform: none;
+    filter: none;
+    box-shadow:
+      5px 5px 9px color-mix(in srgb, var(--neo-shadow-color) 84%, transparent),
+      -5px -5px 9px color-mix(in srgb, var(--neo-highlight-color) 86%, transparent),
+      inset 1px 1px 0 color-mix(in srgb, var(--neo-highlight-color) 72%, transparent);
+  }
+  .card[data-button^="neumorphism"] .pv--tertiary:hover {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+.card[data-button^="neumorphism"] .pv:active,
+.card[data-button^="neumorphism"] .pv.is-pressed {
+  transform: none;
+  filter: none;
+  box-shadow:
+    inset 4px 4px 7px color-mix(in srgb, var(--neo-shadow-color) 90%, transparent),
+    inset -4px -4px 7px color-mix(in srgb, var(--neo-highlight-color) 90%, transparent);
+}
+.card[data-button^="neumorphism"] .pv--primary:active,
+.card[data-button^="neumorphism"] .pv--primary.is-pressed {
+  box-shadow:
+    inset 4px 4px 7px rgba(0,0,0,0.38),
+    inset -4px -4px 7px rgba(66,78,98,0.3);
+}
+.card[data-button^="neumorphism"] .pv--tertiary:active,
+.card[data-button^="neumorphism"] .pv--tertiary.is-pressed {
+  background: transparent;
+  box-shadow: none;
+}
+.card[data-family="neumorph"] .type-sample {
+  letter-spacing: 0;
+}
+body[data-family="neumorph"] .bg {
+  background: var(--bg-base);
+}
+body[data-family="neumorph"] .bg-orb {
+  opacity: 0;
+}
+body[data-family="neumorph"] .bg-grain {
+  opacity: 0;
 }
 
 /* =========================================================
@@ -720,7 +817,8 @@ body[data-family="pixel"] .bg-grain {
   letter-spacing: 0;
 }
 @media (hover: hover) { .card[data-family="hand"][data-style="sketch"] .pv:hover { transform: translate(-1px, -1px); } }
-.card[data-family="hand"][data-style="sketch"] .pv:active { transform: translate(1px, 2px); filter: none; }
+.card[data-family="hand"][data-style="sketch"] .pv:active,
+.card[data-family="hand"][data-style="sketch"] .pv.is-pressed { transform: translate(1px, 2px); filter: none; }
 
 /* --- Calligraphic sub-style — refined, elegant --- */
 .card[data-family="hand"][data-style="calligraphic"] {

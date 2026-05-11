@@ -248,6 +248,28 @@ const MATERIALS = {
     paletteMood: { hueRange: [80, 140], satRange: [30, 55], lightRange: [42, 58], harmony: ['analogous', 'mono'], contrast: 'soft' },
     fontMoods: ['classic', 'minimal'],
   },
+  Neumorph: {
+    family: 'neumorph',
+    cardBg: '#edf1f5', borderOpacity: 0, blur: 0, saturate: 1, noise: 0,
+    cardRadius: '36px',
+    cardShadow: '12px 12px 22px rgba(174,182,192,0.48), -12px -12px 22px rgba(255,255,255,1)',
+    bgBase: '#dfe6ed',
+    bgOrbs: ['#e4e9ee', '#f3f6f9', '#dce3ea', '#f8fafc'],
+    paletteMood: { hueRange: [190, 230], satRange: [12, 28], lightRange: [38, 52], harmony: ['mono', 'analogous'], contrast: 'soft' },
+    fontMoods: ['minimal', 'soft'],
+    buttonStyles: ['neumorphism'],
+  },
+  NeumorphDark: {
+    family: 'neumorph',
+    cardBg: '#161b24', borderOpacity: 0, blur: 0, saturate: 1, noise: 0,
+    cardRadius: '36px',
+    cardShadow: '12px 12px 22px rgba(0,0,0,0.48), -10px -10px 20px rgba(52,62,78,0.36)',
+    bgBase: '#111722',
+    bgOrbs: ['#182030', '#202a3a', '#0d121b', '#263146'],
+    paletteMood: { hueRange: [210, 270], satRange: [46, 76], lightRange: [58, 72], harmony: ['mono', 'analogous'], contrast: 'soft', mode: 'dark' },
+    fontMoods: ['minimal', 'modern'],
+    buttonStyles: ['neumorphism'],
+  },
 
   // ----- Metal materials — warm and cool refined surfaces -----
   Gold: {
@@ -895,6 +917,7 @@ const MATERIAL_BORDER_COLOR = {
   Gold: '#fff4c0', Copper: '#ffe8d0', Platinum: '#eef0f8', Brass: '#f0e0a0', Bronze: '#f4ddb0',
   Obsidian: '#7080b0', Midnight: '#6070b8', Carbon: '#606070', Eclipse: '#9070c8',
   Forest: '#507068', Espresso: '#806040', Slate: '#6070a0',
+  Neumorph: '#f8fafc', NeumorphDark: '#263146',
   Ivory: '#fff7e8', Newsprint: '#d8d0c0', Gallery: '#ffffff', Runway: '#b89a82',
   Sterile: '#e4f8ff', Blueprint: '#8fc8ff', Diagnostic: '#b8f4e8', Instrument: '#dce4e8',
   Neon: '#00f5ff', Afterhours: '#7a58ff', Synthwave: '#ff5fc8', Laser: '#39ff14',
@@ -1035,6 +1058,7 @@ const DEFAULT_PAGE_STYLE = PAGE_STYLES[0];
 function getFamilyGroup(mat) {
   if (!mat) return 'generic';
   if (mat.family === 'pixel') return 'pixel';
+  if (mat.family === 'neumorph') return 'neumorph';
   if (mat.family === 'hand' && mat.style === 'calligraphic') return 'hand-calligraphic';
   if (mat.family === 'hand') return 'hand-sketch';
   return 'generic';
@@ -1183,6 +1207,40 @@ const BUTTON_STYLES = [
     secondaryShadow: '0 8px 20px rgba(15,18,25,0.06), 0 2px 5px rgba(255,255,255,0.65) inset, 0 -4px 8px rgba(15,18,25,0.08) inset',
     tertiaryBorder: (a) => `1px solid ${a}55`,
     tertiaryShadow: '0 2px 5px rgba(255,255,255,0.35) inset',
+  },
+  {
+    name: 'neumorphism',
+    radius: '24px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a, b, isDark) => isDark
+      ? '8px 8px 18px rgba(0,0,0,0.42), -7px -7px 16px rgba(66,78,98,0.34), inset 1px 1px 0 rgba(255,255,255,0.16)'
+      : '6px 6px 12px rgba(174,182,192,0.48), -6px -6px 12px rgba(255,255,255,1), inset 1px 1px 0 rgba(255,255,255,0.44)',
+    secondaryShadow: (isDark) => isDark
+      ? '6px 6px 12px rgba(0,0,0,0.38), -6px -6px 12px rgba(66,78,98,0.34), inset 1px 1px 0 rgba(255,255,255,0.1)'
+      : '6px 6px 12px rgba(174,182,192,0.44), -6px -6px 12px rgba(255,255,255,1), inset 1px 1px 0 rgba(255,255,255,0.78)',
+    tertiaryBorder: () => 'none',
+    tertiaryShadow: () => 'none',
+  },
+  {
+    name: 'neumorphism-soft',
+    radius: '16px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a, b, isDark) => BUTTON_STYLES.find((s) => s.name === 'neumorphism').primaryShadow(a, b, isDark),
+    secondaryShadow: (isDark) => BUTTON_STYLES.find((s) => s.name === 'neumorphism').secondaryShadow(isDark),
+    tertiaryBorder: () => 'none',
+    tertiaryShadow: () => 'none',
+  },
+  {
+    name: 'neumorphism-pill',
+    radius: '999px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1) => g1,
+    primaryShadow: (a, b, isDark) => BUTTON_STYLES.find((s) => s.name === 'neumorphism').primaryShadow(a, b, isDark),
+    secondaryShadow: (isDark) => BUTTON_STYLES.find((s) => s.name === 'neumorphism').secondaryShadow(isDark),
+    tertiaryBorder: () => 'none',
+    tertiaryShadow: () => 'none',
   },
   {
     name: 'rubberized',
@@ -1441,11 +1499,17 @@ function genPalette(material) {
 
 // Button styles locked to a family (or family + style). Every other material
 // picks from the remaining "general" pool.
-const FAMILY_BUTTON_STYLES = new Set(['arcade-block', 'hand-sketch', 'hand-calligraphic']);
+const FAMILY_BUTTON_STYLES = new Set(['arcade-block', 'hand-sketch', 'hand-calligraphic', 'neumorphism', 'neumorphism-soft', 'neumorphism-pill']);
 
 function pickButtonStyle(material) {
   if (material) {
     if (material.family === 'pixel') return BUTTON_STYLES.find((s) => s.name === 'arcade-block');
+    if (material.family === 'neumorph') {
+      const pool = ['neumorphism', 'neumorphism-soft', 'neumorphism-pill'];
+      const name = pickFresh(pool, 'button');
+      remember('button', name);
+      return BUTTON_STYLES.find((s) => s.name === name);
+    }
     if (material.family === 'hand') {
       const target = material.style === 'sketch' ? 'hand-sketch' : 'hand-calligraphic';
       return BUTTON_STYLES.find((s) => s.name === target);
@@ -1573,11 +1637,16 @@ function applyTheme(theme, opts = {}) {
     const [a, bb, ccc] = c.palette;
     const [, g2, g3] = c.grays;
     const isDark = c.mode === 'dark';
+    const neoShadowColor = isDark ? 'rgba(0,0,0,0.48)' : 'rgba(174,182,192,0.48)';
+    const neoHighlightColor = isDark ? 'rgba(66,78,98,0.44)' : 'rgba(255,255,255,1)';
     ui.card.dataset.button = b.name;
     document.body.dataset.button = b.name;
+    root.setProperty('--neo-shadow-color', neoShadowColor);
+    root.setProperty('--neo-highlight-color', neoHighlightColor);
     root.setProperty('--btn-radius', b.radius);
-    root.setProperty('--btn-primary-bg', b.primaryGrad(a, bb, ccc));
+    root.setProperty('--btn-primary-bg', b.primaryGrad(a, bb, ccc, c.grays[0]));
     root.setProperty('--btn-secondary-bg', b.secondaryGrad(c.grays[0], g2, g3));
+    root.setProperty('--btn-neo-secondary-bg', m.cardBg);
     root.setProperty('--btn-primary-active-text', a);
     root.setProperty('--btn-secondary-active-text', g2);
     root.setProperty('--btn-tertiary-active-text', m.bgBase);
@@ -1761,6 +1830,38 @@ function setScope(scope) {
   positionPill(ui.scopeSeg);
 }
 
+function clearPressedPreviewButtons() {
+  $$('.pv.is-pressed').forEach((btn) => {
+    btn.classList.remove('is-pressed');
+    if (btn.hasPointerCapture && btn.dataset.pointerId) {
+      try { btn.releasePointerCapture(Number(btn.dataset.pointerId)); } catch {}
+    }
+    delete btn.dataset.pointerId;
+  });
+}
+
+function wirePreviewPressStates(root = document) {
+  root.addEventListener('pointerdown', (e) => {
+    const btn = e.target.closest('.pv');
+    if (!btn || !root.contains(btn)) return;
+    clearPressedPreviewButtons();
+    btn.classList.add('is-pressed');
+    btn.dataset.pointerId = String(e.pointerId);
+    if (btn.setPointerCapture) {
+      try { btn.setPointerCapture(e.pointerId); } catch {}
+    }
+  });
+
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => {
+    root.addEventListener(type, (e) => {
+      const btn = e.target.closest('.pv');
+      if (!btn || !root.contains(btn)) return;
+      btn.classList.remove('is-pressed');
+      delete btn.dataset.pointerId;
+    });
+  });
+}
+
 // ---- saved themes ----
 const STORAGE_KEY = 'palette.saved.v1';
 
@@ -1828,6 +1929,9 @@ function buildSavedCard(theme, idx) {
   const isEditingThisCard = isEditingSaved() && state.savedEdit.index === idx;
   const a = t.colors.palette[0], b = t.colors.palette[1], c = t.colors.palette[2];
   const [g1, g2, g3] = t.colors.grays;
+  const isDark = t.colors.mode === 'dark';
+  const neoShadowColor = isDark ? 'rgba(0,0,0,0.48)' : 'rgba(174,182,192,0.48)';
+  const neoHighlightColor = isDark ? 'rgba(66,78,98,0.44)' : 'rgba(255,255,255,1)';
 
   const vars = {
     '--card-bg': t.material.cardBg,
@@ -1853,17 +1957,20 @@ function buildSavedCard(theme, idx) {
     '--ink-strong': t.colors.inkStrong,
     '--ink-mute': t.colors.inkMute,
     '--accent': t.colors.accent,
+    '--neo-shadow-color': neoShadowColor,
+    '--neo-highlight-color': neoHighlightColor,
 
     '--btn-radius': t.button.radius,
-    '--btn-primary-bg': t.button.primaryGrad(a, b, c),
+    '--btn-primary-bg': t.button.primaryGrad(a, b, c, g1),
     '--btn-secondary-bg': t.button.secondaryGrad(g1, g2, g3),
+    '--btn-neo-secondary-bg': t.material.cardBg,
     '--btn-primary-active-text': a,
     '--btn-secondary-active-text': g2,
     '--btn-tertiary-active-text': t.material.bgBase,
-    '--btn-primary-shadow': t.button.primaryShadow(a, b, t.colors.mode === 'dark'),
-    '--btn-secondary-shadow': typeof t.button.secondaryShadow === 'function' ? t.button.secondaryShadow(t.colors.mode === 'dark') : t.button.secondaryShadow,
+    '--btn-primary-shadow': t.button.primaryShadow(a, b, isDark),
+    '--btn-secondary-shadow': typeof t.button.secondaryShadow === 'function' ? t.button.secondaryShadow(isDark) : t.button.secondaryShadow,
     '--btn-tertiary-border': t.button.tertiaryBorder(a),
-    '--btn-tertiary-shadow': typeof t.button.tertiaryShadow === 'function' ? t.button.tertiaryShadow(t.colors.mode === 'dark') : t.button.tertiaryShadow,
+    '--btn-tertiary-shadow': typeof t.button.tertiaryShadow === 'function' ? t.button.tertiaryShadow(isDark) : t.button.tertiaryShadow,
   };
 
   const card = document.createElement('article');
@@ -1914,9 +2021,9 @@ function buildSavedCard(theme, idx) {
         ${swatchHTML('gray', g3, 2)}
       </section>
       <section class="btn-stack" aria-label="Button preview">
-        <button class="pv pv--primary" type="button"><span>Primary action</span></button>
-        <button class="pv pv--secondary" type="button"><span>Secondary</span></button>
-        <button class="pv pv--tertiary" type="button"><span>Tertiary</span></button>
+        <button class="pv pv--primary" type="button"><span>Primary button</span></button>
+        <button class="pv pv--secondary" type="button"><span>Secondary button</span></button>
+        <button class="pv pv--tertiary" type="button"><span>Tertiary button</span></button>
       </section>
     </div>
   `;
@@ -2641,16 +2748,16 @@ async function exportImage() {
   const btnX = padding + 28;
 
   svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${btnRx}" fill="${primaryGrad.fill}"/>`;
-  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="#ffffff" text-anchor="middle">Primary action</text>`;
+  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="#ffffff" text-anchor="middle">Primary button</text>`;
   y += btnH + 10;
 
   svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${btnRx}" fill="${secondaryGrad.fill}"/>`;
-  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.inkStrong}" text-anchor="middle">Secondary</text>`;
+  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.inkStrong}" text-anchor="middle">Secondary button</text>`;
   y += btnH + 10;
 
   const tertiaryDash = tertiaryBorder.dashed ? ' stroke-dasharray="6,4"' : '';
   svg += `<rect x="${btnX}" y="${y}" width="${btnW}" height="${btnH}" rx="${btnRx}" fill="none" stroke="${tertiaryBorder.color}" stroke-width="${tertiaryBorder.width}"${tertiaryDash}/>`;
-  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.accent}" text-anchor="middle">Tertiary</text>`;
+  svg += `<text x="${btnX + btnW / 2}" y="${y + btnH / 2 + 6}" font-family="${sansFamily}" font-weight="600" font-size="16" fill="${t.colors.accent}" text-anchor="middle">Tertiary button</text>`;
   y += btnH + 24;
 
   // Material label
@@ -2696,6 +2803,8 @@ function init() {
   document.addEventListener('dblclick', (e) => {
     if (e.target.closest('button, .segmented, .controls')) e.preventDefault();
   }, { capture: true });
+  wirePreviewPressStates(document);
+  window.addEventListener('blur', clearPressedPreviewButtons);
 
   wireSegmented(ui.topSeg, (btn) => switchMode(btn.dataset.mode));
   wireSegmented(ui.scopeSeg, (btn) => { state.scope = btn.dataset.scope; });
