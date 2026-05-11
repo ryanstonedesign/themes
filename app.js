@@ -1541,7 +1541,7 @@ function pickButtonStyle(material) {
       return BUTTON_STYLES.find((s) => s.name === target);
     }
     if (Array.isArray(material.buttonStyles) && material.buttonStyles.length) {
-      const pool = [...new Set([...material.buttonStyles, 'rubberized', 'rubberized-rect'])]
+      const pool = [...new Set([...material.buttonStyles, 'rubberized-rect'])]
         .filter((name) => BUTTON_STYLES.some((s) => s.name === name));
       if (pool.length) {
         const name = pickFresh(pool, 'button');
