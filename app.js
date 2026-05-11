@@ -1269,6 +1269,32 @@ const BUTTON_STYLES = [
     tertiaryShadow: () => 'none',
   },
   {
+    name: 'rubberized-rect',
+    radius: '14px',
+    primaryGrad: (a) => a,
+    secondaryGrad: (g1, g2) => g2,
+    primaryShadow: (a, b, isDark) => isDark ? `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.3),
+      2px 2px 10px rgba(0,0,0,0.45),
+      -2px -2px 10px rgba(0,0,0,0.2)` : `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.3),
+      2px 2px 10px rgba(0,0,0,0.3),
+      -2px -2px 10px rgba(255,255,255,0.5)`,
+    secondaryShadow: (isDark) => isDark ? `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.22),
+      2px 2px 10px rgba(0,0,0,0.38),
+      -2px -2px 10px rgba(0,0,0,0.18)` : `
+      inset 6px 6px 10px rgba(255,255,255,0.6),
+      inset -6px -6px 10px rgba(0,0,0,0.22),
+      2px 2px 10px rgba(0,0,0,0.22),
+      -2px -2px 10px rgba(255,255,255,0.58)`,
+    tertiaryBorder: (a) => `5px solid ${a}`,
+    tertiaryShadow: () => 'none',
+  },
+  {
     name: 'radial-glow',
     radius: '18px',
     primaryGrad: (a, b, c) => `
