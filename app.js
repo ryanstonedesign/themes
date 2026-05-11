@@ -1580,7 +1580,7 @@ function applyTheme(theme, opts = {}) {
     root.setProperty('--btn-secondary-bg', b.secondaryGrad(c.grays[0], g2, g3));
     root.setProperty('--btn-primary-active-text', a);
     root.setProperty('--btn-secondary-active-text', g2);
-    root.setProperty('--btn-tertiary-active-text', 'transparent');
+    root.setProperty('--btn-tertiary-active-text', m.bgBase);
     root.setProperty('--btn-primary-shadow', b.primaryShadow(a, bb, isDark));
     root.setProperty('--btn-secondary-shadow', typeof b.secondaryShadow === 'function' ? b.secondaryShadow(isDark) : b.secondaryShadow);
     root.setProperty('--btn-tertiary-border', b.tertiaryBorder(a));
@@ -1859,7 +1859,7 @@ function buildSavedCard(theme, idx) {
     '--btn-secondary-bg': t.button.secondaryGrad(g1, g2, g3),
     '--btn-primary-active-text': a,
     '--btn-secondary-active-text': g2,
-    '--btn-tertiary-active-text': 'transparent',
+    '--btn-tertiary-active-text': t.material.bgBase,
     '--btn-primary-shadow': t.button.primaryShadow(a, b, t.colors.mode === 'dark'),
     '--btn-secondary-shadow': typeof t.button.secondaryShadow === 'function' ? t.button.secondaryShadow(t.colors.mode === 'dark') : t.button.secondaryShadow,
     '--btn-tertiary-border': t.button.tertiaryBorder(a),
