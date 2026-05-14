@@ -882,6 +882,7 @@ const MATERIALS = {
   },
 };
 const MATERIAL_NAMES = Object.keys(MATERIALS);
+const NEUMORPH_MATERIAL_NAMES = MATERIAL_NAMES.filter((name) => MATERIALS[name].family === 'neumorph');
 
 // Corner radius per material (applied via --card-radius; family CSS overrides take priority)
 const MATERIAL_CARD_RADIUS = {
@@ -1381,15 +1382,19 @@ const pickFresh = (pool, key, identityFn = (x) => x) => {
 };
 
 // ----------------------------- generation pieces -----------------------------
-function pickMaterial() {
-  const name = pickFresh(MATERIAL_NAMES, 'material');
-  remember('material', name);
+function materialFromName(name) {
   return {
     name,
     ...MATERIALS[name],
     cardRadius: MATERIAL_CARD_RADIUS[name] || '32px',
     borderColor: MATERIAL_BORDER_COLOR[name] || '#ffffff',
   };
+}
+
+function pickMaterial() {
+  const name = pickFresh(MATERIAL_NAMES, 'material');
+  remember('material', name);
+  return materialFromName(name);
 }
 
 function pickFontPair(materialFontMoods) {
@@ -1569,6 +1574,8 @@ const state = {
   theme: null,
   saved: [],
   savedEdit: null,
+  fullRegenCount: 0,
+  lastNeumorphRegen: 0,
 };
 
 const ui = {
@@ -1749,18 +1756,29 @@ function buildNextTheme(prev, scope = 'all') {
   const newButton = (mat) => pickButtonStyle(mat);
   const newPage = () => pickPageStyle();
 
+  const pickNeumorphMaterial = () => {
+    const fresh = NEUMORPH_MATERIAL_NAMES.filter((n) => !isRecent('material', n) && n !== prev?.material?.name);
+    const candidates = fresh.length ? fresh : NEUMORPH_MATERIAL_NAMES.filter((n) => n !== prev?.material?.name);
+    const name = candidates.length ? choice(candidates) : choice(NEUMORPH_MATERIAL_NAMES);
+    remember('material', name);
+    return materialFromName(name);
+  };
+
+  const shouldForceNeumorph = () => {
+    if (NEUMORPH_MATERIAL_NAMES.length === 0) return false;
+    if (prev?.material?.family === 'neumorph') return false;
+    const nextCount = state.fullRegenCount + 1;
+    if (state.lastNeumorphRegen === 0) return nextCount >= 5;
+    return nextCount - state.lastNeumorphRegen >= 15;
+  };
+
   // Pick a material from a given pool, avoiding the current one and recent picks
   const pickFromPool = (pool) => {
     const fresh = pool.filter((n) => !isRecent('material', n) && n !== prev?.material?.name);
     const candidates = fresh.length > 0 ? fresh : pool.filter((n) => n !== prev?.material?.name);
     const name = candidates.length > 0 ? choice(candidates) : choice(pool);
     remember('material', name);
-    return {
-      name,
-      ...MATERIALS[name],
-      cardRadius: MATERIAL_CARD_RADIUS[name] || '32px',
-      borderColor: MATERIAL_BORDER_COLOR[name] || '#ffffff',
-    };
+    return materialFromName(name);
   };
 
   // Pool of material names in the same family group as the given material
@@ -1773,11 +1791,17 @@ function buildNextTheme(prev, scope = 'all') {
 
   if (scope === 'all') {
     // Full material change from the whole pool
-    let tries = 0;
-    do {
-      material = pickFromPool(MATERIAL_NAMES);
-      tries++;
-    } while (prev && material.name === prev.material.name && tries < 5);
+    if (shouldForceNeumorph()) {
+      material = pickNeumorphMaterial();
+    } else {
+      let tries = 0;
+      do {
+        material = pickFromPool(MATERIAL_NAMES);
+        tries++;
+      } while (prev && material.name === prev.material.name && tries < 5);
+    }
+    state.fullRegenCount += 1;
+    if (material.family === 'neumorph') state.lastNeumorphRegen = state.fullRegenCount;
     font = newFont(material);
     colors = newColors(material);
     button = newButton(material);
