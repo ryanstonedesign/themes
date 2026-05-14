@@ -2366,6 +2366,100 @@ function buildDesignMarkdown(t) {
   const btnSecondaryShadow = typeof t.button.secondaryShadow === 'function' ? t.button.secondaryShadow(isDark) : t.button.secondaryShadow;
   const btnTertiaryBorder = t.button.tertiaryBorder(a);
 
+  // Hover/active state tokens per button interaction family
+  const neoShadowColor = isDark ? 'rgba(0,0,0,0.48)' : 'rgba(174,182,192,0.48)';
+  const neoHighlightColor = isDark ? 'rgba(66,78,98,0.44)' : 'rgba(255,255,255,1)';
+  const btnName = t.button.name;
+  let btnStates; let btnStatesProse;
+  if (btnName.startsWith('rubberized')) {
+    const priHoverText = `color-mix(in srgb, ${g1} 82%, ${a})`;
+    const defHoverText = `color-mix(in srgb, ${a} 84%, #000000)`;
+    const rubInset = 'inset 2px 2px 1px rgba(0,0,0,0.3), inset -2px -2px 1px rgba(255,255,255,0.5)';
+    btnStates = {
+      primary:   { hover: { transform: 'none', filter: 'none', textColor: priHoverText },
+                   active: { shadow: rubInset, textColor: a } },
+      secondary: { hover: { transform: 'none', filter: 'none', textColor: defHoverText },
+                   active: { shadow: rubInset, textColor: g2 } },
+      tertiary:  { hover: { background: 'transparent', transform: 'none', filter: 'none' },
+                   active: { background: 'transparent', textColor: m.bgBase } },
+    };
+    btnStatesProse = `Rubberized buttons convey press through inset shadow and colour shifts — no transform is applied on hover or press.\n\n` +
+      `- **button-primary** hover — text lightens to \`${priHoverText}\`.\n` +
+      `- **button-primary** active — inset rubber shadow \`${rubInset}\` + text shifts to \`${a}\` (primary).\n` +
+      `- **button-secondary** hover — text darkens to \`${defHoverText}\`.\n` +
+      `- **button-secondary** active — same inset rubber shadow + text shifts to \`${g2}\` (surface-muted).\n` +
+      `- **button-tertiary** hover — no visual change.\n` +
+      `- **button-tertiary** active — text shifts to the page background colour \`${m.bgBase}\`.`;
+  } else if (btnName.startsWith('neumorphism')) {
+    const neoHoverShadow =
+      `5px 5px 9px color-mix(in srgb, ${neoShadowColor} 84%, transparent), ` +
+      `-5px -5px 9px color-mix(in srgb, ${neoHighlightColor} 86%, transparent), ` +
+      `inset 1px 1px 0 color-mix(in srgb, ${neoHighlightColor} 72%, transparent)`;
+    const neoActivePri = 'inset 4px 4px 7px rgba(0,0,0,0.38), inset -4px -4px 7px rgba(66,78,98,0.3)';
+    const neoActiveSec =
+      `inset 4px 4px 7px color-mix(in srgb, ${neoShadowColor} 90%, transparent), ` +
+      `inset -4px -4px 7px color-mix(in srgb, ${neoHighlightColor} 90%, transparent)`;
+    btnStates = {
+      primary:   { hover: { transform: 'none', filter: 'none', shadow: neoHoverShadow },
+                   active: { transform: 'none', filter: 'none', shadow: neoActivePri } },
+      secondary: { hover: { transform: 'none', filter: 'none', shadow: neoHoverShadow },
+                   active: { transform: 'none', filter: 'none', shadow: neoActiveSec } },
+      tertiary:  { hover: { background: 'transparent', shadow: 'none' },
+                   active: { background: 'transparent', shadow: 'none' } },
+    };
+    btnStatesProse = `Neumorphic buttons convey press through shadow shifts — no transform or brightness filter is applied.\n\n` +
+      `- **button-primary** hover — deeper lifted outset neumorph shadow.\n` +
+      `- **button-primary** active — hard inset shadow \`${neoActivePri}\`.\n` +
+      `- **button-secondary** hover — same deeper lifted outset shadow.\n` +
+      `- **button-secondary** active — inset neumorph shadow using surface tints: \`${neoActiveSec}\`.\n` +
+      `- **button-tertiary** hover — no change (transparent; box-shadow: none).\n` +
+      `- **button-tertiary** active — no change.`;
+  } else if (btnName === 'arcade-block') {
+    btnStates = {
+      primary:   { hover: { transform: 'translate(-1px, -1px)', filter: 'none' },
+                   active: { transform: 'translate(2px, 2px)', filter: 'none' } },
+      secondary: { hover: { transform: 'translate(-1px, -1px)', filter: 'none' },
+                   active: { transform: 'translate(2px, 2px)', filter: 'none' } },
+      tertiary:  { hover: { transform: 'translate(-1px, -1px)', filter: 'none' },
+                   active: { transform: 'translate(2px, 2px)', filter: 'none' } },
+    };
+    btnStatesProse = `Pixel buttons use a hard offset translation (no blur) to simulate the 8-bit push-in — all three variants behave identically.\n\n` +
+      `- All buttons hover — \`translate(-1px, -1px)\` (no filter).\n` +
+      `- All buttons active — \`translate(2px, 2px)\` (no filter).`;
+  } else if (btnName === 'hand-sketch') {
+    btnStates = {
+      primary:   { hover: { transform: 'translate(-1px, -1px)' },
+                   active: { transform: 'translate(1px, 2px)', filter: 'none' } },
+      secondary: { hover: { transform: 'translate(-1px, -1px)' },
+                   active: { transform: 'translate(1px, 2px)', filter: 'none' } },
+      tertiary:  { hover: { transform: 'translate(-1px, -1px)' },
+                   active: { transform: 'translate(1px, 2px)', filter: 'none' } },
+    };
+    btnStatesProse = `Hand-sketch buttons use a small ink-offset translation to simulate pressing a hand-drawn stamp — all three variants behave identically.\n\n` +
+      `- All buttons hover — \`translate(-1px, -1px)\`.\n` +
+      `- All buttons active — \`translate(1px, 2px)\` (no brightness filter).`;
+  } else {
+    const priHoverShadow = `${btnPrimaryShadow}, 0 12px 28px rgba(0,0,0,0.06)`;
+    btnStates = {
+      primary:   { hover: { transform: 'translateY(-1px)', filter: 'brightness(1.04)', shadow: priHoverShadow },
+                   active: { transform: 'translateY(1px) scale(0.995)', filter: 'brightness(0.96)' } },
+      secondary: { hover: { transform: 'translateY(-1px)', filter: 'brightness(1.04)' },
+                   active: { transform: 'translateY(1px) scale(0.995)', filter: 'brightness(0.96)' } },
+      tertiary:  { hover: { background: `color-mix(in srgb, ${a} 10%, transparent)`, transform: 'translateY(-1px)', filter: 'brightness(1.04)' },
+                   active: { background: `color-mix(in srgb, ${a} 16%, transparent)`, transform: 'translateY(1px) scale(0.995)', filter: 'brightness(0.96)' } },
+    };
+    btnStatesProse = `All three variants share the same lift-and-depress interaction (hover requires a pointer device).\n\n` +
+      `- **button-primary** hover — lift \`translateY(-1px)\` + \`brightness(1.04)\` + deeper shadow glow.\n` +
+      `- **button-primary** active — depress \`translateY(1px) scale(0.995)\` + \`brightness(0.96)\`.\n` +
+      `- **button-secondary** hover — lift \`translateY(-1px)\` + \`brightness(1.04)\`.\n` +
+      `- **button-secondary** active — depress \`translateY(1px) scale(0.995)\` + \`brightness(0.96)\`.\n` +
+      `- **button-tertiary** hover — 10% primary tint on background + lift \`translateY(-1px)\` + \`brightness(1.04)\`.\n` +
+      `- **button-tertiary** active — 16% primary tint on background + depress \`translateY(1px) scale(0.995)\` + \`brightness(0.96)\`.`;
+  }
+  const stateYaml = (obj) => Object.entries(obj)
+    .map(([k, v]) => `      ${k}: "${v}"`)
+    .join('\n');
+
   // mix-blend-mode: overlay on a very dark surface produces no visible noise.
   // Compute relative luminance from the card background rgba to detect this.
   const rgbaMatch = m.cardBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
@@ -2544,16 +2638,28 @@ ${cardYaml}
     textColor: "#FFFFFF"
     rounded: "{rounded.button}"
     shadow: "${btnPrimaryShadow}"
+    hover:
+${stateYaml(btnStates.primary.hover)}
+    active:
+${stateYaml(btnStates.primary.active)}
   button-secondary:
     background: "${btnSecondaryBg}"
     textColor: "{colors.inkStrong}"
     rounded: "{rounded.button}"
     shadow: "${btnSecondaryShadow}"
+    hover:
+${stateYaml(btnStates.secondary.hover)}
+    active:
+${stateYaml(btnStates.secondary.active)}
   button-tertiary:
     background: transparent
     textColor: "{colors.primary}"
     rounded: "{rounded.button}"
     border: "${btnTertiaryBorder}"
+    hover:
+${stateYaml(btnStates.tertiary.hover)}
+    active:
+${stateYaml(btnStates.tertiary.active)}
 ---
 
 # ${m.name}
@@ -2601,6 +2707,10 @@ ${cardCss}
 - **button-secondary** — \`${btnSecondaryBg}\` background with an \`{colors.inkStrong}\` label, \`{rounded.button}\` corners, and \`box-shadow: ${btnSecondaryShadow}\`. Use for the next-most-important action; pair at most one secondary with each primary.
 - **button-tertiary** — transparent fill with a \`{colors.primary}\` label and a \`${btnTertiaryBorder}\` border at \`{rounded.button}\` corners. Use for low-priority links, "Cancel"/"Dismiss"-style actions, and inline navigation.
 - **card** — see "Card surface" above. Use as the default container for grouped content.
+
+## Button states
+
+${btnStatesProse}
 `;
 }
 
