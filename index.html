@@ -29,6 +29,7 @@
         <button class="seg-btn" role="tab" aria-selected="false" data-mode="saved">
           Saved <span class="seg-count" id="savedCount" hidden>0</span>
         </button>
+        <button class="seg-btn" role="tab" aria-selected="false" data-mode="examples">Examples</button>
         <span class="seg-pill" aria-hidden="true"></span>
       </nav>
 
@@ -85,9 +86,15 @@
         </div>
       </section>
 
+      <!-- Examples view -->
+      <section class="view view--examples" id="examplesView" hidden>
+        <div class="snap-stack" id="examplesStack"></div>
+      </section>
+
       <button class="ctrl ctrl--icon saved-edit-btn" id="savedEditBtn" hidden aria-label="Edit saved theme" title="Edit">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16.5 3.5 4 4L8 20l-5 1 1-5 12.5-12.5Z"/></svg>
       </button>
+      <div class="example-name-bar" id="exampleNameBar" hidden aria-live="polite"></div>
 
       <!-- Bottom control bar -->
       <div class="controls" id="controls">

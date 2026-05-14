@@ -296,7 +296,8 @@ button:focus-visible,
   align-items: stretch;
 }
 .view--create { align-items: stretch; }
-.view--saved {
+.view--saved,
+.view--examples {
   align-items: stretch;
   padding: 0;
 }
@@ -920,6 +921,31 @@ body[data-family="neumorph"] .bg-grain {
 .saved-edit-btn:active {
   transform: translateX(-50%);
 }
+
+.example-name-bar {
+  position: fixed;
+  z-index: 5;
+  top: var(--saved-edit-top, calc(var(--saved-card-top, 0px) + var(--saved-card-height, 100%) + 12px));
+  left: var(--saved-card-center, 50%);
+  width: min(var(--stage-w), var(--saved-card-width, var(--stage-w)));
+  min-height: var(--ctrl-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border-radius: var(--ctrl-radius);
+  background: var(--ctrl-bg);
+  color: var(--ctrl-ink);
+  box-shadow: var(--ctrl-shadow);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.example-name-bar[hidden] { display: none; }
 
 .saved-empty {
   width: 100%;

@@ -1569,6 +1569,7 @@ const state = {
   theme: null,
   saved: [],
   savedEdit: null,
+  examples: [],
 };
 
 const ui = {
@@ -1585,9 +1586,12 @@ const ui = {
   fontLink: $('#font-link'),
   createView: $('#createView'),
   savedView: $('#savedView'),
+  examplesView: $('#examplesView'),
   snapStack: $('#snapStack'),
+  examplesStack: $('#examplesStack'),
   savedEmpty: $('#savedEmpty'),
   savedEditBtn: $('#savedEditBtn'),
+  exampleNameBar: $('#exampleNameBar'),
   savedCount: $('#savedCount'),
   controls: $('#controls'),
 };
@@ -1723,6 +1727,59 @@ function applyTheme(theme, opts = {}) {
 
 function themeId(t) {
   return `${t.material.name}|${t.font.sans}-${t.font.serif}|${t.colors.seed}|${t.button.name}|${t.page?.name || DEFAULT_PAGE_STYLE.name}`;
+}
+
+function materialByName(name) {
+  return {
+    name,
+    ...MATERIALS[name],
+    cardRadius: MATERIAL_CARD_RADIUS[name] || '32px',
+    borderColor: MATERIAL_BORDER_COLOR[name] || '#ffffff',
+  };
+}
+
+function preserveGenerationHistory(fn) {
+  const snapshot = Object.fromEntries(Object.entries(history).map(([key, value]) => [key, [...value]]));
+  try {
+    return fn();
+  } finally {
+    Object.entries(snapshot).forEach(([key, value]) => { history[key] = value; });
+  }
+}
+
+function buildExampleTheme(name) {
+  const material = materialByName(name);
+  const pair = pickFontPair(material.fontMoods);
+  const font = {
+    sans: pair.sans,
+    serif: pair.serif,
+    mood: pair.mood,
+    sansWeight: choice(pair.sw),
+    serifWeight: choice(pair.rw),
+    scale: choice(TYPE_SCALES),
+    sw: pair.sw,
+    rw: pair.rw,
+  };
+  return {
+    material,
+    font,
+    colors: genPalette(material),
+    button: pickButtonStyle(material),
+    page: DEFAULT_PAGE_STYLE,
+  };
+}
+
+function ensureExamples() {
+  if (state.examples.length === MATERIAL_NAMES.length) return;
+  state.examples = preserveGenerationHistory(() => MATERIAL_NAMES.map(buildExampleTheme));
+}
+
+function saveTheme(theme) {
+  const id = themeId(theme);
+  if (state.saved.some((t) => themeId(rehydrate(t)) === id)) return false;
+  state.saved.unshift(JSON.parse(JSON.stringify(theme)));
+  persistSaved();
+  return true;
 }
 
 // ---- generation (scope-aware) ----
@@ -1950,8 +2007,10 @@ function rehydrate(theme) {
 }
 
 // Build the same card markup the Create view uses, with theme-scoped CSS vars.
-function buildSavedCard(theme, idx) {
+function buildSavedCard(theme, idx, opts = {}) {
   const t = theme;
+  const mode = opts.mode || 'saved';
+  const isExample = mode === 'example';
   const isEditingThisCard = isEditingSaved() && state.savedEdit.index === idx;
   const a = t.colors.palette[0], b = t.colors.palette[1], c = t.colors.palette[2];
   const [g1, g2, g3] = t.colors.grays;
@@ -2000,7 +2059,7 @@ function buildSavedCard(theme, idx) {
   };
 
   const card = document.createElement('article');
-  card.className = 'card saved-card';
+  card.className = `card saved-card${isExample ? ' example-card' : ''}`;
   card.dataset.idx = String(idx);
   if (t.material.family) card.dataset.family = t.material.family;
   if (t.material.style) card.dataset.style = t.material.style;
@@ -2010,6 +2069,7 @@ function buildSavedCard(theme, idx) {
   const swatchHTML = (role, hex, i) =>
     `<div class="swatch" data-role="${role}" data-i="${i}" style="background:${hex}"><span class="swatch-hex">${hex}</span></div>`;
 
+  const exampleSaved = isExample && state.saved.some((savedTheme) => themeId(rehydrate(savedTheme)) === themeId(t));
   const cardActionsHTML = isEditingThisCard
     ? `
       <button class="ctrl ctrl--icon" data-action="save-edit" aria-label="Save edited theme" title="Save edits">
@@ -2017,6 +2077,15 @@ function buildSavedCard(theme, idx) {
       </button>
       <button class="ctrl ctrl--icon" data-action="discard-edit" aria-label="Discard edits" title="Discard edits">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+    `
+    : isExample
+    ? `
+      <button class="ctrl ctrl--icon" data-action="share" aria-label="Export theme" title="Export">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+      </button>
+      <button class="ctrl ctrl--icon${exampleSaved ? ' is-saved' : ''}" data-action="save-example" aria-label="Save theme" title="Save">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="${exampleSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.9 6.3 6.6.6-5 4.6 1.5 6.5L12 17.8 6 21l1.5-6.5-5-4.6 6.6-.6L12 3Z"/></svg>
       </button>
     `
     : `
@@ -2067,6 +2136,13 @@ function buildSavedCard(theme, idx) {
     updateControlsVisibility();
     renderSaved();
   });
+  card.querySelector('[data-action="save-example"]')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const saved = saveTheme(theme);
+    e.currentTarget.classList.add('is-saved');
+    e.currentTarget.querySelector('svg')?.setAttribute('fill', 'currentColor');
+    showToast(saved ? 'Saved' : 'Already saved');
+  });
   card.querySelector('[data-action="save-edit"]')?.addEventListener('click', (e) => {
     e.stopPropagation();
     saveSavedEdit();
@@ -2087,6 +2163,10 @@ let savedObserver = null;
 let savedActiveIndex = null;
 let savedAtmosphereFrame = 0;
 const savedIntersectionRatios = new Map();
+let examplesObserver = null;
+let examplesActiveIndex = null;
+let examplesAtmosphereFrame = 0;
+const examplesIntersectionRatios = new Map();
 
 function cloneTheme(theme) {
   return JSON.parse(JSON.stringify(theme));
@@ -2097,8 +2177,9 @@ function isEditingSaved() {
 }
 
 function syncSavedFrame() {
-  if (!ui.savedView || !ui.snapStack || ui.savedView.hidden) return;
-  const rect = ui.savedView.getBoundingClientRect();
+  const frameView = !ui.savedView?.hidden ? ui.savedView : (!ui.examplesView?.hidden ? ui.examplesView : null);
+  if (!frameView) return;
+  const rect = frameView.getBoundingClientRect();
   const editButtonHeight = ui.regenBtn.getBoundingClientRect().height || 44;
   const remainingBelowCard = window.innerHeight - rect.bottom;
   const editButtonTop = rect.bottom + Math.max(0, (remainingBelowCard - editButtonHeight) / 2) + 8;
@@ -2117,12 +2198,15 @@ function updateControlsVisibility() {
   const editing = isEditingSaved();
   const controlsVisible = state.mode === 'create' || editing;
   const savedEditVisible = state.mode === 'saved' && state.saved.length > 0 && !editing;
+  const exampleNameVisible = state.mode === 'examples';
   controls.hidden = false;
   controls.classList.toggle('is-hidden', !controlsVisible);
   controls.classList.toggle('is-saved-edit', editing);
   controls.setAttribute('aria-hidden', controlsVisible ? 'false' : 'true');
   ui.savedEditBtn.hidden = !savedEditVisible;
   ui.savedEditBtn.setAttribute('aria-hidden', savedEditVisible ? 'false' : 'true');
+  ui.exampleNameBar.hidden = !exampleNameVisible;
+  ui.exampleNameBar.setAttribute('aria-hidden', exampleNameVisible ? 'false' : 'true');
   ui.topSeg.classList.toggle('is-disabled', editing);
   ui.topSeg.querySelectorAll('.seg-btn').forEach((btn) => {
     btn.disabled = editing;
@@ -2292,17 +2376,77 @@ function renderSaved(focusIndex = 0) {
   if (focusedTheme) updatePageAtmosphere(focusedTheme.material, focusedTheme.page);
 }
 
+function renderExamples(focusIndex = 0) {
+  ensureExamples();
+  syncSavedFrame();
+
+  if (examplesObserver) { examplesObserver.disconnect(); examplesObserver = null; }
+  if (examplesAtmosphereFrame) cancelAnimationFrame(examplesAtmosphereFrame);
+  examplesAtmosphereFrame = 0;
+  examplesActiveIndex = null;
+  examplesIntersectionRatios.clear();
+  ui.examplesStack.innerHTML = '';
+
+  state.examples.forEach((theme, idx) => {
+    ensureFontsLoaded(theme.font);
+    const page = document.createElement('div');
+    page.className = 'snap-page';
+    page.dataset.idx = String(idx);
+    page.appendChild(buildSavedCard(theme, idx, { mode: 'example' }));
+    ui.examplesStack.appendChild(page);
+  });
+
+  examplesObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      examplesIntersectionRatios.set(+e.target.dataset.idx, e.intersectionRatio);
+    }
+    if (examplesAtmosphereFrame) return;
+    examplesAtmosphereFrame = requestAnimationFrame(() => {
+      examplesAtmosphereFrame = 0;
+      let bestIndex = null;
+      let bestRatio = 0;
+      examplesIntersectionRatios.forEach((ratio, idx) => {
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          bestIndex = idx;
+        }
+      });
+      if (bestIndex == null || bestRatio < 0.52 || bestIndex === examplesActiveIndex) return;
+      examplesActiveIndex = bestIndex;
+      const theme = state.examples[bestIndex];
+      if (!theme) return;
+      ui.exampleNameBar.textContent = theme.material.name;
+      updatePageAtmosphere(theme.material, theme.page);
+    });
+  }, { root: ui.examplesStack, threshold: [0, 0.25, 0.52, 0.75, 1] });
+
+  ui.examplesStack.querySelectorAll('.snap-page').forEach((p) => examplesObserver.observe(p));
+  ui.examplesStack.scrollTop = focusIndex * window.innerHeight;
+  const focusedTheme = state.examples[focusIndex] || state.examples[0];
+  examplesActiveIndex = focusIndex;
+  if (focusedTheme) {
+    ui.exampleNameBar.textContent = focusedTheme.material.name;
+    updatePageAtmosphere(focusedTheme.material, focusedTheme.page);
+  }
+}
+
 // ---- mode switching ----
 function switchMode(mode) {
   if (mode !== 'saved') state.savedEdit = null;
   state.mode = mode;
   const isCreate = mode === 'create';
+  const isSaved = mode === 'saved';
+  const isExamples = mode === 'examples';
   ui.createView.hidden = !isCreate;
-  ui.savedView.hidden = isCreate;
+  ui.savedView.hidden = !isSaved;
+  ui.examplesView.hidden = !isExamples;
   updateControlsVisibility();
-  if (mode === 'saved') {
+  if (isSaved) {
     syncSavedFrame();
     renderSaved();
+  } else if (isExamples) {
+    syncSavedFrame();
+    renderExamples();
   } else if (state.theme) {
     // Restore Create-theme atmosphere when returning from Saved
     updatePageAtmosphere(state.theme.material, state.theme.page);
@@ -2872,7 +3016,7 @@ function init() {
     positionPill(ui.topSeg);
     positionPill(ui.scopeSeg);
     updateToastPosition();
-    if (state.mode === 'saved') syncSavedFrame();
+    if (state.mode === 'saved' || state.mode === 'examples') syncSavedFrame();
   });
 
   // Initial layout — defer pill until layout is settled
