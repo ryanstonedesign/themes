@@ -2722,7 +2722,10 @@ ${btnStatesProse}
 }
 
 function downloadDesignMarkdown(filename, md) {
-  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  downloadBlob(filename, new Blob([md], { type: 'text/markdown;charset=utf-8' }));
+}
+
+function downloadBlob(filename, blob) {
   const url = URL.createObjectURL(blob);
   const dl = document.createElement('a');
   dl.href = url;
@@ -2734,6 +2737,20 @@ function downloadDesignMarkdown(filename, md) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+async function shareOrDownloadBlob(filename, blob, title, text) {
+  try {
+    const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' });
+    if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+      await navigator.share({ files: [file], title, text });
+      return;
+    }
+  } catch (err) {
+    if (err?.name === 'AbortError') throw err;
+    console.warn(`Unable to use native file sharing for ${filename}`, err);
+  }
+  downloadBlob(filename, blob);
+}
+
 async function exportCSS() {
   const t = state.shareTarget || state.theme;
   if (!t) return;
@@ -2743,25 +2760,19 @@ async function exportCSS() {
   const filename = `DESIGN-${slug}.md`;
 
   try {
-    const file = new File([md], filename, { type: 'text/markdown' });
-    if (navigator.canShare?.({ files: [file] }) && navigator.share) {
-      await navigator.share({
-        files: [file],
-        title: filename,
-        text: 'DESIGN.md theme template',
-      });
-      closeShare();
-      return;
-    }
+    await shareOrDownloadBlob(
+      filename,
+      new Blob([md], { type: 'text/markdown;charset=utf-8' }),
+      filename,
+      'DESIGN.md theme template'
+    );
   } catch (err) {
     if (err?.name === 'AbortError') {
       closeShare();
       return;
     }
-    console.warn('Unable to use native file sharing for DESIGN.md', err);
+    downloadDesignMarkdown(filename, md);
   }
-
-  downloadDesignMarkdown(filename, md);
   closeShare();
 }
 
@@ -2823,7 +2834,162 @@ async function copyDesignMarkdown() {
   showToast('Copied');
 }
 
+let exportStylesPromise = null;
+function loadExportStyles() {
+  if (!exportStylesPromise) {
+    exportStylesPromise = fetch('./styles.css').then((res) => {
+      if (!res.ok) throw new Error('Unable to load export styles');
+      return res.text();
+    });
+  }
+  return exportStylesPromise;
+}
+
+function imageFromUrl(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Unable to render PNG export'));
+    img.src = url;
+  });
+}
+
+function canvasToBlob(canvas, type = 'image/png') {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error('Unable to create PNG export'));
+    }, type);
+  });
+}
+
+function exportPageVars(theme) {
+  const m = theme.material;
+  const p = theme.page || DEFAULT_PAGE_STYLE;
+  return [
+    ['--bg-base', m.bgBase],
+    ['--bg-orb-a', m.bgOrbs[0]],
+    ['--bg-orb-b', m.bgOrbs[1]],
+    ['--bg-orb-c', m.bgOrbs[2]],
+    ['--bg-orb-d', m.bgOrbs[3]],
+    ['--page-bg', p.bg(m).replace(/\s+/g, ' ').trim()],
+    ['--page-overlay', p.overlay(m).replace(/\s+/g, ' ').trim()],
+    ['--page-overlay-opacity', typeof p.overlayOpacity === 'function' ? p.overlayOpacity(m) : (p.overlayOpacity || '1')],
+    ['--page-overlay-blend', typeof p.overlayBlend === 'function' ? p.overlayBlend(m) : (p.overlayBlend || 'normal')],
+    ['--page-orb-filter', p.orbFilter || 'blur(110px)'],
+    ['--page-orb-opacity', p.orbOpacity || '0.85'],
+    ['--page-orb-scale-a', p.orbScale?.[0] ?? 1],
+    ['--page-orb-scale-b', p.orbScale?.[1] ?? 1],
+    ['--page-orb-scale-c', p.orbScale?.[2] ?? 1],
+    ['--page-orb-scale-d', p.orbScale?.[3] ?? 1],
+    ['--page-overlay-size', p.overlaySize || 'auto'],
+  ].map(([k, v]) => `${k}: ${v}`).join(';');
+}
+
 async function exportImage() {
+  const t = state.shareTarget || state.theme;
+  if (!t) return;
+
+  const W = 800, H = 1100;
+  const css = await loadExportStyles();
+  const card = buildSavedCard(t, -1);
+  card.classList.remove('saved-card');
+  card.removeAttribute('data-idx');
+  card.querySelector('.card-actions')?.remove();
+
+  const rootAttrs = [
+    t.material.family ? `data-family="${escapeHtml(t.material.family)}"` : '',
+    t.material.style ? `data-style="${escapeHtml(t.material.style)}"` : '',
+    `data-button="${escapeHtml(t.button.name)}"`,
+  ].filter(Boolean).join(' ');
+  const rootStyle = `${card.getAttribute('style') || ''};${exportPageVars(t)}`;
+  const exportCss = `${css}
+html, body { margin: 0; width: ${W}px; height: ${H}px; overflow: hidden; }
+.export-root {
+  width: ${W}px;
+  height: ${H}px;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-base);
+  font-family: var(--font-sans);
+  color: var(--ctrl-ink);
+  -webkit-font-smoothing: antialiased;
+}
+.export-root *, .export-root *::before, .export-root *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.export-root .bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.export-root[data-family="neumorph"] .bg { background: var(--bg-base); }
+.export-root[data-family="neumorph"] .bg-orb,
+.export-root[data-family="neumorph"] .bg-grain { opacity: 0; }
+.export-root[data-family="pixel"] .bg-grain {
+  background: var(--page-overlay, linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px));
+  background-size: var(--page-overlay-size, 24px 24px);
+}
+.export-card-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 56px;
+}
+.export-root .card {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  flex: none;
+}
+.export-root .card-actions { display: none !important; }`;
+  const html = `
+    <div xmlns="http://www.w3.org/1999/xhtml" class="export-root" ${rootAttrs} style="${escapeHtml(rootStyle)}">
+      <style>${escapeHtml(exportCss)}</style>
+      <div class="bg" aria-hidden="true">
+        <div class="bg-orb bg-orb--a"></div>
+        <div class="bg-orb bg-orb--b"></div>
+        <div class="bg-orb bg-orb--c"></div>
+        <div class="bg-orb bg-orb--d"></div>
+        <div class="bg-grain"></div>
+      </div>
+      <div class="export-card-wrap">${card.outerHTML}</div>
+    </div>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <foreignObject width="100%" height="100%">${html}</foreignObject>
+  </svg>`;
+
+  let svgUrl = '';
+  try {
+    svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+    const img = await imageFromUrl(svgUrl);
+    const canvas = document.createElement('canvas');
+    canvas.width = W * 2;
+    canvas.height = H * 2;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+    ctx.drawImage(img, 0, 0, W, H);
+    const png = await canvasToBlob(canvas, 'image/png');
+    const filename = `theme-${t.material.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+    await shareOrDownloadBlob(filename, png, filename, 'Theme PNG export');
+    closeShare();
+  } catch (err) {
+    if (err?.name !== 'AbortError') {
+      console.warn('Unable to export PNG', err);
+      showToast('PNG failed');
+    }
+    closeShare();
+  } finally {
+    if (svgUrl) URL.revokeObjectURL(svgUrl);
+  }
+}
+
+async function exportImageApprox() {
   // Build a self-contained SVG snapshot of the card and download as PNG.
   const t = state.shareTarget || state.theme;
   if (!t) return;
@@ -3063,6 +3229,7 @@ function escapeXml(s) {
 // ----------------------------- wire up -----------------------------
 function init() {
   loadSaved();
+  loadExportStyles().catch((err) => console.warn('Unable to preload PNG export styles', err));
 
   document.addEventListener('dblclick', (e) => {
     if (e.target.closest('button, .segmented, .controls')) e.preventDefault();
