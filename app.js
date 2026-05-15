@@ -2759,10 +2759,15 @@ function fallbackCopyText(text) {
   ta.value = text;
   ta.setAttribute('readonly', '');
   ta.style.position = 'fixed';
-  ta.style.left = '-9999px';
+  ta.style.left = '0';
   ta.style.top = '0';
+  ta.style.width = '1px';
+  ta.style.height = '1px';
+  ta.style.opacity = '0.01';
   document.body.appendChild(ta);
+  ta.focus({ preventScroll: true });
   ta.select();
+  ta.setSelectionRange(0, ta.value.length);
   const copied = document.execCommand('copy');
   ta.remove();
   if (!copied) throw new Error('Copy failed');
@@ -2987,9 +2992,10 @@ async function exportImage() {
   svg += `</svg>`;
 
   // Convert SVG to PNG via canvas
+  let svgUrl = '';
   try {
     const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    svgUrl = URL.createObjectURL(blob);
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -2999,16 +3005,23 @@ async function exportImage() {
       ctx.scale(2, 2);
       ctx.drawImage(img, 0, 0);
       canvas.toBlob((b) => {
+        URL.revokeObjectURL(svgUrl);
+        if (!b) return;
+        const pngUrl = URL.createObjectURL(b);
         const dl = document.createElement('a');
-        dl.href = URL.createObjectURL(b);
+        dl.href = pngUrl;
         dl.download = `palette-${t.material.name.toLowerCase()}.png`;
+        dl.style.display = 'none';
+        document.body.appendChild(dl);
         dl.click();
-        URL.revokeObjectURL(url);
+        dl.remove();
+        window.setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
       }, 'image/png');
     };
-    img.onerror = () => { URL.revokeObjectURL(url); };
-    img.src = url;
+    img.onerror = () => { URL.revokeObjectURL(svgUrl); };
+    img.src = svgUrl;
   } catch (e) {
+    if (svgUrl) URL.revokeObjectURL(svgUrl);
   }
   closeShare();
 }
