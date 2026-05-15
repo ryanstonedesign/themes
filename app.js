@@ -2721,25 +2721,47 @@ ${btnStatesProse}
 `;
 }
 
-function exportCSS() {
+function downloadDesignMarkdown(filename, md) {
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const dl = document.createElement('a');
+  dl.href = url;
+  dl.download = filename;
+  dl.style.display = 'none';
+  document.body.appendChild(dl);
+  dl.click();
+  dl.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function exportCSS() {
   const t = state.shareTarget || state.theme;
   if (!t) return;
 
   const slug = t.material.name.toLowerCase().replace(/\s+/g, '-');
   const md = buildDesignMarkdown(t);
-  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const dl = document.createElement('a');
-  dl.href = url;
-  dl.download = `DESIGN-${slug}.md`;
-  dl.style.display = 'none';
-  document.body.appendChild(dl);
-  dl.click();
-  dl.remove();
-  window.setTimeout(() => {
-    URL.revokeObjectURL(url);
-    window.focus();
-  }, 1000);
+  const filename = `DESIGN-${slug}.md`;
+
+  try {
+    const file = new File([md], filename, { type: 'text/markdown' });
+    if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+      await navigator.share({
+        files: [file],
+        title: filename,
+        text: 'DESIGN.md theme template',
+      });
+      closeShare();
+      return;
+    }
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      closeShare();
+      return;
+    }
+    console.warn('Unable to use native file sharing for DESIGN.md', err);
+  }
+
+  downloadDesignMarkdown(filename, md);
   closeShare();
 }
 
