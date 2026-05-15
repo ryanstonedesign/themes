@@ -2732,8 +2732,14 @@ function exportCSS() {
   const dl = document.createElement('a');
   dl.href = url;
   dl.download = `DESIGN-${slug}.md`;
+  dl.style.display = 'none';
+  document.body.appendChild(dl);
   dl.click();
-  URL.revokeObjectURL(url);
+  dl.remove();
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+    window.focus();
+  }, 1000);
   closeShare();
 }
 
@@ -2786,6 +2792,7 @@ async function copyDesignMarkdown() {
       fallbackCopyText(md);
     } catch (fallbackErr) {
       console.warn('Unable to copy DESIGN.md to clipboard', fallbackErr || err);
+      showToast('Copy failed');
       return;
     }
   }
