@@ -2357,6 +2357,10 @@ function buildDesignMarkdown(t) {
   const toGFParam = (name, weight) => `family=${name.replace(/ /g, '+')}:wght@${weight}`;
   const fontUrl = `https://fonts.googleapis.com/css2?${toGFParam(t.font.sans, t.font.sansWeight)}&display=swap`;
   const m = t.material;
+  const p = t.page || DEFAULT_PAGE_STYLE;
+  const pageOverlay = p.overlay(m).replace(/\s+/g, ' ').trim();
+  const pageOverlayOpacity = typeof p.overlayOpacity === 'function' ? p.overlayOpacity(m) : (p.overlayOpacity || '1');
+  const pageOverlayBlend = typeof p.overlayBlend === 'function' ? p.overlayBlend(m) : (p.overlayBlend || 'normal');
   const [a, b2, c2] = t.colors.palette;
   const [g1, g2, g3] = t.colors.grays;
   const btnPrimaryBg = t.button.primaryGrad(a, b2, c2);
@@ -2599,6 +2603,9 @@ description: "Generated theme — ${m.name} material, ${t.button.name} button sh
 page:
   style: "${t.page?.name || DEFAULT_PAGE_STYLE.name}"
   background: "${m.bgBase}"
+  overlay: "${pageOverlay}"
+  overlayOpacity: "${pageOverlayOpacity}"
+  overlayBlend: "${pageOverlayBlend}"${p.overlaySize ? `\n  overlaySize: "${p.overlaySize}"` : ''}
   orbs: ["${m.bgOrbs[0]}", "${m.bgOrbs[1]}", "${m.bgOrbs[2]}", "${m.bgOrbs[3]}"]
 colors:
   primary: "${t.colors.palette[0]}"
