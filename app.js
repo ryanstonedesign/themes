@@ -2870,48 +2870,69 @@ async function exportImage() {
   // Build background SVG matching the actual page style selected for this theme.
   const pageStyle = t.page || DEFAULT_PAGE_STYLE;
   const pageName = pageStyle.name || 'aurora-blur';
-  const orbOp = parseFloat(pageStyle.orbOpacity != null ? pageStyle.orbOpacity : '0.85');
   const [orb0, orb1, orb2, orb3] = t.material.bgOrbs;
+  const isDarkMode = t.material.paletteMood?.mode === 'dark';
 
-  // Per-style base gradient approximated in SVG (color-mix() isn't supported in SVG).
   let bgBaseDef = '';
   let bgBaseLayer = `<rect width="100%" height="100%" fill="${baseBg}"/>`;
-  if (pageName === 'soft-corner-wash') {
-    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${orb0}" stop-opacity="0.28"/><stop offset="48%" stop-color="${baseBg}" stop-opacity="0"/><stop offset="100%" stop-color="${orb2}" stop-opacity="0.24"/></linearGradient>`;
-    bgBaseLayer = `<rect width="100%" height="100%" fill="${baseBg}"/><rect width="100%" height="100%" fill="url(#bgBase)"/>`;
-  } else if (pageName === 'mesh-gradient') {
-    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${baseBg}"/><stop offset="100%" stop-color="${orb3}" stop-opacity="0.24"/></linearGradient>`;
-    bgBaseLayer = `<rect width="100%" height="100%" fill="url(#bgBase)"/>`;
-  } else if (pageName === 'fine-grid' || pageName === 'dot-grid') {
-    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${baseBg}"/><stop offset="100%" stop-color="${orb1}" stop-opacity="0.12"/></linearGradient>`;
-    bgBaseLayer = `<rect width="100%" height="100%" fill="url(#bgBase)"/>`;
-  } else if (pageName === 'spotlight') {
-    bgBaseDef = `<radialGradient id="bgBase" cx="50%" cy="42%" r="50%"><stop offset="0%" stop-color="${orb0}" stop-opacity="0.34"/><stop offset="48%" stop-color="${baseBg}" stop-opacity="0"/></radialGradient>`;
-    bgBaseLayer = `<rect width="100%" height="100%" fill="${baseBg}"/><rect width="100%" height="100%" fill="url(#bgBase)"/>`;
-  }
-
-  // Orb radial gradients scaled by the page style's orbOpacity.
+  // Orbs are only rendered for aurora-blur (their primary visual) and mesh-gradient (baked into
+  // its bg() CSS). All other styles use heavily-blurred CSS circles at low opacity — without a
+  // blur filter the SVG equivalents look harsh and don't match the live page.
   let bgOrbDefs = '';
   let bgOrbLayers = '';
-  if (orbOp > 0) {
+  // Dot/grid SVG <pattern> overlays for styles that use them.
+  let bgOverlayDef = '';
+  let bgOverlayLayer = '';
+
+  if (pageName === 'aurora-blur') {
     bgOrbDefs = `
-    <radialGradient id="ga" cx="20%" cy="15%" r="60%"><stop offset="0%" stop-color="${orb0}" stop-opacity="${(0.95 * orbOp).toFixed(2)}"/><stop offset="100%" stop-color="${orb0}" stop-opacity="0"/></radialGradient>
-    <radialGradient id="gb" cx="80%" cy="25%" r="55%"><stop offset="0%" stop-color="${orb1}" stop-opacity="${(0.85 * orbOp).toFixed(2)}"/><stop offset="100%" stop-color="${orb1}" stop-opacity="0"/></radialGradient>
-    <radialGradient id="gc" cx="85%" cy="90%" r="65%"><stop offset="0%" stop-color="${orb2}" stop-opacity="${(0.85 * orbOp).toFixed(2)}"/><stop offset="100%" stop-color="${orb2}" stop-opacity="0"/></radialGradient>
-    <radialGradient id="gd" cx="15%" cy="95%" r="50%"><stop offset="0%" stop-color="${orb3}" stop-opacity="${(0.70 * orbOp).toFixed(2)}"/><stop offset="100%" stop-color="${orb3}" stop-opacity="0"/></radialGradient>`;
+    <radialGradient id="ga" cx="20%" cy="15%" r="60%"><stop offset="0%" stop-color="${orb0}" stop-opacity="0.95"/><stop offset="100%" stop-color="${orb0}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gb" cx="80%" cy="25%" r="55%"><stop offset="0%" stop-color="${orb1}" stop-opacity="0.85"/><stop offset="100%" stop-color="${orb1}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gc" cx="85%" cy="90%" r="65%"><stop offset="0%" stop-color="${orb2}" stop-opacity="0.85"/><stop offset="100%" stop-color="${orb2}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gd" cx="15%" cy="95%" r="50%"><stop offset="0%" stop-color="${orb3}" stop-opacity="0.70"/><stop offset="100%" stop-color="${orb3}" stop-opacity="0"/></radialGradient>`;
     bgOrbLayers = `
     <rect width="100%" height="100%" fill="url(#ga)"/>
     <rect width="100%" height="100%" fill="url(#gb)"/>
     <rect width="100%" height="100%" fill="url(#gc)"/>
     <rect width="100%" height="100%" fill="url(#gd)"/>`;
+  } else if (pageName === 'soft-corner-wash') {
+    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${orb0}" stop-opacity="0.28"/><stop offset="48%" stop-color="${baseBg}" stop-opacity="0"/><stop offset="100%" stop-color="${orb2}" stop-opacity="0.24"/></linearGradient>`;
+    bgBaseLayer = `<rect width="100%" height="100%" fill="${baseBg}"/><rect width="100%" height="100%" fill="url(#bgBase)"/>`;
+  } else if (pageName === 'mesh-gradient') {
+    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${baseBg}"/><stop offset="100%" stop-color="${orb3}" stop-opacity="0.24"/></linearGradient>`;
+    bgBaseLayer = `<rect width="100%" height="100%" fill="url(#bgBase)"/>`;
+    bgOrbDefs = `
+    <radialGradient id="ga" cx="20%" cy="20%" r="30%"><stop offset="0%" stop-color="${orb0}" stop-opacity="0.50"/><stop offset="100%" stop-color="${orb0}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gb" cx="82%" cy="18%" r="28%"><stop offset="0%" stop-color="${orb1}" stop-opacity="0.50"/><stop offset="100%" stop-color="${orb1}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gc" cx="75%" cy="82%" r="34%"><stop offset="0%" stop-color="${orb2}" stop-opacity="0.50"/><stop offset="100%" stop-color="${orb2}" stop-opacity="0"/></radialGradient>`;
+    bgOrbLayers = `
+    <rect width="100%" height="100%" fill="url(#ga)"/>
+    <rect width="100%" height="100%" fill="url(#gb)"/>
+    <rect width="100%" height="100%" fill="url(#gc)"/>`;
+  } else if (pageName === 'fine-grid') {
+    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${baseBg}"/><stop offset="100%" stop-color="${orb1}" stop-opacity="0.12"/></linearGradient>`;
+    bgBaseLayer = `<rect width="100%" height="100%" fill="url(#bgBase)"/>`;
+    const gridOp = isDarkMode ? (0.38 * 0.54).toFixed(2) : (0.18 * 0.42).toFixed(2);
+    bgOverlayDef = `<pattern id="bgPattern" width="28" height="28" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="28" stroke="${orb0}" stroke-width="1" stroke-opacity="${gridOp}"/><line x1="0" y1="0" x2="28" y2="0" stroke="${orb2}" stroke-width="1" stroke-opacity="${gridOp}"/></pattern>`;
+    bgOverlayLayer = `<rect width="100%" height="100%" fill="url(#bgPattern)"/>`;
+  } else if (pageName === 'dot-grid') {
+    bgBaseDef = `<linearGradient id="bgBase" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${baseBg}"/><stop offset="100%" stop-color="${orb1}" stop-opacity="0.10"/></linearGradient>`;
+    bgBaseLayer = `<rect width="100%" height="100%" fill="url(#bgBase)"/>`;
+    const dotOp = isDarkMode ? (0.48 * 0.50).toFixed(2) : (0.28 * 0.42).toFixed(2);
+    bgOverlayDef = `<pattern id="bgPattern" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r="1" fill="${orb0}" opacity="${dotOp}"/></pattern>`;
+    bgOverlayLayer = `<rect width="100%" height="100%" fill="url(#bgPattern)"/>`;
+  } else if (pageName === 'spotlight') {
+    bgBaseDef = `<radialGradient id="bgBase" cx="50%" cy="42%" r="50%"><stop offset="0%" stop-color="${orb0}" stop-opacity="0.34"/><stop offset="48%" stop-color="${baseBg}" stop-opacity="0"/></radialGradient>`;
+    bgBaseLayer = `<rect width="100%" height="100%" fill="${baseBg}"/><rect width="100%" height="100%" fill="url(#bgBase)"/>`;
   }
+  // solid-field, paper-texture, quiet-vignette: flat baseBg (default bgBaseLayer)
 
-  const bgDefs = bgBaseDef + bgOrbDefs;
+  const bgDefs = bgBaseDef + bgOrbDefs + bgOverlayDef;
 
   let y = padding + 56;
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
     <defs>${bgDefs}${primaryGrad.def}${secondaryGrad.def}</defs>
-    ${bgBaseLayer}${bgOrbLayers}
+    ${bgBaseLayer}${bgOrbLayers}${bgOverlayLayer}
     ${cardShadowEl}
     <rect x="${padding}" y="${padding}" width="${contentW}" height="${H - padding * 2}" rx="${cardRx}" fill="${cardFill}" ${cardStrokeAttrs}/>`;
 
