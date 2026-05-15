@@ -2981,7 +2981,8 @@ html, body { margin: 0; width: ${W}px; height: ${H}px; overflow: hidden; }
   } catch (err) {
     if (err?.name !== 'AbortError') {
       console.warn('Unable to export PNG', err);
-      showToast('PNG failed');
+      await exportImageApprox();
+      return;
     }
     closeShare();
   } finally {
@@ -3189,36 +3190,26 @@ async function exportImageApprox() {
   // Convert SVG to PNG via canvas
   let svgUrl = '';
   try {
-    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-    svgUrl = URL.createObjectURL(blob);
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = W * 2; canvas.height = H * 2;
-      const ctx = canvas.getContext('2d');
-      ctx.scale(2, 2);
-      ctx.drawImage(img, 0, 0);
-      canvas.toBlob((b) => {
-        URL.revokeObjectURL(svgUrl);
-        if (!b) return;
-        const pngUrl = URL.createObjectURL(b);
-        const dl = document.createElement('a');
-        dl.href = pngUrl;
-        dl.download = `palette-${t.material.name.toLowerCase()}.png`;
-        dl.style.display = 'none';
-        document.body.appendChild(dl);
-        dl.click();
-        dl.remove();
-        window.setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
-      }, 'image/png');
-    };
-    img.onerror = () => { URL.revokeObjectURL(svgUrl); };
-    img.src = svgUrl;
-  } catch (e) {
+    svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+    const img = await imageFromUrl(svgUrl);
+    const canvas = document.createElement('canvas');
+    canvas.width = W * 2;
+    canvas.height = H * 2;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+    ctx.drawImage(img, 0, 0);
+    const png = await canvasToBlob(canvas, 'image/png');
+    const filename = `theme-${t.material.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+    await shareOrDownloadBlob(filename, png, filename, 'Theme PNG export');
+  } catch (err) {
+    if (err?.name !== 'AbortError') {
+      console.warn('Unable to export fallback PNG', err);
+      showToast('PNG failed');
+    }
+  } finally {
     if (svgUrl) URL.revokeObjectURL(svgUrl);
+    closeShare();
   }
-  closeShare();
 }
 
 
